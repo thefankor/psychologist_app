@@ -1,0 +1,16 @@
+.env
+/venv
+__pycache__/
+*.py[codz]
+*$py.class
+**/__pycache__/
+*.py[cod]
+*.pyo
+
+.idea
+/local
+/files
+
+app.log
+
+back-end/static
