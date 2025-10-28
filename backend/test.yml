@@ -1,0 +1,16 @@
+rtc:
+  udp_port: 50000
+  udp_port_range: 50000-60000
+  tcp_port: 7881
+  use_external_ip: true
+
+turn:
+  enabled: true
+  domain: rtc.simal.live
+  tls: true
+
+keys:
+  devkey: SdzBWiIcbwmE7FvGp5EUNtS8r9j+gQIBbMDSLRl4yvm4+ink
+
+api_key: 63RC2yRLM4/KsEXzTe9CB/9VyK83Zb9qWpjvsBrD6Pqr6Ibp
+api_secret: SdzBWiIcbwmE7FvGp5EUNtS8r9j+gQIBbMDSLRl4yvm4+ink
