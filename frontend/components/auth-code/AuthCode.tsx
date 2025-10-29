@@ -10,12 +10,13 @@ import {
 	Platform,
 	TouchableWithoutFeedback,
 } from 'react-native';
-import Button from '@/components/custom/Button';
+
 import { styles } from './styles';
 import { UI } from '@/types/ui';
 import { StatusBar } from 'expo-status-bar';
 import { formatTime, hidePart } from '@/helpers/helper';
 import { useRouter } from 'expo-router';
+import { Button } from '../custom';
 
 const AuthCode = () => {
 	const router = useRouter();
@@ -48,6 +49,7 @@ const AuthCode = () => {
 			if (code === CORRECT_CODE) {
 				setStatus('success');
 				Keyboard.dismiss();
+				router.push('/(auth)/InitialProfileFormPage');
 			} else {
 				setStatus('error');
 			}

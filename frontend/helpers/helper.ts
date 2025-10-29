@@ -12,3 +12,11 @@ export const formatTime = (timeInSeconds: number): string => {
 
 	return `${formattedMinutes}:${formattedSeconds}`;
 };
+
+export const dataHandler = (
+	key: string,
+	value: string,
+	setData: (item: any) => void
+) => {
+	return setData((prev: any) => ({ ...prev, [key]: value }));
+};

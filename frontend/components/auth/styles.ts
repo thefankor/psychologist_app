@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
 		color: '#011443',
 	},
 	email__input_with_text: {
-		paddingTop: 20, // Добавляем отступ сверху когда есть текст
+		paddingTop: 20,
 	},
 	input__wrap: {
 		position: 'relative',
@@ -55,7 +55,7 @@ export const styles = StyleSheet.create({
 	},
 	button__text: {
 		color: '#fff',
-		fontFamily: 'Involve',
+		fontFamily: 'Hezaedrus500',
 		fontSize: 14,
 		textAlign: 'center',
 	},

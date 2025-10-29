@@ -6,11 +6,12 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 } from 'react-native';
-import Button from '@/components/custom/Button';
 import { styles } from './styles';
 import { UI } from '@/types/ui';
 import { useRouter } from 'expo-router';
-export default function Auth() {
+import { Button } from '../custom';
+
+const Auth = () => {
 	const [email, setEmail] = useState<string>('');
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -98,4 +99,6 @@ export default function Auth() {
 			</View>
 		</KeyboardAvoidingView>
 	);
-}
+};
+
+export default Auth;

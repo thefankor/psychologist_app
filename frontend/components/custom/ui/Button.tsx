@@ -1,3 +1,4 @@
+import React from 'react';
 import {
 	Pressable,
 	Text,
@@ -18,7 +19,7 @@ interface Props {
 	counter?: number;
 }
 
-const Button: React.FC<Props> = ({
+export const Button: React.FC<Props> = ({
 	text,
 	style,
 	disabled,
@@ -75,5 +76,3 @@ const styles = StyleSheet.create({
 		fontFamily: 'Hezaedrus500',
 	},
 });
-
-export default Button;
