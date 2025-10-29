@@ -15,8 +15,10 @@ import { styles } from './styles';
 import { UI } from '@/types/ui';
 import { StatusBar } from 'expo-status-bar';
 import { formatTime, hidePart } from '@/helpers/helper';
+import { useRouter } from 'expo-router';
 
 const AuthCode = () => {
+	const router = useRouter();
 	const [codes, setCodes] = useState<string[]>(['', '', '', '', '']);
 	const inputRefs = useRef<(TextInput | null)[]>([]);
 	const [status, setStatus] = useState<'default' | 'error' | 'success'>(
@@ -101,7 +103,10 @@ const AuthCode = () => {
 				<StatusBar style='dark' />
 				<View style={[styles.container, { justifyContent: 'center' }]}>
 					<View style={styles.container__header}>
-						<Pressable style={styles.back__btn}>
+						<Pressable
+							style={styles.back__btn}
+							onPress={() => router.push('/(auth)/AuthPage')}
+						>
 							<Image
 								source={require('@/assets/images/back.png')}
 								style={{ height: 24, width: 24 }}

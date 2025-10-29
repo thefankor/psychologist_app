@@ -9,11 +9,12 @@ import {
 import Button from '@/components/custom/Button';
 import { styles } from './styles';
 import { UI } from '@/types/ui';
-
+import { useRouter } from 'expo-router';
 export default function Auth() {
 	const [email, setEmail] = useState<string>('');
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const router = useRouter();
 
 	const validateEmail = (email: string): string | null => {
 		if (email.length === 0) return 'Поле не должно быть пустым';
@@ -34,6 +35,7 @@ export default function Auth() {
 
 		setTimeout(() => {
 			setIsLoading(false);
+			router.push('/(auth)/AuthCodePage');
 		}, 2000);
 	};
 
