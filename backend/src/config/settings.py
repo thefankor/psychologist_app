@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    STATIC_BASE_URL: str
     POSTGRES_HOST: str
     POSTGRES_DB: str
     POSTGRES_PORT: str = 5432
