@@ -49,7 +49,7 @@ const AuthCode = () => {
 			if (code === CORRECT_CODE) {
 				setStatus('success');
 				Keyboard.dismiss();
-				router.push('/(auth)/InitialProfileFormPage');
+				router.push('/(auth)/FormPage');
 			} else {
 				setStatus('error');
 			}

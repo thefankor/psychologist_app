@@ -17,7 +17,7 @@ export default function AuthLayout() {
 				}}
 			/>
 			<Stack.Screen
-				name='InitialProfileFormPage'
+				name='FormPage'
 				options={{
 					headerShown: false,
 				}}

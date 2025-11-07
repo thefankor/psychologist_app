@@ -13,6 +13,7 @@ import Animated, {
 	withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import StoreProvider from '@/store/StoreProvider';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -54,22 +55,27 @@ export default function RootLayout() {
 	return (
 		<SafeAreaProvider>
 			<StatusBar style='dark' />
-			<Animated.View
-				style={[StyleSheet.absoluteFill, { backgroundColor: '#fff' }]}
-			>
-				{appReady && (
-					<Animated.View
-						style={[StyleSheet.absoluteFill, contentStyle]}
-					>
-						<Stack>
-							<Stack.Screen
-								name='(auth)'
-								options={{ headerShown: false }}
-							/>
-						</Stack>
-					</Animated.View>
-				)}
-			</Animated.View>
+			<StoreProvider>
+				<Animated.View
+					style={[
+						StyleSheet.absoluteFill,
+						{ backgroundColor: '#fff' },
+					]}
+				>
+					{appReady && (
+						<Animated.View
+							style={[StyleSheet.absoluteFill, contentStyle]}
+						>
+							<Stack>
+								<Stack.Screen
+									name='(auth)'
+									options={{ headerShown: false }}
+								/>
+							</Stack>
+						</Animated.View>
+					)}
+				</Animated.View>
+			</StoreProvider>
 		</SafeAreaProvider>
 	);
 }
