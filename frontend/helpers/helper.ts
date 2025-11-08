@@ -1,3 +1,5 @@
+import * as SecureStore from 'expo-secure-store';
+
 export const hidePart = (text: string, n: number, format?: string) => {
 	const replaced = text.substring(n);
 	return format ? format : '***' + replaced;
@@ -20,3 +22,11 @@ export const dataHandler = (
 ) => {
 	return setData((prev: any) => ({ ...prev, [key]: value }));
 };
+
+export async function saveToken(token: string) {
+	await SecureStore.setItemAsync('auth_token', token);
+}
+
+export async function getToken() {
+	return await SecureStore.getItemAsync('auth_token');
+}

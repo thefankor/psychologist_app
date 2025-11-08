@@ -10,6 +10,7 @@ import { styles } from './styles';
 import { UI } from '@/types/ui';
 import { useRouter } from 'expo-router';
 import { Button } from '../custom';
+import { getVerifyCode } from '@/api/auth/auth';
 
 const Auth = () => {
 	const [email, setEmail] = useState<string>('');
@@ -24,7 +25,8 @@ const Auth = () => {
 		return null;
 	};
 
-	const sendEmail = (email: string) => {
+	const sendEmail = async (email: string) => {
+		setIsLoading(true);
 		setError(null);
 		const validationError = validateEmail(email);
 		if (validationError) {
@@ -32,12 +34,13 @@ const Auth = () => {
 			return;
 		}
 
-		setIsLoading(true);
+		await getVerifyCode(email);
+		router.push({
+			pathname: '/(auth)/AuthCodePage',
+			params: { email },
+		});
 
-		setTimeout(() => {
-			setIsLoading(false);
-			router.push('/(auth)/AuthCodePage');
-		}, 2000);
+		setIsLoading(false);
 	};
 
 	const handleEmailChange = (text: string) => {

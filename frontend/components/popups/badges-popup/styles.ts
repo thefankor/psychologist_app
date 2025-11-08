@@ -74,7 +74,7 @@ export const styles = StyleSheet.create({
 	},
 	button__text: {
 		color: '#fff',
-		fontFamily: 'Involve',
+		fontFamily: 'Hezaedrus',
 		fontSize: 14,
 	},
 	reset__btn: {

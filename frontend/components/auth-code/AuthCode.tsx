@@ -14,9 +14,10 @@ import {
 import { styles } from './styles';
 import { UI } from '@/types/ui';
 import { StatusBar } from 'expo-status-bar';
-import { formatTime, hidePart } from '@/helpers/helper';
-import { useRouter } from 'expo-router';
+import { formatTime, saveToken } from '@/helpers/helper';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '../custom';
+import { checkVerifyCode, getVerifyCode } from '@/api/auth/auth';
 
 const AuthCode = () => {
 	const router = useRouter();
@@ -26,8 +27,7 @@ const AuthCode = () => {
 		'default'
 	);
 	const [timer, setTimer] = useState(60);
-
-	const CORRECT_CODE = '12345';
+	const { email } = useLocalSearchParams<{ email: string }>();
 
 	useEffect(() => {
 		if (timer <= 0) return;
@@ -43,16 +43,23 @@ const AuthCode = () => {
 		return () => clearInterval(interval);
 	}, [timer]);
 
-	const verifyCode = (currentCodes: string[]) => {
-		const code = currentCodes.join('');
-		if (code.length === 5) {
-			if (code === CORRECT_CODE) {
-				setStatus('success');
-				Keyboard.dismiss();
-				router.push('/(auth)/FormPage');
-			} else {
-				setStatus('error');
+	const verifyCode = async (codesArray: string[]) => {
+		const code = codesArray.join('');
+
+		if (code.length < 5) return;
+
+		try {
+			const res = await checkVerifyCode(email, code);
+
+			setStatus('success');
+			Keyboard.dismiss();
+			if (res) {
+				await saveToken(res.token);
 			}
+			router.push('/(auth)/FormPage');
+		} catch (err) {
+			setStatus('error');
+			console.log(err);
 		}
 	};
 
@@ -69,6 +76,11 @@ const AuthCode = () => {
 		} else {
 			setStatus('default');
 		}
+	};
+
+	const handleSendAgain = async () => {
+		setTimer(60);
+		await getVerifyCode(email);
 	};
 
 	const handleKeyPress = ({ nativeEvent }: any, index: number) => {
@@ -122,8 +134,7 @@ const AuthCode = () => {
 							Введите 5-значный код
 						</Text>
 						<Text style={styles.code__description}>
-							Письмо с кодом было отправлено на почту{' '}
-							{hidePart('example@mail.ru', 5)}
+							Письмо с кодом было отправлено на почту {email}
 						</Text>
 
 						<View style={styles.input__wrap}>
@@ -166,7 +177,7 @@ const AuthCode = () => {
 								pressColor={UI.colors.pressableColor}
 								style={UI.styles.continueButton}
 								textStyle={UI.styles.continueText}
-								onPress={() => setTimer(60)}
+								onPress={handleSendAgain}
 							/>
 						) : (
 							<Text style={styles.repeat__text}>
