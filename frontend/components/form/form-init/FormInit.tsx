@@ -91,8 +91,8 @@ export const FormInit = ({ setStep }: Props) => {
 				'initData',
 				JSON.stringify({
 					name: formState.name,
-					age: formState.birthDate,
-					gender: formState.gender,
+					birth_date: formState.birthDate,
+					gender: Gender[formState.gender]?.toUpperCase(),
 				})
 			);
 			await AsyncStorage.setItem('init', 'true');

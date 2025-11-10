@@ -99,16 +99,7 @@ const Form = () => {
 
 	useEffect(() => {
 		(async () => {
-			const initCompleted = await AsyncStorage.getItem('init');
-			if (initCompleted) {
-				fadeAnim.setValue(0);
-				setStep(FormSteps.STEP_ONE);
-				Animated.timing(fadeAnim, {
-					toValue: 1,
-					duration: 300,
-					useNativeDriver: true,
-				}).start();
-			}
+			setStep(FormSteps.INIT);
 			setIsLoading(false);
 		})();
 	}, []);

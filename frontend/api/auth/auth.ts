@@ -15,7 +15,7 @@ export const getVerifyCode = async (email: string) => {
 
 		if (!res.ok) {
 			const error = await res.json();
-			throw new Error(error?.detail || 'API error');
+			throw new Error(error?.message || 'API error');
 		}
 
 		return true;
@@ -42,7 +42,7 @@ export const checkVerifyCode = async (email: string, code: string) => {
 
 		if (!res.ok) {
 			const error = await res.json();
-			throw new Error(error?.detail || 'API error');
+			throw new Error(error?.message || 'API error');
 		}
 
 		return res.json();

@@ -10,6 +10,8 @@ import { Select, Option } from '@/components/custom/ui/Select';
 import { methods } from './methods';
 import { UI } from '@/types/ui';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { sendUserData } from '@/api/profile/profile';
+import { getToken } from '@/helpers/helper';
 
 interface Props {
 	step: FormSteps;
@@ -74,6 +76,7 @@ export const FormStep = ({ step, setFormData, formData, setStep }: Props) => {
 	const handleParameterToggle = (label: any) => {
 		if (label === 'any' || label === 'closest') {
 			setFormData((prev) => ({ ...prev, time: label }));
+			setSelectedItems([label]);
 			return;
 		}
 
@@ -83,52 +86,48 @@ export const FormStep = ({ step, setFormData, formData, setStep }: Props) => {
 			return;
 		}
 
-		setSelectedItems((prev) => {
-			let newSelection: any[];
-
+		const newSelection = (() => {
 			if (
 				stepState.config === FormSteps.STEP_TWO ||
 				stepState.config === FormSteps.PRICING ||
 				stepState.config === FormSteps.STEP_SIX
 			) {
-				newSelection = prev.includes(label)
-					? prev.filter((item) => item !== label)
-					: [...prev, label];
-
-				if (stepState.config === FormSteps.STEP_TWO) {
-					setFormData((prev) => ({
-						...prev,
-						format: newSelection,
-					}));
-				} else if (stepState.config === FormSteps.PRICING) {
-					setFormData((prev) => ({
-						...prev,
-						pricing: newSelection,
-					}));
-				} else if (stepState.config === FormSteps.STEP_SIX) {
-					setFormData((prev) => ({
-						...prev,
-						method: newSelection as MethodFormat[],
-					}));
-				}
+				return selectedItems.includes(label)
+					? selectedItems.filter((item) => item !== label)
+					: [...selectedItems, label];
 			} else {
-				newSelection = [label];
-
-				if (stepState.config === FormSteps.STEP_THREE) {
-					setFormData((prev) => ({
-						...prev,
-						long: label,
-					}));
-				} else if (stepState.config === FormSteps.STEP_FOUR) {
-					setFormData((prev) => ({
-						...prev,
-						gender: label,
-					}));
-				}
+				return [label];
 			}
+		})();
 
-			return newSelection;
-		});
+		setSelectedItems(newSelection);
+
+		if (stepState.config === FormSteps.STEP_TWO) {
+			setFormData((prev) => ({
+				...prev,
+				format: newSelection,
+			}));
+		} else if (stepState.config === FormSteps.STEP_THREE) {
+			setFormData((prev) => ({
+				...prev,
+				long: newSelection[0],
+			}));
+		} else if (stepState.config === FormSteps.PRICING) {
+			setFormData((prev) => ({
+				...prev,
+				pricing: newSelection,
+			}));
+		} else if (stepState.config === FormSteps.STEP_FOUR) {
+			setFormData((prev) => ({
+				...prev,
+				gender: newSelection[0],
+			}));
+		} else if (stepState.config === FormSteps.STEP_SIX) {
+			setFormData((prev) => ({
+				...prev,
+				method: newSelection as MethodFormat[],
+			}));
+		}
 	};
 
 	const handleTimeSelect = (value: any) => {
@@ -171,8 +170,13 @@ export const FormStep = ({ step, setFormData, formData, setStep }: Props) => {
 				const initData = JSON.parse(
 					(await AsyncStorage.getItem('initData'))!
 				);
-
+				const token = await getToken();
 				const sendData = { ...initData, formData };
+
+				if (token) {
+					await sendUserData(token, sendData);
+				}
+
 				console.log(sendData);
 
 				// router.push('/(app)/profile');

@@ -56,6 +56,7 @@ const AuthCode = () => {
 			if (res) {
 				await saveToken(res.token);
 			}
+			console.log(res.token);
 			router.push('/(auth)/FormPage');
 		} catch (err) {
 			setStatus('error');
