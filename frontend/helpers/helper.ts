@@ -30,3 +30,40 @@ export async function saveToken(token: string) {
 export async function getToken() {
 	return await SecureStore.getItemAsync('auth_token');
 }
+
+export async function deleteToken() {
+	return await SecureStore.deleteItemAsync('auth_token');
+}
+export const formatDate = (dateString: string | Date | undefined): string => {
+	if (!dateString) return '';
+
+	try {
+		const date =
+			typeof dateString === 'string' ? new Date(dateString) : dateString;
+
+		if (isNaN(date.getTime())) return '';
+
+		const day = date.getDate();
+		const month = date.getMonth();
+
+		const months = [
+			'января',
+			'февраля',
+			'марта',
+			'апреля',
+			'мая',
+			'июня',
+			'июля',
+			'августа',
+			'сентября',
+			'октября',
+			'ноября',
+			'декабря',
+		];
+
+		return `${day} ${months[month]}`;
+	} catch (e) {
+		console.error('Error formatting date:', e);
+		return '';
+	}
+};

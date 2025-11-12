@@ -9,7 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Button } from '@/components/custom/ui/Button';
 import { UI } from '@/types/ui';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FormSteps } from '@/types/types';
+import { FormSteps, genderOptions } from '@/types/types';
 
 const labelStyle = {
 	paddingTop: 0,
@@ -32,12 +32,6 @@ export interface InitState {
 	gender: Gender;
 	birthDate: Date | string;
 }
-
-export const genderOptions: Option[] = [
-	{ label: Gender.NOT_STATED, value: 'Неважно' },
-	{ label: Gender.MALE, value: 'Мужской' },
-	{ label: Gender.FEMALE, value: 'Женский' },
-];
 
 interface Props {
 	setStep: (step: FormSteps) => void;

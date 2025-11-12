@@ -1,9 +1,8 @@
 import { View, Text } from 'react-native';
 import { styles } from './styles';
 import { Step, steps } from './steps';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { FormData, FormSteps, MethodFormat } from '@/types/types';
-import { useEffect, useState } from 'react';
 import { FormBlock } from '../form-block/FormBlock';
 import { Button } from '@/components/custom/ui/Button';
 import { Select, Option } from '@/components/custom/ui/Select';
@@ -12,6 +11,7 @@ import { UI } from '@/types/ui';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sendUserData } from '@/api/profile/profile';
 import { getToken } from '@/helpers/helper';
+import { useRouter } from 'expo-router';
 
 interface Props {
 	step: FormSteps;
@@ -37,6 +37,7 @@ const timeOptions: Option[] = [
 ];
 
 export const FormStep = ({ step, setFormData, formData, setStep }: Props) => {
+	const router = useRouter();
 	const [stepState, setStepState] = useState<Step>({
 		name: '',
 		questions: [],
@@ -179,7 +180,7 @@ export const FormStep = ({ step, setFormData, formData, setStep }: Props) => {
 
 				console.log(sendData);
 
-				// router.push('/(app)/profile');
+				router.push('/(auth)/ProfilePage');
 			} catch (err: any) {
 				console.log(err.response.detail);
 			}

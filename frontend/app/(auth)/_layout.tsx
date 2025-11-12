@@ -22,6 +22,30 @@ export default function AuthLayout() {
 					headerShown: false,
 				}}
 			/>
+			<Stack.Screen
+				name='ProfilePage'
+				options={{
+					headerShown: false,
+				}}
+			/>
+			<Stack.Screen
+				name='ProfileEditPage'
+				options={{
+					headerShown: false,
+				}}
+			/>
+			<Stack.Screen
+				name='ProfileFavoritesPage'
+				options={{
+					headerShown: false,
+				}}
+			/>
+			<Stack.Screen
+				name='ProfileMethodsPage'
+				options={{
+					headerShown: false,
+				}}
+			/>
 		</Stack>
 	);
 }

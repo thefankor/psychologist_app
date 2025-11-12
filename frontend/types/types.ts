@@ -69,3 +69,32 @@ export interface FormData {
 	time: DateFormat | null;
 	method: MethodFormat[] | null;
 }
+
+export enum PhoneCodes {
+	RU = '+7',
+}
+
+export enum Gender {
+	NOT_CHOOSEN = 0,
+	NOT_STATED = 1,
+	MALE = 2,
+	FEMALE = 3,
+}
+
+export interface Option {
+	label: any;
+	value: string;
+}
+
+export const genderOptions: Option[] = [
+	{ label: Gender.NOT_STATED, value: 'Неважно' },
+	{ label: Gender.MALE, value: 'Мужской' },
+	{ label: Gender.FEMALE, value: 'Женский' },
+];
+
+export interface FavoriteTypes {
+	id: number;
+	avatar: string;
+	full_name: string;
+	methods: string[];
+}
