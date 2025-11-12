@@ -56,6 +56,34 @@ async def set_sbp_payment_method(
     return {}
 
 
+@router.delete(
+    "/{payment_method_id}/",
+    summary="Delete payment method",
+    description="Удалить платежный метод",
+    status_code=204,
+    responses={
+        401: {
+            "description": "Токен не валиден",
+            "content": {
+                "application/json": {"example": {"detail": "Токен не валиден"}}
+            },
+        },
+        404: {
+            "description": "Ресурс не найден",
+            "content": {
+                "application/json": {"example": {"detail": "Ресурс не найден"}}
+            },
+        },
+    },
+)
+async def delete_payment_method(
+    payment_method_id: int,
+    _: int = Depends(get_current_user_id),
+    service: PaymentMethodService = Depends(),
+):
+    return await service.delete_payment_method(method_id=payment_method_id)
+
+
 @router.post(
     "/sbp/verify/",
     summary="Verify SBP phone number",

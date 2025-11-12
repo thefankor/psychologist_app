@@ -5,8 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from src.core.wrapper import handle_db_errors
 from src.crud.impl.base import BaseDAO
-from src.models import User, UserRole
-from src.models.user import ClientProfile
+from src.models import ClientProfile, User, UserRole
 
 
 class UserDAO(BaseDAO):

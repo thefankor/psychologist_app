@@ -1,8 +1,9 @@
 from io import BytesIO
 from pathlib import Path
 from uuid import uuid4
+
+from fastapi import HTTPException, UploadFile
 from PIL import Image
-from fastapi import UploadFile, HTTPException
 
 from src.config import constants
 
@@ -19,7 +20,6 @@ class FileManager:
         return f"{uuid4().hex}{ext}"
 
     async def save_image(self, file: UploadFile, quality: int = 75) -> str:
-
         filename = self.generate_filename(file)
         save_path = self.upload_dir / filename
 
@@ -28,7 +28,7 @@ class FileManager:
             img = Image.open(BytesIO(contents))
             img = img.convert("RGB")
             img.save(save_path, optimize=True, quality=quality)
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=400,
                 detail={

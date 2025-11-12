@@ -2,7 +2,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.crud.impl import (
     ClientDAO,
+    FavoritesDAO,
     PaymentMethodDAO,
+    PsychologistDAO,
     UserDAO,
 )
 
@@ -35,6 +37,8 @@ class Store:
         self._user_dao: UserDAO | None = None
         self._client_dao: ClientDAO | None = None
         self._payment_method_dao: PaymentMethodDAO | None = None
+        self._favorite_dao: FavoritesDAO | None = None
+        self._psychologist_dao: PsychologistDAO | None = None
 
     @property
     def user(self) -> UserDAO:
@@ -68,3 +72,25 @@ class Store:
         if self._payment_method_dao is None:
             self._payment_method_dao = PaymentMethodDAO(session=self._session)
         return self._payment_method_dao
+
+    @property
+    def favorite(self) -> FavoritesDAO:
+        """Возвращает интерфейс для работы с избранными психологами клиента.
+
+        Returns:
+            FavoritesDAO: Интерфейс для работы с избранными психологами клиента.
+        """
+        if self._favorite_dao is None:
+            self._favorite_dao = FavoritesDAO(session=self._session)
+        return self._favorite_dao
+
+    @property
+    def psychologist(self) -> PsychologistDAO:
+        """Возвращает интерфейс для работы с психологами
+
+        Returns:
+            PsychologistDAO: Интерфейс для работы с психологами
+        """
+        if self._psychologist_dao is None:
+            self._psychologist_dao = PsychologistDAO(session=self._session)
+        return self._psychologist_dao
