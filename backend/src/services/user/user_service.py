@@ -80,6 +80,9 @@ class UserService:
             is_active=False,
         )
 
+    async def delete_client_profile(self, user_id: int):
+        await self._store.client.delete(model_id=user_id)
+
     async def update_profile(self, user_id: int, data: ProfileUpdateRequest):
         if data.email:
             await self._store.user.update(
