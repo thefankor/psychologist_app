@@ -26,7 +26,9 @@ class CallService:
         self._store = store
 
     async def get_token(self, user_id: int, appointment_id: UUID) -> CallTokenResponse:
-        room_name = await self._get_room_name_by_appointment_id(appointment_id=appointment_id)
+        room_name = await self._get_room_name_by_appointment_id(
+            appointment_id=appointment_id
+        )
 
         client_name = await self._store.client.get_client_name(user_id=user_id)
 

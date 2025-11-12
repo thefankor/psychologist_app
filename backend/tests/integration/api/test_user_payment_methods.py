@@ -131,58 +131,64 @@ class TestUserMethodsEndpoints:
         assert data["sbp"][0]["phone"] == "+79958890055"
         assert data["sbp"][0]["bank"] == "T-bank"
 
-    # @pytest.mark.asyncio
-    # async def test_get_me_success(self, client, db_session, new_user_token):
-    #     """Тест успешного получения профиля пользователя"""
-    #
-    #     response = client.get(
-    #         "/user/",
-    #         headers={"Authorization": f"Bearer {new_user_token}"},
-    #     )
-    #
-    #     assert response.status_code == 200
-    #     data = response.json()
-    #
-    #     assert data["phone"] is None
-    #     assert data["avatar"] is None
-    #     assert data["email"] == "test11@gmail.com"
-    #
-    # def test_get_me_unauthorized(self, client):
-    #     """Тест получения профиля без авторизации"""
-    #     response = client.get("/user/")
-    #
-    #     assert response.status_code == 401
-    #     data = response.json()
-    #     assert "Authentication failed" in str(data["detail"])
-    #
-    # def test_get_me_invalid_token(self, client):
-    #     """Тест получения профиля с невалидным токеном"""
-    #     response = client.get(
-    #         "/user/", headers={"Authorization": "Bearer invalid_token"}
-    #     )
-    #
-    #     assert response.status_code == 401
-    #     data = response.json()
-    #     assert "Authentication failed" in str(data["detail"])
-    #
-    # @pytest.mark.asyncio
-    # async def test_get_me_wrong_token_type(self, client, db_session):
-    #     """Тест получения профиля с токеном неправильного типа"""
-    #     user = User(email="test00012@gmail.com")
-    #
-    #     async with db_session as session:
-    #         session.add(user)
-    #         await session.commit()
-    #         user_id = user.id
-    #
-    #     auth_service = AuthService()
-    #     tokens = auth_service.create_tokens({"sub": str(user_id), "type": "XXX"})
-    #
-    #     response = client.get(
-    #         "/user/",
-    #         headers={"Authorization": f"Bearer {tokens.token}"},
-    #     )
-    #
-    #     assert response.status_code == 401
-    #     data = response.json()
-    #     assert "Authentication failed" in str(data["detail"])
+    @pytest.mark.asyncio
+    async def test_save_get_delete_methods(self, authorized_client):
+        """Тест запросов добавления, получения и удаление метода"""
+
+        with patch(
+            "src.utils.sms_confirm_service.SMSCodeService.get",
+            return_value=SMSGetCode(
+                code="88888", data={"bank": "T-bank", "type": "SBP"}
+            ),
+        ):
+            response1 = authorized_client.post(
+                "/user/methods/sbp/verify/",
+                json={"phone": "+79958890055", "code": "88888"},
+            )
+
+        assert response1.status_code == 200
+
+        response2 = authorized_client.get(
+            "/user/methods/",
+        )
+
+        assert response2.status_code == 200
+
+        data = response2.json()
+
+        assert len(data["sbp"]) == 1
+        assert data["sbp"][0]["phone"] == "+79958890055"
+        assert data["sbp"][0]["bank"] == "T-bank"
+
+        response3 = authorized_client.delete(
+            f"/user/methods/{data['sbp'][0]['id']}/",
+        )
+        assert response3.status_code == 204
+
+        response4 = authorized_client.get(
+            "/user/methods/",
+        )
+
+        assert response4.status_code == 200
+
+        data = response4.json()
+
+        assert len(data["sbp"]) == 0
+
+    @pytest.mark.asyncio
+    async def test_delete_non_exist_methods(self, authorized_client):
+        """Тест запросов добавления, получения и удаление метода"""
+
+        response = authorized_client.delete(
+            "/user/methods/40034330/",
+        )
+        assert response.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_delete_methods_unauthorized_user(self, client):
+        """Тест запросов добавления, получения и удаление метода"""
+
+        response = client.delete(
+            "/user/methods/100/",
+        )
+        assert response.status_code == 401

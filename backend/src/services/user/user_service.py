@@ -1,4 +1,4 @@
-from fastapi import Depends, UploadFile, HTTPException
+from fastapi import Depends, HTTPException, UploadFile
 
 from src.config import settings
 from src.core.dependencies import get_store
@@ -44,7 +44,9 @@ class UserService:
             notifications=profile.notifications,
             subscription=None,
             timezone=profile.timezone,
-            avatar= settings.STATIC_BASE_URL + profile.avatar if profile.avatar else None,
+            avatar=settings.STATIC_BASE_URL + profile.avatar
+            if profile.avatar
+            else None,
             birth_date=profile.birth_date,
             gender=profile.gender,
             new=profile.is_new,

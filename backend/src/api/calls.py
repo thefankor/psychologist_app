@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from src.core.dependencies import get_current_user_id
-from src.schemas import CallTokenResponse, CallTokenRequest
+from src.schemas import CallTokenRequest, CallTokenResponse
 from src.services.call import CallService
 
 router = APIRouter(tags=["Calls"])
@@ -23,6 +23,8 @@ router = APIRouter(tags=["Calls"])
 async def get_profile(
     data: CallTokenRequest,
     user_id: int = Depends(get_current_user_id),
-    call_service: CallService = Depends()
+    call_service: CallService = Depends(),
 ) -> CallTokenResponse:
-    return await call_service.get_token(user_id=user_id, appointment_id=data.appointment_id)
+    return await call_service.get_token(
+        user_id=user_id, appointment_id=data.appointment_id
+    )

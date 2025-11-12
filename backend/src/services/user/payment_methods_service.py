@@ -65,6 +65,9 @@ class PaymentMethodService:
 
         await self._sms_service.delete(phone=phone)
 
+    async def delete_payment_method(self, method_id: int):
+        await self._store.payment_method.delete(model_id=method_id)
+
     @staticmethod
     def generate_code(length: int = 5) -> int:
         """Генерирует случайный цифровой код нужной длины (по умолчанию 5 цифр)."""

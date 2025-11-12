@@ -125,7 +125,7 @@ async def update_profile(
 )
 async def update_avatar(
     image: UploadFile,
-        user_id: int = Depends(get_current_user_id),
-        user_service: UserService = Depends(),
+    user_id: int = Depends(get_current_user_id),
+    user_service: UserService = Depends(),
 ) -> EmptyModel:
     return await user_service.upload_photo(user_id=user_id, image=image)

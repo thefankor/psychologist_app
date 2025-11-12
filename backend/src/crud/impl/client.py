@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
 from src.crud.impl.base import BaseDAO
-from src.models.user import ClientProfile
+from src.models import ClientProfile
 
 
 class ClientDAO(BaseDAO):

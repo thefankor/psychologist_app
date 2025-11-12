@@ -73,6 +73,31 @@ class BaseDAO:
         return result.scalar_one_or_none()
 
     @handle_db_errors
+    async def find_one_id_or_404(self, **filter_by):
+        """
+        Находит одну запись по указанным фильтрам и возвращает ее идентификатор или выбрасывает исключение..
+
+        Используется для поиска конкретной записи с возможностью
+        указания нескольких условий фильтрации.
+
+        Args:
+            **filter_by: Параметры фильтрации (поле=значение).
+
+        Returns:
+            int | UUID | None: Найденная запись или None, если не найдена.
+
+        Raises:
+            NotFoundException: Если запись с указанным ID не найдена.
+        """
+        query = select(self.model.id).filter_by(**filter_by)
+        result = await self.session.execute(query)
+        instance = result.scalar_one_or_none()
+
+        if not instance:
+            raise NotFoundException
+        return instance
+
+    @handle_db_errors
     async def check_exist_or_404(self, model_id: int | UUID):
         """Проверяет существование записи по ID или выбрасывает исключение.
 
