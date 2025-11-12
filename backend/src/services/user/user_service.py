@@ -1,9 +1,14 @@
-from fastapi import Depends
+from fastapi import Depends, UploadFile, HTTPException
 
+from src.config import settings
 from src.core.dependencies import get_store
 from src.crud import Store
-from src.schemas.payment_methods import SBP, ProfilePaymentMethod
 from src.schemas.user import ProfileUpdateRequest, UserProfileResponse, UserSurvey
+from src.utils import FileManager
+
+file_manager = FileManager(
+    upload_path="static/users",
+)
 
 
 class UserService:
@@ -39,8 +44,8 @@ class UserService:
             notifications=profile.notifications,
             subscription=None,
             timezone=profile.timezone,
-            avatar=profile.avatar,
-            birth_date=profile.birth_date,  # TODO: добавить поле в модели
+            avatar= settings.STATIC_BASE_URL + profile.avatar if profile.avatar else None,
+            birth_date=profile.birth_date,
             gender=profile.gender,
             new=profile.is_new,
         )
@@ -88,5 +93,22 @@ class UserService:
         )
         return {}
 
-    async def get_payment_methods(self, user_id: int):
-        return ProfilePaymentMethod(sbp=SBP(id=1, phone="+79990998767", bank="Сбер"))
+    async def upload_photo(self, user_id: int, image: UploadFile):
+        if not image.content_type.startswith("image/"):
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "detail": "Invalid image upload.",
+                    "message": "Only image files are allowed",
+                },
+            )
+
+        image_url = await file_manager.save_image(image)
+
+        await self._store.client.update(
+            model_id=user_id,
+            return_model=False,
+            avatar=image_url,
+        )
+
+        return {}
