@@ -1,4 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
+import { Dispatch } from '@reduxjs/toolkit';
+import { setMessage } from '@/store/slices/chatSlice';
+import * as MediaLibrary from 'expo-media-library';
 
 export const hidePart = (text: string, n: number, format?: string) => {
 	const replaced = text.substring(n);
@@ -66,4 +69,52 @@ export const formatDate = (dateString: string | Date | undefined): string => {
 		console.error('Error formatting date:', e);
 		return '';
 	}
+};
+
+export const loadImages = async (
+	setPhotos: React.Dispatch<React.SetStateAction<MediaLibrary.Asset[]>>,
+	inPopup?: boolean
+) => {
+	if (inPopup) {
+		return;
+	}
+	const fetchedAlbums = await MediaLibrary.getAssetsAsync({
+		mediaType: 'photo',
+		first: 20,
+		sortBy: ['creationTime'],
+	});
+	setPhotos(fetchedAlbums.assets);
+};
+
+export const requestPermissionsMedia = async (
+	setPhotos: React.Dispatch<React.SetStateAction<MediaLibrary.Asset[]>>,
+	requestPermission: () => Promise<MediaLibrary.PermissionResponse>,
+	inPopup?: boolean
+) => {
+	try {
+		const permission = await MediaLibrary.requestPermissionsAsync();
+
+		if (permission.status !== 'granted') {
+			requestPermission();
+		}
+
+		if (permission.status === 'granted') {
+			return await loadImages(setPhotos, inPopup);
+		}
+	} catch (error) {
+		console.error('Ошибка при запросе разрешений:', error);
+	}
+};
+
+export const messageHandler = (
+	message: string,
+	dispatch: Dispatch,
+	images?: File[]
+) => {
+	return dispatch(
+		setMessage({
+			message,
+			images,
+		})
+	);
 };

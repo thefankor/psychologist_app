@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { View, StyleSheet, Pressable, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { usePathname, useSearchParams } from 'expo-router/build/hooks';
 
 interface Props {
 	children: ReactNode;
@@ -9,24 +10,28 @@ interface Props {
 
 const ProfileLayout = ({ children }: Props) => {
 	const router = useRouter();
+	const pathname = usePathname();
 
+	const isMainPage = pathname === '/profile/profile';
 	return (
 		<View style={[styles.container]}>
 			<StatusBar style='dark' />
+			{!isMainPage && (
+				<View style={styles.container__header}>
+					<Pressable
+						style={styles.back__btn}
+						onPress={() => router.back()}
+					>
+						<Image
+							style={styles.back__image}
+							height={100}
+							width={100}
+							source={require('@/assets/images/back.png')}
+						/>
+					</Pressable>
+				</View>
+			)}
 
-			<View style={styles.container__header}>
-				<Pressable
-					style={styles.back__btn}
-					onPress={() => router.back()}
-				>
-					<Image
-						style={styles.back__image}
-						height={100}
-						width={100}
-						source={require('@/assets/images/back.png')}
-					/>
-				</Pressable>
-			</View>
 			<View style={styles.container__body}>{children}</View>
 		</View>
 	);

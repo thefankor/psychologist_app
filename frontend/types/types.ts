@@ -98,3 +98,49 @@ export interface FavoriteTypes {
 	full_name: string;
 	methods: string[];
 }
+
+export interface MessageType {
+	message: string;
+	images: string[] | null;
+	time: string;
+	from_id: number;
+	viewed?: boolean;
+	from?: string;
+	avatar?: string;
+}
+
+export interface Group {
+	messages: MessageType[];
+	members: number;
+	image: string;
+	name: string;
+	description: string;
+	rules: string;
+}
+
+export interface AuthData {
+	id: number;
+	name: string;
+	email: string;
+	notifications: boolean;
+	subscribe: boolean;
+	phone: string;
+	timezone: any;
+	code: PhoneCodes;
+	gender: GenderFormat;
+	avatar: string;
+	birth_date: string | Date;
+}
+
+export interface GroupType {
+	id: number;
+	name: string;
+	description: string;
+	rules: string;
+	members: number;
+	image: string;
+	messages: number;
+	lastMessage: string;
+	from: string;
+	time: string;
+}

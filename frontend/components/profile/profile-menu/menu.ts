@@ -15,7 +15,7 @@ export const useMenu = (): Menu[] => {
 	const router = useRouter();
 
 	const logout = () => {
-		router.push('/(auth)/AuthPage');
+		router.push('/(app)/AuthPage');
 	};
 
 	// const deleteProfile = async () => {
@@ -38,7 +38,7 @@ export const useMenu = (): Menu[] => {
 	// 							await deleteUser(token);
 	// 							await deleteToken();
 
-	// 							router.push('/(auth)/AuthPage');
+	// 							router.push('/(app)/AuthPage');
 	// 						}
 	// 					} catch (error) {
 	// 						console.log('Ошибка при удаления профиля:', error);
@@ -58,19 +58,19 @@ export const useMenu = (): Menu[] => {
 			name: 'Мои данные',
 			type: 'redirect',
 			image: require('@/assets/images/user.png'),
-			action: () => router.push('/(auth)/ProfileEditPage'),
+			action: () => router.push('/(app)/profile/edit'),
 		},
 		{
 			name: 'Избранное',
 			type: 'redirect',
 			image: require('@/assets/images/favorite.png'),
-			action: () => router.push('/(auth)/ProfileFavoritesPage'),
+			action: () => router.push('/(app)/profile/favorites'),
 		},
 		{
 			name: 'Способы оплаты',
 			type: 'redirect',
 			image: require('@/assets/images/payments.png'),
-			action: () => router.push('/(auth)/ProfileMethodsPage'),
+			action: () => router.push('/(app)/profile/methods'),
 		},
 		{
 			name: 'Удалить аккаунт',

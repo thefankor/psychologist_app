@@ -68,7 +68,7 @@ export default function RootLayout() {
 						>
 							<Stack>
 								<Stack.Screen
-									name='(auth)'
+									name='(app)'
 									options={{ headerShown: false }}
 								/>
 							</Stack>

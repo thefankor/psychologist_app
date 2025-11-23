@@ -1,5 +1,5 @@
 import Profile from '@/components/profile/Profile';
-import ProfileLayout from './ProfileLayout';
+import ProfileLayout from '@/components/profile/ProfileLayout';
 import Navigation from '@/components/navigation/Navigation';
 import { View } from 'react-native';
 

@@ -18,6 +18,7 @@ const Auth = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const router = useRouter();
+
 	useEffect(() => {
 		checkToken();
 	}, []);
@@ -25,9 +26,10 @@ const Auth = () => {
 	const checkToken = async () => {
 		const token = await getToken();
 		if (token) {
-			router.replace('/(auth)/ProfilePage');
+			router.replace('/(app)/profile/profile');
 		}
 	};
+
 	const validateEmail = (email: string): string | null => {
 		if (email.length === 0) return 'Поле не должно быть пустым';
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -46,7 +48,7 @@ const Auth = () => {
 
 		await getVerifyCode(email);
 		router.push({
-			pathname: '/(auth)/AuthCodePage',
+			pathname: '/(app)/auth/verify',
 			params: { email },
 		});
 

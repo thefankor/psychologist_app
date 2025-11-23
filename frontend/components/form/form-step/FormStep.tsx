@@ -180,7 +180,7 @@ export const FormStep = ({ step, setFormData, formData, setStep }: Props) => {
 
 				console.log(sendData);
 
-				router.push('/(auth)/ProfilePage');
+				router.push('/(app)/profile/profile');
 			} catch (err: any) {
 				console.log(err.response.detail);
 			}

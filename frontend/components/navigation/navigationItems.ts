@@ -15,7 +15,7 @@ export const navigationItems: Navigator[] = [
 		activeImage: require('@/assets/images/psyho_active.png'),
 	},
 	{
-		route: '/GroupsPage',
+		route: '/groups/groups',
 		name: 'Чаты',
 		image: require('@/assets/images/chat.png'),
 		activeImage: require('@/assets/images/chat_active.png'),
@@ -27,7 +27,7 @@ export const navigationItems: Navigator[] = [
 		activeImage: require('@/assets/images/meditation_active.png'),
 	},
 	{
-		route: '/ProfilePage',
+		route: '/profile/profile',
 		name: 'Дневник',
 		image: require('@/assets/images/avatar.png'),
 		activeImage: require('@/assets/images/user.png'),
