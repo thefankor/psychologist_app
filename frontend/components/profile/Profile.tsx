@@ -25,6 +25,10 @@ const Profile = () => {
 		}
 	};
 
+	const profileImage = userData.avatar
+		? { uri: userData.avatar }
+		: require('@/assets/images/avatar.png');
+
 	return (
 		<>
 			<ScrollView
@@ -34,10 +38,7 @@ const Profile = () => {
 					paddingBottom: 80,
 				}}
 			>
-				<Image
-					source={require('@/assets/images/avatar.png')}
-					style={styles.container__avatar}
-				/>
+				<Image source={profileImage} style={styles.container__avatar} />
 				<Text style={styles.container__name}>{userData?.name}</Text>
 				<View style={styles.container__menu}>
 					<View style={[styles.container__section, styles.first]}>

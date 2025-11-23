@@ -72,3 +72,35 @@ export const updateUser = async (token: string, data: any) => {
 		throw error;
 	}
 };
+
+export const updateUserPhoto = async (token: string, image: any) => {
+	const url = `${BASE_URL}/user/upload_photo/`;
+
+	try {
+		const formData = new FormData();
+		formData.append('image', {
+			uri: image.uri,
+			name: image.fileName || `photo.${image.uri.split('.').pop()}`,
+			type: image.type || 'image/jpeg',
+		} as any);
+
+		const res = await fetch(url, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			body: formData,
+		});
+
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+
+		const data = await res.json();
+		return data;
+	} catch (error: any) {
+		console.log('Ошибка во время обновления аватара: ', error);
+		throw error;
+	}
+};

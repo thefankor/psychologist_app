@@ -1,4 +1,4 @@
-import { View, Image, Pressable, Text, ScrollView } from 'react-native';
+import { View, Image, Pressable, Text, ScrollView, Alert } from 'react-native';
 import { useEffect, useState } from 'react';
 import { styles } from './styles';
 import { TextInput } from 'react-native-paper';
@@ -12,7 +12,8 @@ import Animated, {
 	useSharedValue,
 	withTiming,
 } from 'react-native-reanimated';
-import { getUser, updateUser } from '@/api/profile/profile';
+import * as ImagePicker from 'expo-image-picker';
+import { getUser, updateUser, updateUserPhoto } from '@/api/profile/profile';
 
 const genderMap: Record<string, Gender> = {
 	NOT_STATED: Gender.NOT_STATED,
@@ -25,13 +26,22 @@ const ProfileEdit = () => {
 	const [visible, setVisible] = useState(false);
 	const buttonMargin = useSharedValue(20);
 	const [token, setToken] = useState<string | null>(null);
-	const [settingsUpdate, setSettingsUpdate] = useState({
+	const [settingsUpdate, setSettingsUpdate] = useState<{
+		name: string;
+		phone: string;
+		email: string;
+		gender: Gender;
+		birth_date: Date;
+		avatar: { uri: string } | null;
+		avatarFile: any;
+	}>({
 		name: '',
 		phone: '',
 		email: '',
 		gender: Gender.NOT_STATED,
 		birth_date: new Date(),
 		avatar: null,
+		avatarFile: null,
 	});
 
 	useEffect(() => {
@@ -43,7 +53,6 @@ const ProfileEdit = () => {
 		setToken(token);
 		if (token) {
 			const res = await getUser(token);
-
 			setSettingsUpdate({
 				name: res.name ?? '',
 				phone: res.phone ?? '',
@@ -52,43 +61,11 @@ const ProfileEdit = () => {
 				birth_date: res.birth_date
 					? new Date(res.birth_date)
 					: new Date(),
-				avatar: require('@/assets/images/avatar.png'),
+				avatar: res.avatar
+					? { uri: res.avatar }
+					: require('@/assets/images/avatar.png'),
+				avatarFile: null,
 			});
-		}
-	};
-
-	const updateUserData = async () => {
-		if (!token) return;
-
-		try {
-			const payload = {
-				name: settingsUpdate.name,
-				phone: settingsUpdate.phone,
-				email: settingsUpdate.email,
-				gender:
-					Object.keys(genderMap).find(
-						(key) => genderMap[key] === settingsUpdate.gender
-					) || 'NOT_STATED',
-				birth_date: settingsUpdate.birth_date
-					? settingsUpdate.birth_date.toISOString()
-					: null,
-				timezone: 'UTC_12_M',
-			};
-
-			await updateUser(token, payload);
-			console.log('Профиль успешно обновлён');
-		} catch (error) {
-			console.log('Ошибка при обновлении профиля:', error);
-		}
-	};
-
-	const handleDateConfirm = ({ date }: { date: any }) => {
-		setVisible(false);
-		if (date) {
-			setSettingsUpdate((prev) => ({
-				...prev,
-				birth_date: date,
-			}));
 		}
 	};
 
@@ -110,9 +87,121 @@ const ProfileEdit = () => {
 		buttonMargin.value = withTiming(isOpen ? 200 : 20, { duration: 300 });
 	};
 
+	const handleDateConfirm = ({ date }: { date: any }) => {
+		setVisible(false);
+		if (date) handleChange('birth_date', date);
+	};
+
 	const animatedButtonStyle = useAnimatedStyle(() => ({
 		marginTop: buttonMargin.value,
 	}));
+
+	const isValidPhone = (phone: string) => {
+		const regex = /^\+7\d{10}$/;
+		return regex.test(phone);
+	};
+
+	const pickImage = async () => {
+		const cameraPerm = await ImagePicker.requestCameraPermissionsAsync();
+		const mediaPerm =
+			await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+		if (!cameraPerm.granted || !mediaPerm.granted) {
+			Alert.alert(
+				'Нет доступа',
+				'Нужно разрешение на доступ к камере и фото'
+			);
+			return;
+		}
+
+		Alert.alert(
+			'Выберите фото',
+			'Камера или галерея?',
+			[
+				{
+					text: 'Камера',
+					onPress: async () => {
+						const result = await ImagePicker.launchCameraAsync({
+							mediaTypes: ImagePicker.MediaTypeOptions.Images,
+							allowsEditing: true,
+							aspect: [1, 1],
+							quality: 0.8,
+						});
+						if (!result.canceled) setAvatarFile(result.assets[0]);
+					},
+				},
+				{
+					text: 'Галерея',
+					onPress: async () => {
+						const result =
+							await ImagePicker.launchImageLibraryAsync({
+								mediaTypes: ImagePicker.MediaTypeOptions.Images,
+								allowsEditing: true,
+								aspect: [1, 1],
+								quality: 0.8,
+							});
+						if (!result.canceled) setAvatarFile(result.assets[0]);
+					},
+				},
+				{ text: 'Отмена', style: 'cancel' },
+			],
+			{ cancelable: true }
+		);
+	};
+
+	const setAvatarFile = (file: any) => {
+		setSettingsUpdate((prev) => ({
+			...prev,
+			avatarFile: file,
+			avatar: { uri: file.uri },
+		}));
+	};
+
+	const updateUserData = async () => {
+		if (!token) return;
+
+		if (!isValidPhone(settingsUpdate.phone)) {
+			Alert.alert(
+				'Ошибка',
+				'Неверный номер телефона. Формат: +7XXXXXXXXXX'
+			);
+			return;
+		}
+
+		try {
+			// Сначала фото, если есть
+			if (settingsUpdate.avatarFile) {
+				const uploaded = await updateUserPhoto(
+					token,
+					settingsUpdate.avatarFile
+				);
+				if (uploaded?.image) {
+					handleChange('avatar', { uri: uploaded.image });
+					handleChange('avatarFile', null);
+				}
+			}
+
+			const payload = {
+				name: settingsUpdate.name,
+				phone: settingsUpdate.phone,
+				email: settingsUpdate.email,
+				gender:
+					Object.keys(genderMap).find(
+						(key) => genderMap[key] === settingsUpdate.gender
+					) || 'NOT_STATED',
+				birth_date: settingsUpdate.birth_date
+					? settingsUpdate.birth_date.toISOString()
+					: null,
+				timezone: 'UTC_12_M',
+			};
+
+			await updateUser(token, payload);
+			Alert.alert('Успех', 'Профиль успешно обновлен');
+		} catch (error) {
+			console.log('Ошибка при обновлении профиля:', error);
+			Alert.alert('Ошибка', 'Не удалось обновить профиль');
+		}
+	};
 
 	return (
 		<ScrollView
@@ -140,7 +229,7 @@ const ProfileEdit = () => {
 				) : (
 					<View style={styles.container__avatar} />
 				)}
-				<Pressable>
+				<Pressable onPress={pickImage}>
 					<Text style={styles.container__text}>
 						Изменить фотографию
 					</Text>
@@ -171,6 +260,7 @@ const ProfileEdit = () => {
 						activeUnderlineColor='transparent'
 						selectionColor='#3871FF'
 						placeholderTextColor='rgba(1, 20, 67, 0.3)'
+						keyboardType='phone-pad'
 					/>
 
 					<TextInput

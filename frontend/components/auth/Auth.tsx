@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	Text,
 	TextInput,
@@ -11,13 +11,23 @@ import { UI } from '@/types/ui';
 import { useRouter } from 'expo-router';
 import { Button } from '../custom';
 import { getVerifyCode } from '@/api/auth/auth';
+import { getToken } from '@/helpers/helper';
 
 const Auth = () => {
 	const [email, setEmail] = useState<string>('');
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const router = useRouter();
+	useEffect(() => {
+		checkToken();
+	}, []);
 
+	const checkToken = async () => {
+		const token = await getToken();
+		if (token) {
+			router.replace('/(auth)/ProfilePage');
+		}
+	};
 	const validateEmail = (email: string): string | null => {
 		if (email.length === 0) return 'Поле не должно быть пустым';
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
