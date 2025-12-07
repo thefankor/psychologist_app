@@ -12,36 +12,55 @@ const Group = ({
 	from,
 	id,
 }: GroupType) => {
-	const openGroup = (id: number) => {
+	const openGroup = () => {
 		router.push({
 			pathname: '/groups/[id]',
-			params: { id: id.toString() },
+			params: { id: String(id) },
 		});
 	};
+
 	return (
-		<Pressable onPress={() => openGroup(id)} style={styles.group}>
+		<Pressable onPress={openGroup} style={styles.group}>
 			<Image source={image} style={styles.group__image} />
+
 			<View style={styles.group__info}>
-				<Text allowFontScaling={false} style={styles.group__name}>
-					{name}
-				</Text>
-				<Text allowFontScaling={false} style={styles.group__from}>
+				<View style={styles.headerRow}>
+					<Text
+						allowFontScaling={false}
+						style={styles.group__name}
+						numberOfLines={1}
+					>
+						{name}
+					</Text>
+					<Text allowFontScaling={false} style={styles.group__time}>
+						{time}
+					</Text>
+				</View>
+
+				<Text
+					allowFontScaling={false}
+					style={styles.group__from}
+					numberOfLines={1}
+				>
 					{from}
 				</Text>
-				<Text allowFontScaling={false} style={styles.group__message}>
+
+				<Text
+					allowFontScaling={false}
+					style={styles.group__message}
+					numberOfLines={2}
+				>
 					{lastMessage}
 				</Text>
 			</View>
-			<View style={styles.group__stats}>
-				<Text allowFontScaling={false} style={styles.group__time}>
-					{time}
-				</Text>
+
+			{messages > 0 && (
 				<View style={styles.group__messages}>
 					<Text allowFontScaling={false} style={styles.messages}>
 						{messages}
 					</Text>
 				</View>
-			</View>
+			)}
 		</Pressable>
 	);
 };

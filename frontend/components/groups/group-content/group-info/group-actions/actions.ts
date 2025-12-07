@@ -1,4 +1,4 @@
-import { setSearchMode } from '@/store/slices/groupSlice';
+import { setSearchMode } from '@/store/slices/groupsSlice';
 import { router } from 'expo-router';
 import { ImageProps } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';

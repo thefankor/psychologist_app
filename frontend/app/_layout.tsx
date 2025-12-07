@@ -66,11 +66,12 @@ export default function RootLayout() {
 						<Animated.View
 							style={[StyleSheet.absoluteFill, contentStyle]}
 						>
-							<Stack>
-								<Stack.Screen
-									name='(app)'
-									options={{ headerShown: false }}
-								/>
+							<Stack screenOptions={{ headerShown: false }}>
+								<Stack.Screen name='index' />
+								<Stack.Screen name='auth' />
+								<Stack.Screen name='form' />
+								<Stack.Screen name='profile' />
+								<Stack.Screen name='groups' />
 							</Stack>
 						</Animated.View>
 					)}

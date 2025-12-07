@@ -26,7 +26,7 @@ const Auth = () => {
 	const checkToken = async () => {
 		const token = await getToken();
 		if (token) {
-			router.replace('/(app)/profile/profile');
+			router.replace('/profile');
 		}
 	};
 
@@ -48,7 +48,7 @@ const Auth = () => {
 
 		await getVerifyCode(email);
 		router.push({
-			pathname: '/(app)/auth/verify',
+			pathname: '/auth/verify',
 			params: { email },
 		});
 

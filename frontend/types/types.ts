@@ -28,16 +28,19 @@ export enum TimeFormat {
 	SOME = 'some',
 	LONG = 'long',
 }
+
 export enum PricingFormat {
 	SMALL = 'small',
 	MEDIUM = 'medium',
 	LARGE = 'large',
 }
+
 export enum GenderFormat {
 	NOT_STATED = 'not_stated',
 	MALE = 'male',
 	FEMALE = 'female',
 }
+
 export enum time {
 	MORNING = 0,
 	DAY = 1,
@@ -46,6 +49,7 @@ export enum time {
 	WEEKEND_DAY = 4,
 	WEEKEND_EVENING = 5,
 }
+
 export enum MethodFormat {
 	GESTALT = 'gestalt',
 	PSYHODRAM = 'psyhodram',
@@ -99,25 +103,6 @@ export interface FavoriteTypes {
 	methods: string[];
 }
 
-export interface MessageType {
-	message: string;
-	images: string[] | null;
-	time: string;
-	from_id: number;
-	viewed?: boolean;
-	from?: string;
-	avatar?: string;
-}
-
-export interface Group {
-	messages: MessageType[];
-	members: number;
-	image: string;
-	name: string;
-	description: string;
-	rules: string;
-}
-
 export interface AuthData {
 	id: number;
 	name: string;
@@ -132,15 +117,63 @@ export interface AuthData {
 	birth_date: string | Date;
 }
 
-export interface GroupType {
+export type UserRole = 'ADMIN' | 'CLIENT';
+
+export interface ChatAuthor {
 	id: number;
 	name: string;
+	role: UserRole;
+	avatar: string | null;
+}
+
+export interface ServerMessage {
+	id: string;
+	chat_id: string;
+	author: ChatAuthor;
+	text: string;
+	media_url: string | null;
+	reply_to: string | null;
+	created_at: string;
+	read_at: string | null;
+	updated_at?: string;
+	local_message_id?: string;
+}
+
+export interface ServerChat {
+	id: string;
+	type: 'GROUP' | 'PRIVATE';
+	name: string;
+	image: string | null;
+	description?: string;
+	rules?: string;
+	last_messages: ServerMessage[];
+}
+
+export interface UIMessage {
+	id: string;
+	localId?: string;
+	chatId: string;
+	author: ChatAuthor;
+	text: string;
+	mediaUrl: string | null;
+	replyTo: string | null;
+	createdAt: string;
+	readAt: string | null;
+	isMine: boolean;
+	isDelivered?: boolean;
+}
+
+export interface GroupListItem {
+	id: string;
+	name: string;
+	image: { uri: string } | any;
 	description: string;
 	rules: string;
 	members: number;
-	image: string;
 	messages: number;
 	lastMessage: string;
 	from: string;
 	time: string;
 }
+
+export type GroupType = GroupListItem;

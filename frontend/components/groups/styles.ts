@@ -101,4 +101,15 @@ export const styles = StyleSheet.create({
 		width: '100%',
 		height: 100,
 	},
+	noChatsContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		paddingTop: 80,
+	},
+	noChatsText: {
+		fontFamily: 'Hezaedrus',
+		fontSize: 16,
+		color: 'rgba(1, 20, 67, 0.5)',
+	},
 });

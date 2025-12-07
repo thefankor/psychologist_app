@@ -1,7 +1,6 @@
-import { BASE_URL } from '@env';
+const BASE_URL = 'https://api.simal.live';
 
 export const sendUserData = async (token: string, data: any) => {
-	console.log(token);
 	const url = `${BASE_URL}/user/survey/`;
 	try {
 		const res = await fetch(url, {

@@ -12,7 +12,7 @@ const ProfileLayout = ({ children }: Props) => {
 	const router = useRouter();
 	const pathname = usePathname();
 
-	const isMainPage = pathname === '/profile/profile';
+	const isMainPage = pathname === '/profile';
 	return (
 		<View style={[styles.container]}>
 			<StatusBar style='dark' />

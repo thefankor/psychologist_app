@@ -15,7 +15,7 @@ export const useMenu = (): Menu[] => {
 	const router = useRouter();
 
 	const logout = () => {
-		router.push('/(app)/AuthPage');
+		router.push('/auth');
 	};
 
 	// const deleteProfile = async () => {
@@ -58,19 +58,19 @@ export const useMenu = (): Menu[] => {
 			name: 'Мои данные',
 			type: 'redirect',
 			image: require('@/assets/images/user.png'),
-			action: () => router.push('/(app)/profile/edit'),
+			action: () => router.push('/profile/edit'),
 		},
 		{
 			name: 'Избранное',
 			type: 'redirect',
 			image: require('@/assets/images/favorite.png'),
-			action: () => router.push('/(app)/profile/favorites'),
+			action: () => router.push('/profile/favorites'),
 		},
 		{
 			name: 'Способы оплаты',
 			type: 'redirect',
 			image: require('@/assets/images/payments.png'),
-			action: () => router.push('/(app)/profile/methods'),
+			action: () => router.push('/profile/methods'),
 		},
 		{
 			name: 'Удалить аккаунт',

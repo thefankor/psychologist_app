@@ -1,4 +1,4 @@
-import { BASE_URL } from '@env';
+const BASE_URL = 'https://api.simal.live';
 
 export const getVerifyCode = async (email: string) => {
 	const url = `${BASE_URL}/auth/login/`;

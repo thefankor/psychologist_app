@@ -6,9 +6,12 @@ import { getUser } from '@/api/profile/profile';
 import { useCallback, useState } from 'react';
 import { getToken } from '@/helpers/helper';
 import { useFocusEffect } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { setUser } from '@/store/slices/userSlice';
 
 const Profile = () => {
 	const menu = useMenu();
+	const dispatch = useDispatch();
 	const [userData, setUserData] = useState<any>({});
 
 	useFocusEffect(
@@ -19,9 +22,21 @@ const Profile = () => {
 
 	const getUserData = async () => {
 		const token = await getToken();
-		if (token) {
+		if (!token) return;
+
+		try {
 			const res = await getUser(token);
 			setUserData(res);
+
+			dispatch(
+				setUser({
+					id: res.id,
+					name: res.name,
+					avatar: res.avatar,
+				})
+			);
+		} catch (err) {
+			console.error('Ошибка загрузки профиля', err);
 		}
 	};
 

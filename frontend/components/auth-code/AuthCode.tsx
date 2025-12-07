@@ -57,7 +57,7 @@ const AuthCode = () => {
 				await saveToken(res.token);
 			}
 			console.log(res.token);
-			router.push('/(app)/form/form');
+			router.push('/form');
 		} catch (err) {
 			setStatus('error');
 			console.log(err);
@@ -120,7 +120,7 @@ const AuthCode = () => {
 					<View style={styles.container__header}>
 						<Pressable
 							style={styles.back__btn}
-							onPress={() => router.push('/(app)/auth/auth')}
+							onPress={() => router.push('/auth')}
 						>
 							<Image
 								source={require('@/assets/images/back.png')}

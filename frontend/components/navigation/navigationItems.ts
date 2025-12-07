@@ -9,13 +9,13 @@ interface Navigator {
 }
 export const navigationItems: Navigator[] = [
 	{
-		route: '/PsyhoPage',
+		route: '/psychologists',
 		name: 'Психологи',
 		image: require('@/assets/images/psyho.png'),
 		activeImage: require('@/assets/images/psyho_active.png'),
 	},
 	{
-		route: '/groups/groups',
+		route: '/groups',
 		name: 'Чаты',
 		image: require('@/assets/images/chat.png'),
 		activeImage: require('@/assets/images/chat_active.png'),
@@ -27,8 +27,8 @@ export const navigationItems: Navigator[] = [
 		activeImage: require('@/assets/images/meditation_active.png'),
 	},
 	{
-		route: '/profile/profile',
-		name: 'Дневник',
+		route: '/profile',
+		name: 'Профиль',
 		image: require('@/assets/images/avatar.png'),
 		activeImage: require('@/assets/images/user.png'),
 	},

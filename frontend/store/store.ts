@@ -1,15 +1,17 @@
 import { configureStore } from '@reduxjs/toolkit';
 import popupSlice from '@/store/slices/popupSlice';
-import chatSlice from './slices/chatSlice';
-import groupSlice from './slices/groupSlice';
+import chatSlice from './slices/chatsSlice';
+import groupSlice from './slices/groupsSlice';
 import sessionSlice from './slices/sessionSlice';
+import userSlice from './slices/userSlice';
 
 const store = configureStore({
 	reducer: {
 		popup: popupSlice,
-		chat: chatSlice,
+		chats: chatSlice,
 		group: groupSlice,
 		session: sessionSlice,
+		user: userSlice,
 	},
 });
 

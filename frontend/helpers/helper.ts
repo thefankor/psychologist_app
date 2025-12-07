@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { Dispatch } from '@reduxjs/toolkit';
-import { setMessage } from '@/store/slices/chatSlice';
+import { setMessage } from '@/store/slices/chatsSlice';
 import * as MediaLibrary from 'expo-media-library';
 
 export const hidePart = (text: string, n: number, format?: string) => {

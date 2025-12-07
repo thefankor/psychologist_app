@@ -169,7 +169,6 @@ const ProfileEdit = () => {
 		}
 
 		try {
-			// Сначала фото, если есть
 			if (settingsUpdate.avatarFile) {
 				const uploaded = await updateUserPhoto(
 					token,
