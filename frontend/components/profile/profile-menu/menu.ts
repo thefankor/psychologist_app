@@ -1,8 +1,7 @@
-import { ImageProps } from 'react-native';
+import { ImageProps, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { deleteToken, getToken } from '@/helpers/helper';
 import { deleteUser } from '@/api/profile/profile';
-import { Alert } from 'react-native';
 
 export interface Menu {
 	image: ImageProps;
@@ -14,51 +13,55 @@ export interface Menu {
 export const useMenu = (): Menu[] => {
 	const router = useRouter();
 
-	const logout = () => {
+	const logout = async () => {
+		await deleteToken();
 		router.push('/auth');
 	};
 
-	// const deleteProfile = async () => {
-	// 	Alert.alert(
-	// 		'Удаление аккаунта',
-	// 		'Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.',
-	// 		[
-	// 			{
-	// 				text: 'Отмена',
-	// 				style: 'cancel',
-	// 			},
-	// 			{
-	// 				text: 'Удалить',
-	// 				style: 'destructive',
-	// 				onPress: async () => {
-	// 					try {
-	// 						const token = await getToken();
-	// 						console.log('menu', token);
-	// 						if (token) {
-	// 							await deleteUser(token);
-	// 							await deleteToken();
+	const deleteProfile = async () => {
+		Alert.alert(
+			'Удаление аккаунта',
+			'Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.',
+			[
+				{
+					text: 'Отмена',
+					style: 'cancel',
+				},
+				{
+					text: 'Удалить',
+					style: 'destructive',
+					onPress: async () => {
+						try {
+							const token = await getToken();
+							console.log('menu', token);
+							if (token) {
+								await deleteUser(token);
+								await deleteToken();
 
-	// 							router.push('/(app)/AuthPage');
-	// 						}
-	// 					} catch (error) {
-	// 						console.log('Ошибка при удаления профиля:', error);
-	// 						Alert.alert('Ошибка', 'Не удалось удалить аккаунт');
-	// 					}
-	// 				},
-	// 			},
-	// 		]
-	// 	);
-	// };
-
-	const deleteProfile = () => {
-		console.log('Пользователь удален');
+								router.push('/auth');
+							}
+						} catch (error) {
+							console.log('Ошибка при удаления профиля:', error);
+							Alert.alert('Ошибка', 'Не удалось удалить аккаунт');
+						}
+					},
+				},
+			]
+		);
 	};
+
 	return [
 		{
 			name: 'Мои данные',
 			type: 'redirect',
 			image: require('@/assets/images/user.png'),
 			action: () => router.push('/profile/edit'),
+		},
+		{
+			name: 'Мои сессии',
+			type: 'redirect',
+			image: require('@/assets/images/sessions.png'),
+			action: () => router.push('/profile/sessions'),
 		},
 		{
 			name: 'Избранное',

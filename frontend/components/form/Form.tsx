@@ -157,14 +157,9 @@ const Form = () => {
 											styles.nav__active,
 									]}
 									key={index}
-								></View>
+								/>
 							))}
 				</View>
-				{step !== FormSteps.INIT && (
-					<Pressable onPress={skipForm}>
-						<Text style={styles.skip__text}>Пропустить</Text>
-					</Pressable>
-				)}
 			</View>
 
 			<Animated.View

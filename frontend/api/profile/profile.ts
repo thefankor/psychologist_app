@@ -103,3 +103,24 @@ export const updateUserPhoto = async (token: string, image: any) => {
 		throw error;
 	}
 };
+
+export const deleteUser = async (token: string) => {
+	const url = `${BASE_URL}/user/`;
+	try {
+		const res = await fetch(url, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+	} catch (error: any) {
+		console.log('Ошибка во время получения удаления пользователя: ', error);
+		throw error;
+	}
+};

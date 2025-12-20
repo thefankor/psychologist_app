@@ -177,3 +177,13 @@ export interface GroupListItem {
 }
 
 export type GroupType = GroupListItem;
+
+export type Session = {
+	id: number;
+	psychologistName: string;
+	date: string;
+	time: string;
+	type: string;
+	isUpcoming: boolean;
+	avatarUri: string;
+};

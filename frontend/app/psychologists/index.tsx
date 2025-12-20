@@ -1,7 +1,12 @@
-import Navigation from '@/components/navigation/Navigation';
-import { Psychologists } from '@/components/psychologists/Psychologists';
 import { View } from 'react-native';
+import { Psychologists } from '@/components/psychologists/Psychologists';
+import Navigation from '@/components/navigation/Navigation';
 
 export default function PsychologistsPage() {
-	return <Psychologists />;
+	return (
+		<View style={{ flex: 1, backgroundColor: '#F5F8FF' }}>
+			<Psychologists />
+			<Navigation />
+		</View>
+	);
 }

@@ -49,7 +49,7 @@ const chatsSlice = createSlice({
 				(m) => m.id !== msg.id && m.localId !== msg.localId
 			);
 
-			state.messages[msg.chatId] = [...filtered, msg];
+			state.messages[msg.chatId] = [msg, ...filtered];
 		},
 
 		setCurrentChat(state, action: PayloadAction<string>) {

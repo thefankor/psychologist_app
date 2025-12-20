@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
 	card: {
 		backgroundColor: '#fff',
 		borderRadius: 32,
-		paddingTop: 60,
+		paddingTop: 40,
 		paddingHorizontal: 20,
 		paddingBottom: 32,
 		shadowColor: '#000',
@@ -67,14 +67,14 @@ export const styles = StyleSheet.create({
 	ratingText: {
 		fontFamily: 'Hezaedrus500',
 		fontSize: 15,
-		color: '#011443',
+		color: '#3565D9',
 	},
 	favoriteButton: {
 		position: 'absolute',
 		top: 8,
 		right: 8,
 		backgroundColor: '#fff',
-		padding: 14,
+		padding: 10,
 		borderRadius: 30,
 		shadowColor: '#000',
 		shadowOpacity: 0.15,
@@ -82,8 +82,8 @@ export const styles = StyleSheet.create({
 		elevation: 10,
 	},
 	heartIcon: {
-		width: 28,
-		height: 28,
+		width: 25,
+		height: 25,
 	},
 	info: {
 		alignItems: 'center',
@@ -109,9 +109,9 @@ export const styles = StyleSheet.create({
 	},
 	priceLabel: {
 		fontFamily: 'Hezaedrus',
-		fontSize: 16,
+		fontSize: 18,
 		color: '#01144380',
-		marginRight: 6,
+		margin: 8,
 	},
 	price: {
 		fontFamily: 'Hezaedrus500',
@@ -146,20 +146,19 @@ export const styles = StyleSheet.create({
 	statItem: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		backgroundColor: '#F0F5FF',
+		backgroundColor: '#f1f4fbff',
 		paddingHorizontal: 16,
 		paddingVertical: 12,
 		borderRadius: 28,
 	},
 	statIcon: {
-		width: 32,
-		height: 32,
-		marginRight: 12,
+		width: 22,
+		height: 22,
 	},
 	statText: {
 		fontFamily: 'Hezaedrus500',
 		fontSize: 14,
-		color: '#011443',
+		color: '#4163B8',
 	},
 	bookButton: {
 		backgroundColor: '#3E75FF',
@@ -171,5 +170,15 @@ export const styles = StyleSheet.create({
 		fontFamily: 'Hezaedrus500',
 		fontSize: 17,
 		color: '#fff',
+	},
+	flagButton: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: '#3E75FF',
+		width: 35,
+		height: 35,
+		borderRadius: '50%',
+		marginRight: 10,
 	},
 });

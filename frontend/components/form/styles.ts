@@ -41,6 +41,7 @@ export const styles = StyleSheet.create({
 		width: '100%',
 		display: 'flex',
 		flexDirection: 'row',
+		justifyContent: 'center',
 	},
 	nav__wrap: {
 		width: '75%',

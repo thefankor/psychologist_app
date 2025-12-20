@@ -11,7 +11,7 @@ const mockData = [
 		methods: 'Гештальт терапия, Арт-терапия',
 		sessionsCount: 4,
 		experienceYears: 10,
-		avatarUri: 'https://randomuser.me/api/portraits/women/44.jpg',
+		avatarUri: 'https://randomuser.me/api/portraits/women/46.jpg',
 	},
 	{
 		id: 2,
@@ -20,8 +20,18 @@ const mockData = [
 		price: 4000,
 		methods: 'КПТ, Психоанализ',
 		sessionsCount: 3,
-		experienceYears: 12,
+		experienceYears: 8,
 		avatarUri: 'https://randomuser.me/api/portraits/women/68.jpg',
+	},
+	{
+		id: 3,
+		name: 'Арсен Маркарян',
+		rating: 5,
+		price: 4000,
+		methods: 'Знает все',
+		sessionsCount: 5,
+		experienceYears: 100,
+		avatarUri: require('@/assets/images/arsen.png'),
 	},
 ];
 
@@ -29,13 +39,10 @@ export const Psychologists = () => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<Text style={styles.title}>Онлайн психотерапия</Text>
-				<Pressable style={styles.menuButton}>
-					<Image
-						source={require('@/assets/images/menu-dots.png')}
-						style={styles.menuIcon}
-					/>
-				</Pressable>
+				<View style={styles.titleWrapper}>
+					<Text style={styles.title}>Онлайн</Text>
+					<Text style={styles.title}>психотерапия</Text>
+				</View>
 			</View>
 
 			<ScrollView showsVerticalScrollIndicator={false}>

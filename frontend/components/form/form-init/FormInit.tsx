@@ -1,15 +1,17 @@
 import { Pressable, Text, TextInput, View, ViewStyle } from 'react-native';
 import { DatePickerModal } from 'react-native-paper-dates';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useKeyboard } from '@react-native-community/hooks';
 import { styles } from './styles';
-import { dataHandler } from '@/helpers/helper';
+import { dataHandler, getToken } from '@/helpers/helper';
 import { Select, Option } from '@/components/custom/ui/Select';
 import { StatusBar } from 'expo-status-bar';
 import { Button } from '@/components/custom/ui/Button';
 import { UI } from '@/types/ui';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FormSteps, genderOptions } from '@/types/types';
+import { getUser } from '@/api/profile/profile';
+import { useRouter } from 'expo-router';
 
 const labelStyle = {
 	paddingTop: 0,
@@ -41,7 +43,7 @@ export const FormInit = ({ setStep }: Props) => {
 	const [date, setDate] = useState(new Date());
 	const [visible, setVisible] = useState(false);
 	const [isFocused, setIsFocused] = useState(false);
-
+	const router = useRouter();
 	const [open, setOpen] = useState<boolean>(false);
 
 	const [formState, setFormState] = useState<InitState>({
@@ -49,6 +51,19 @@ export const FormInit = ({ setStep }: Props) => {
 		gender: Gender.NOT_CHOOSEN,
 		birthDate: 'Указать',
 	});
+
+	useEffect(() => {
+		checkData();
+	}, []);
+
+	const checkData = async () => {
+		const token = await getToken();
+		const res = await getUser(token!);
+
+		if (res.name) {
+			router.push('/profile');
+		}
+	};
 
 	const calculateData = (birthDate: Date) => {
 		const currentDate = new Date().getTime();

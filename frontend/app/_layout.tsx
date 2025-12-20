@@ -16,7 +16,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import StoreProvider from '@/store/StoreProvider';
 
 SplashScreen.preventAutoHideAsync();
-
 export default function RootLayout() {
 	const [fontsLoaded] = useFonts({
 		Hezaedrus: require('../assets/fonts/Hezaedrus-Regular.ttf'),
@@ -72,6 +71,7 @@ export default function RootLayout() {
 								<Stack.Screen name='form' />
 								<Stack.Screen name='profile' />
 								<Stack.Screen name='groups' />
+								<Stack.Screen name='calls' />
 							</Stack>
 						</Animated.View>
 					)}

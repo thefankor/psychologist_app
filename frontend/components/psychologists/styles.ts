@@ -4,19 +4,24 @@ export const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: '#F5F8FF',
-		paddingTop: 50,
+		paddingTop: 60,
+		marginBottom: 80,
 	},
 	header: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
-		alignItems: 'center',
+		alignItems: 'flex-start',
 		paddingHorizontal: 20,
 		marginBottom: 30,
+	},
+	titleWrapper: {
+		flexDirection: 'column',
 	},
 	title: {
 		fontFamily: 'Hezaedrus500',
 		fontSize: 28,
 		color: '#011443',
+		lineHeight: 34,
 	},
 	menuButton: {
 		width: 48,
@@ -29,6 +34,7 @@ export const styles = StyleSheet.create({
 		shadowOpacity: 0.1,
 		shadowRadius: 10,
 		elevation: 8,
+		marginTop: 4,
 	},
 	menuIcon: {
 		width: 28,

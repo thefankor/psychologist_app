@@ -1,21 +1,23 @@
 import { ReactNode } from 'react';
-import { View, StyleSheet, Pressable, Image } from 'react-native';
+import { View, StyleSheet, Pressable, Image, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { usePathname, useSearchParams } from 'expo-router/build/hooks';
+import { usePathname } from 'expo-router';
 
 interface Props {
 	children: ReactNode;
+	title?: string;
 }
 
-const ProfileLayout = ({ children }: Props) => {
+const ProfileLayout = ({ children, title }: Props) => {
 	const router = useRouter();
 	const pathname = usePathname();
-
 	const isMainPage = pathname === '/profile';
+
 	return (
-		<View style={[styles.container]}>
+		<View style={styles.container}>
 			<StatusBar style='dark' />
+
 			{!isMainPage && (
 				<View style={styles.container__header}>
 					<Pressable
@@ -23,12 +25,11 @@ const ProfileLayout = ({ children }: Props) => {
 						onPress={() => router.back()}
 					>
 						<Image
-							style={styles.back__image}
-							height={100}
-							width={100}
 							source={require('@/assets/images/back.png')}
+							style={styles.back__image}
 						/>
 					</Pressable>
+					{title && <Text style={styles.pageTitle}>{title}</Text>}
 				</View>
 			)}
 
@@ -49,34 +50,36 @@ const styles = StyleSheet.create({
 	container__header: {
 		width: '100%',
 		height: 44,
-		display: 'flex',
 		flexDirection: 'row',
 		justifyContent: 'center',
-		position: 'relative',
 		alignItems: 'center',
+		position: 'relative',
 	},
 	back__btn: {
 		width: 44,
 		height: 44,
-		alignItems: 'center',
 		position: 'absolute',
-		justifyContent: 'center',
 		left: 0,
+		justifyContent: 'center',
+		alignItems: 'center',
 		borderWidth: 1.5,
-		borderRadius: 100,
 		borderColor: 'rgba(1, 20, 67, 0.1)',
+		borderRadius: 100,
+		zIndex: 10,
 	},
 	back__image: {
-		maxHeight: 24,
-		maxWidth: 24,
+		width: 24,
+		height: 24,
 	},
-	container__name: {
+	pageTitle: {
 		fontFamily: 'Hezaedrus500',
-		fontSize: 18,
+		fontSize: 24,
+		marginLeft: 18,
+		color: '#011443',
 	},
 	container__body: {
+		flex: 1,
 		width: '100%',
-		height: '95%',
 	},
 });
 

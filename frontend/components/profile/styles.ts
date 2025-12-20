@@ -44,7 +44,7 @@ export const styles = StyleSheet.create({
 	},
 	first: {
 		marginTop: 0,
-		height: 135,
+		height: 180,
 	},
 	second: {
 		height: 95,

@@ -57,16 +57,16 @@ const Profile = () => {
 				<Text style={styles.container__name}>{userData?.name}</Text>
 				<View style={styles.container__menu}>
 					<View style={[styles.container__section, styles.first]}>
-						{menu.slice(0, 3).map((item, index) => (
+						{menu.slice(0, 4).map((item, index) => (
 							<ProfileMenu
 								key={index}
 								{...item}
-								disableBorder={index === 2}
+								disableBorder={index === 3}
 							/>
 						))}
 					</View>
 					<View style={[styles.container__section, styles.second]}>
-						{menu.slice(3, 5).map((item, index) => (
+						{menu.slice(4, 6).map((item, index) => (
 							<ProfileMenu
 								key={index}
 								{...item}

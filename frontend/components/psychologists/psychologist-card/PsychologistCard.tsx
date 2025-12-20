@@ -1,5 +1,6 @@
 import { View, Text, Image, Pressable } from 'react-native';
 import { styles } from './styles';
+import { Button } from '@/components/custom';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 interface PsychologistCardProps {
@@ -25,6 +26,8 @@ export const PsychologistCard = ({
 	onPress,
 	onFavorite,
 }: PsychologistCardProps) => {
+	const isArsen = name === 'Арсен Маркарян';
+
 	return (
 		<Animated.View
 			entering={FadeInDown.duration(600)}
@@ -36,7 +39,11 @@ export const PsychologistCard = ({
 
 					<View style={styles.avatarContainer}>
 						<Image
-							source={{ uri: avatarUri }}
+							source={
+								typeof avatarUri === 'string'
+									? { uri: avatarUri }
+									: avatarUri
+							}
 							style={styles.avatar}
 						/>
 
@@ -66,43 +73,55 @@ export const PsychologistCard = ({
 						<Text style={styles.methods}>{methods}</Text>
 
 						<View style={styles.priceRow}>
-							<Text style={styles.priceLabel}>от </Text>
-							<Text style={styles.price}>
-								{price.toLocaleString('ru')}
-							</Text>
-							<Text style={styles.currency}> ₽</Text>
-							<View style={styles.infoBadge}>
-								<Text style={styles.infoText}>i</Text>
-							</View>
+							{isArsen ? (
+								<Text style={styles.price}>{'Бесценно'}</Text>
+							) : (
+								<View style={styles.priceRow}>
+									<Text style={styles.priceLabel}>от</Text>
+									<Text style={styles.price}>
+										{price.toLocaleString('ru')}
+									</Text>
+									<Text style={styles.priceLabel}>₽</Text>
+								</View>
+							)}
 						</View>
 
 						<View style={styles.stats}>
 							<View style={styles.statItem}>
-								<Image
-									source={require('@/assets/images/flag.png')}
-									style={styles.statIcon}
-								/>
+								<View style={styles.flagButton}>
+									<Image
+										source={require('@/assets/images/flag.png')}
+										style={styles.statIcon}
+									/>
+								</View>
+
 								<Text style={styles.statText}>
 									{sessionsCount} из 5 тем
 								</Text>
 							</View>
 
 							<View style={styles.statItem}>
-								<Image
-									source={require('@/assets/images/briefcase.png')}
-									style={styles.statIcon}
-								/>
+								<View style={styles.flagButton}>
+									<Image
+										source={require('@/assets/images/briefcase.png')}
+										style={styles.statIcon}
+									/>
+								</View>
 								<Text style={styles.statText}>
 									{experienceYears} лет опыта
 								</Text>
 							</View>
 						</View>
 
-						<Pressable style={styles.bookButton}>
-							<Text style={styles.bookButtonText}>
-								Записаться
-							</Text>
-						</Pressable>
+						<Button
+							text={
+								isArsen ? 'Записаться невозможно' : 'Записаться'
+							}
+							disabled={isArsen}
+							pressColor='#3a6bf5'
+							style={styles.bookButton}
+							textStyle={styles.bookButtonText}
+						/>
 					</View>
 				</View>
 			</Pressable>

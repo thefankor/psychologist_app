@@ -70,7 +70,6 @@ export const useChatWebSocket = () => {
 						isMine: !!data.local_message_id,
 						isDelivered: data.event === 'message_delivered',
 					};
-
 					dispatch(addMessage(msg));
 				}
 			} catch (err) {
