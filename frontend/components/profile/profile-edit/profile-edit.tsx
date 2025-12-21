@@ -14,6 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as ImagePicker from 'expo-image-picker';
 import { getUser, updateUser, updateUserPhoto } from '@/api/profile/profile';
+import { Loading } from '@/components/custom/ui/Loading';
 
 const genderMap: Record<string, Gender> = {
 	NOT_STATED: Gender.NOT_STATED,
@@ -43,29 +44,37 @@ const ProfileEdit = () => {
 		avatar: null,
 		avatarFile: null,
 	});
+	const [loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() => {
 		getUserData();
 	}, []);
 
 	const getUserData = async () => {
-		const token = await getToken();
-		setToken(token);
-		if (token) {
-			const res = await getUser(token);
-			setSettingsUpdate({
-				name: res.name ?? '',
-				phone: res.phone ?? '',
-				email: res.email ?? '',
-				gender: genderMap[res.gender] ?? Gender.NOT_STATED,
-				birth_date: res.birth_date
-					? new Date(res.birth_date)
-					: new Date(),
-				avatar: res.avatar
-					? { uri: res.avatar }
-					: require('@/assets/images/avatar.png'),
-				avatarFile: null,
-			});
+		try {
+			setLoading(true);
+			const token = await getToken();
+			setToken(token);
+			if (token) {
+				const res = await getUser(token);
+				setSettingsUpdate({
+					name: res.name ?? '',
+					phone: res.phone ?? '',
+					email: res.email ?? '',
+					gender: genderMap[res.gender] ?? Gender.NOT_STATED,
+					birth_date: res.birth_date
+						? new Date(res.birth_date)
+						: new Date(),
+					avatar: res.avatar
+						? { uri: res.avatar }
+						: require('@/assets/images/avatar.png'),
+					avatarFile: null,
+				});
+			}
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -169,6 +178,7 @@ const ProfileEdit = () => {
 		}
 
 		try {
+			setLoading(true);
 			if (settingsUpdate.avatarFile) {
 				const uploaded = await updateUserPhoto(
 					token,
@@ -199,8 +209,14 @@ const ProfileEdit = () => {
 		} catch (error) {
 			console.log('Ошибка при обновлении профиля:', error);
 			Alert.alert('Ошибка', 'Не удалось обновить профиль');
+		} finally {
+			setLoading(false);
 		}
 	};
+
+	if (loading) {
+		return <Loading />;
+	}
 
 	return (
 		<ScrollView

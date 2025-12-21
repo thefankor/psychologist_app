@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { createCall } from '@/api/calls/calls';
 import { getToken } from '@/helpers/helper';
 import { randomUUID } from 'expo-crypto';
+import { Loading } from '@/components/custom/ui/Loading';
 
 const mockSessions = [
 	{
@@ -53,6 +54,10 @@ export const ProfileSessions = () => {
 			setLoading(false);
 		}
 	};
+
+	if (loading) {
+		return <Loading />;
+	}
 
 	return (
 		<View style={styles.container}>

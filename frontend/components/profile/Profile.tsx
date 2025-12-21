@@ -8,11 +8,13 @@ import { getToken } from '@/helpers/helper';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { setUser } from '@/store/slices/userSlice';
+import { Loading } from '../custom/ui/Loading';
 
 const Profile = () => {
 	const menu = useMenu();
 	const dispatch = useDispatch();
 	const [userData, setUserData] = useState<any>({});
+	const [loading, setLoading] = useState<boolean>(false);
 
 	useFocusEffect(
 		useCallback(() => {
@@ -25,6 +27,7 @@ const Profile = () => {
 		if (!token) return;
 
 		try {
+			setLoading(true);
 			const res = await getUser(token);
 			setUserData(res);
 
@@ -37,12 +40,18 @@ const Profile = () => {
 			);
 		} catch (err) {
 			console.error('Ошибка загрузки профиля', err);
+		} finally {
+			setLoading(false);
 		}
 	};
 
 	const profileImage = userData.avatar
 		? { uri: userData.avatar }
 		: require('@/assets/images/avatar.png');
+
+	if (loading) {
+		return <Loading />;
+	}
 
 	return (
 		<>

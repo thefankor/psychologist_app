@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FormSteps, genderOptions } from '@/types/types';
 import { getUser } from '@/api/profile/profile';
 import { useRouter } from 'expo-router';
+import { Loading } from '@/components/custom/ui/Loading';
 
 const labelStyle = {
 	paddingTop: 0,
@@ -45,6 +46,7 @@ export const FormInit = ({ setStep }: Props) => {
 	const [isFocused, setIsFocused] = useState(false);
 	const router = useRouter();
 	const [open, setOpen] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(false);
 
 	const [formState, setFormState] = useState<InitState>({
 		name: '',
@@ -57,11 +59,18 @@ export const FormInit = ({ setStep }: Props) => {
 	}, []);
 
 	const checkData = async () => {
-		const token = await getToken();
-		const res = await getUser(token!);
+		try {
+			setLoading(true);
+			const token = await getToken();
+			const res = await getUser(token!);
 
-		if (res.name) {
-			router.push('/profile');
+			if (res.name) {
+				router.push('/profile');
+			}
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -96,6 +105,7 @@ export const FormInit = ({ setStep }: Props) => {
 
 	const sendData = async () => {
 		try {
+			setLoading(true);
 			await AsyncStorage.setItem(
 				'initData',
 				JSON.stringify({
@@ -108,8 +118,14 @@ export const FormInit = ({ setStep }: Props) => {
 			setStep(FormSteps.STEP_ONE);
 		} catch (err) {
 			console.log('Error saving data:', err);
+		} finally {
+			setLoading(false);
 		}
 	};
+
+	if (loading) {
+		return <Loading />;
+	}
 
 	return (
 		<View

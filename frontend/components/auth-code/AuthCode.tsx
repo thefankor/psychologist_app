@@ -18,10 +18,12 @@ import { formatTime, saveToken } from '@/helpers/helper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '../custom';
 import { checkVerifyCode, getVerifyCode } from '@/api/auth/auth';
+import { Loading } from '../custom/ui/Loading';
 
 const AuthCode = () => {
 	const router = useRouter();
 	const [codes, setCodes] = useState<string[]>(['', '', '', '', '']);
+	const [loading, setLoading] = useState<boolean>(false);
 	const inputRefs = useRef<(TextInput | null)[]>([]);
 	const [status, setStatus] = useState<'default' | 'error' | 'success'>(
 		'default'
@@ -49,6 +51,7 @@ const AuthCode = () => {
 		if (code.length < 5) return;
 
 		try {
+			setLoading(true);
 			const res = await checkVerifyCode(email, code);
 
 			setStatus('success');
@@ -61,6 +64,8 @@ const AuthCode = () => {
 		} catch (err) {
 			setStatus('error');
 			console.log(err);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -97,7 +102,7 @@ const AuthCode = () => {
 		}
 	};
 
-	const getInputStyle = (index: number) => {
+	const getInputStyle = () => {
 		switch (status) {
 			case 'error':
 				return { borderColor: 'red', color: 'red' };
@@ -107,6 +112,10 @@ const AuthCode = () => {
 				return {};
 		}
 	};
+
+	if (loading) {
+		return <Loading />;
+	}
 
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -157,7 +166,7 @@ const AuthCode = () => {
 									style={[
 										styles.input,
 										code !== '' && styles.input__active,
-										getInputStyle(index),
+										getInputStyle(),
 									]}
 									autoFocus={index === 0}
 									autoCorrect={false}

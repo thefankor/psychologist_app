@@ -1,4 +1,4 @@
-import ProfileFavorites from '@/components/profile/profile-favorites/profile-favorites';
+import ProfileFavorites from '@/components/profile/profile-favorites/ProfileFavorites';
 import ProfileLayout from '@/components/profile/ProfileLayout';
 
 export default function ProfilePage() {

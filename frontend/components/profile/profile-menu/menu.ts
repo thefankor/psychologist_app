@@ -14,8 +14,32 @@ export const useMenu = (): Menu[] => {
 	const router = useRouter();
 
 	const logout = async () => {
-		await deleteToken();
-		router.push('/auth');
+		Alert.alert(
+			'Выход из аккаунта',
+			'Вы уверены, что хотите выйти из аккаунта?',
+			[
+				{
+					text: 'Отмена',
+					style: 'cancel',
+				},
+				{
+					text: 'Выйти',
+					style: 'destructive',
+					onPress: async () => {
+						try {
+							await deleteToken();
+							router.push('/auth');
+						} catch (error) {
+							console.log('Ошибка при выходе из профиля:', error);
+							Alert.alert(
+								'Ошибка',
+								'Не удалось выйти из профиля'
+							);
+						}
+					},
+				},
+			]
+		);
 	};
 
 	const deleteProfile = async () => {

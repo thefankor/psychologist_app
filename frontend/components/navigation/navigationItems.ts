@@ -21,7 +21,7 @@ export const navigationItems: Navigator[] = [
 		activeImage: require('@/assets/images/chat_active.png'),
 	},
 	{
-		route: '/MeditationPage',
+		route: '/meditation',
 		name: 'Медитация',
 		image: require('@/assets/images/meditation.png'),
 		activeImage: require('@/assets/images/meditation_active.png'),

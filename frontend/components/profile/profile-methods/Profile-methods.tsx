@@ -26,28 +26,6 @@ const ProfileMethods = () => {
 					/>
 				</Pressable>
 			</View>
-			<Text style={styles.container__title}>Оплата картой</Text>
-			<View style={styles.container__method}>
-				<Pressable style={styles.link__method}>
-					<View style={styles.method__wrap}>
-						<Image
-							source={require('@/assets/images/card.png')}
-							height={24}
-							width={24}
-							style={styles.method__image}
-						/>
-						<Text style={styles.method__text}>
-							Добавить банковскую карту
-						</Text>
-					</View>
-					<Image
-						source={require('@/assets/images/right.png')}
-						height={24}
-						width={24}
-						style={styles.method__image}
-					/>
-				</Pressable>
-			</View>
 		</View>
 	);
 };

@@ -16,25 +16,34 @@ import { getToken } from '@/helpers/helper';
 import { useDispatch, useSelector } from 'react-redux';
 import { setChats } from '@/store/slices/chatsSlice';
 import { RootState } from '@/store/store';
+import { Loading } from '../custom/ui/Loading';
 
 const Groups = () => {
 	const dispatch = useDispatch();
 	const chats = useSelector((state: RootState) => state.chats.chats);
 	const myId = useSelector((state: RootState) => state.user.id);
 	const myName = useSelector((state: RootState) => state.user.name || 'Я');
+	const [loading, setLoading] = useState<boolean>(false);
 
 	const [searchQuery, setSearchQuery] = useState('');
 
 	useEffect(() => {
-		const load = async () => {
+		load();
+	}, [dispatch]);
+
+	const load = async () => {
+		try {
+			setLoading(true);
 			const token = await getToken();
 			if (!token) return;
 			const data = await getChats(token);
 			dispatch(setChats(data || []));
-		};
-		load();
-	}, [dispatch]);
-
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
 	const filteredChats = chats.filter((chat: ServerChat) =>
 		chat.name.toLowerCase().includes(searchQuery.toLowerCase())
 	);
@@ -63,6 +72,10 @@ const Groups = () => {
 			messages: 0,
 		};
 	});
+
+	if (loading) {
+		return <Loading />;
+	}
 
 	return (
 		<ScrollView

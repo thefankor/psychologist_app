@@ -12,11 +12,12 @@ import { useRouter } from 'expo-router';
 import { Button } from '../custom';
 import { getVerifyCode } from '@/api/auth/auth';
 import { getToken } from '@/helpers/helper';
+import { Loading } from '../custom/ui/Loading';
 
 const Auth = () => {
 	const [email, setEmail] = useState<string>('');
 	const [error, setError] = useState<string | null>(null);
-	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(false);
 	const router = useRouter();
 
 	useEffect(() => {
@@ -24,9 +25,17 @@ const Auth = () => {
 	}, []);
 
 	const checkToken = async () => {
-		const token = await getToken();
-		if (token) {
-			router.replace('/profile');
+		try {
+			setLoading(true);
+
+			const token = await getToken();
+			if (token) {
+				router.replace('/profile');
+			}
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -38,21 +47,25 @@ const Auth = () => {
 	};
 
 	const sendEmail = async (email: string) => {
-		setIsLoading(true);
-		setError(null);
-		const validationError = validateEmail(email);
-		if (validationError) {
-			setError(validationError);
-			return;
+		try {
+			setLoading(true);
+			setError(null);
+			const validationError = validateEmail(email);
+			if (validationError) {
+				setError(validationError);
+				return;
+			}
+
+			await getVerifyCode(email);
+			router.push({
+				pathname: '/auth/verify',
+				params: { email },
+			});
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
 		}
-
-		await getVerifyCode(email);
-		router.push({
-			pathname: '/auth/verify',
-			params: { email },
-		});
-
-		setIsLoading(false);
 	};
 
 	const handleEmailChange = (text: string) => {
@@ -60,6 +73,9 @@ const Auth = () => {
 		if (error) setError(null);
 	};
 
+	if (loading) {
+		return <Loading />;
+	}
 	return (
 		<KeyboardAvoidingView
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -93,7 +109,7 @@ const Auth = () => {
 							value={email}
 							onChangeText={handleEmailChange}
 							returnKeyType='send'
-							editable={!isLoading}
+							editable={!loading}
 							onSubmitEditing={() => sendEmail(email)}
 						/>
 					</View>
@@ -102,12 +118,12 @@ const Auth = () => {
 
 					<Button
 						text={
-							isLoading ? 'Отправка...' : 'Получить код из письма'
+							loading ? 'Отправка...' : 'Получить код из письма'
 						}
 						pressColor='#0043E9'
 						style={[UI.styles.continueButton]}
 						textStyle={styles.button__text}
-						disabled={isLoading}
+						disabled={loading}
 						onPress={() => sendEmail(email)}
 					/>
 				</View>
