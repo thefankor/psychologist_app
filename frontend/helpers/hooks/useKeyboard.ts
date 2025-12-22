@@ -1,4 +1,3 @@
-// hooks/useKeyboardAnimation.ts
 import { useEffect } from 'react';
 import { Keyboard, Platform } from 'react-native';
 import { useSharedValue, withTiming, Easing } from 'react-native-reanimated';
