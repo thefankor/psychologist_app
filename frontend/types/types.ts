@@ -53,8 +53,8 @@ export enum time {
 export enum MethodFormat {
 	GESTALT = 'gestalt',
 	PSYHODRAM = 'psyhodram',
-	PSYHOANALIZE = 'psyhoanalize',
-	EXISTENTAL = 'existential',
+	PSYHOANALISE = 'psyhoanalize',
+	EXISTENAL = 'existential',
 	SYSTEM = 'system',
 }
 
@@ -178,12 +178,28 @@ export interface GroupListItem {
 
 export type GroupType = GroupListItem;
 
+interface SessionAttendes {
+	user_id: number;
+	role: 'CLIENT' | 'PSYCHOLOGIST';
+	name: string;
+	avatar: string;
+}
 export type Session = {
-	id: number;
-	psychologistName: string;
-	date: string;
-	time: string;
-	type: string;
-	isUpcoming: boolean;
-	avatarUri: string;
+	id: string;
+	start_at: string;
+	ends_at: string;
+	is_group: boolean;
+	attendees: SessionAttendes[];
+};
+
+export type Psychologist = {
+	id: 9;
+	first_name: string;
+	last_name: string;
+	methods: string[];
+	avatar: null;
+	rating: number;
+	experience: number;
+	price: number;
+	matches_count: number;
 };

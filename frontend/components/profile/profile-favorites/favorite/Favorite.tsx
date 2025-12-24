@@ -1,40 +1,40 @@
 import { Image, Pressable, Text, View } from 'react-native';
 import { styles } from './styles';
-import { FavoriteTypes } from '@/types/types';
+import { formatMethods } from '@/helpers/helper';
 
-interface FavoriteProps extends FavoriteTypes {
+interface FavoriteProps {
+	id: number;
+	avatar: string | null;
+	full_name: string;
+	methods: string[];
 	onDelete: () => void;
 }
 
-const Favorite = ({ avatar, full_name, methods, onDelete }: FavoriteProps) => {
-	const formatMethods = (methods: string[]) => {
-		const methodLabels: Record<string, string> = {
-			GESTALT: 'Гештальт-терапия',
-			PSYHODRAM: 'Психодрама',
-			PSYHOANALIZE: 'Психоаналитические направления',
-			EXISTENTIAL: 'Экзистенциальная психотерапия',
-			SYSTEM: 'Системная семейная психотерапия',
-		};
+const Favorite = ({ full_name, avatar, methods, onDelete }: FavoriteProps) => {
+	const isArsen = full_name === 'Арсен Маркарян';
 
-		return methods
-			.map((method) => methodLabels[method] || method)
-			.join(', ');
-	};
+	const avatarSource = isArsen
+		? require('@/assets/images/arsen.png')
+		: avatar && avatar.trim() !== ''
+		? { uri: avatar }
+		: require('@/assets/images/ad.png');
 
 	return (
 		<View style={styles.wrapper}>
 			<View style={styles.container}>
 				<View style={styles.container__content}>
 					<Image
-						source={require('@/assets/images/avatar.png')}
+						source={avatarSource}
 						style={styles.container__avatar}
 					/>
+
 					<View style={styles.container__info}>
 						<Text style={styles.container__title}>{full_name}</Text>
 						<Text style={styles.container__description}>
 							{formatMethods(methods)}
 						</Text>
 					</View>
+
 					<Pressable style={styles.deleteButton} onPress={onDelete}>
 						<Image
 							source={require('@/assets/images/delete.png')}

@@ -1,41 +1,64 @@
-import { ScrollView, View, Text, Image, Pressable } from 'react-native';
+import { ScrollView, View, Text } from 'react-native';
 import { PsychologistCard } from './psychologist-card/PsychologistCard';
 import { styles } from './styles';
-
-const mockData = [
-	{
-		id: 1,
-		name: 'Анастасия Степановна',
-		rating: 4.9,
-		price: 3500,
-		methods: 'Гештальт терапия, Арт-терапия',
-		sessionsCount: 4,
-		experienceYears: 10,
-		avatarUri: 'https://randomuser.me/api/portraits/women/46.jpg',
-	},
-	{
-		id: 2,
-		name: 'Елена Васильева',
-		rating: 4.8,
-		price: 4000,
-		methods: 'КПТ, Психоанализ',
-		sessionsCount: 3,
-		experienceYears: 8,
-		avatarUri: 'https://randomuser.me/api/portraits/women/68.jpg',
-	},
-	{
-		id: 3,
-		name: 'Арсен Маркарян',
-		rating: 5,
-		price: 4000,
-		methods: 'Знает все',
-		sessionsCount: 5,
-		experienceYears: 100,
-		avatarUri: require('@/assets/images/arsen.png'),
-	},
-];
+import { getToken } from '@/helpers/helper';
+import { useEffect, useState } from 'react';
+import {
+	getAllPsyshologists,
+	getAllFavorites,
+} from '@/api/psychologists/psychologists';
+import { Loading } from '../custom/ui/Loading';
+import { Psychologist } from '@/types/types';
 
 export const Psychologists = () => {
+	const [loading, setLoading] = useState<boolean>(true);
+	const [psychologists, setPsychologists] = useState<Psychologist[]>([]);
+	const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
+
+	useEffect(() => {
+		loadData();
+	}, []);
+
+	const loadData = async () => {
+		try {
+			setLoading(true);
+			const token = await getToken();
+			if (!token) return;
+
+			const [psychologistsRes, favoritesRes] = await Promise.all([
+				getAllPsyshologists(token),
+				getAllFavorites(token),
+			]);
+
+			setPsychologists(psychologistsRes || []);
+
+			const favIds = new Set<number>(
+				(favoritesRes || []).map((fav: any) => fav.id)
+			);
+			setFavoriteIds(favIds);
+		} catch (error) {
+			console.log('Error loading data:', error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const toggleFavorite = (id: number) => {
+		setFavoriteIds((prev) => {
+			const newSet = new Set(prev);
+			if (newSet.has(id)) {
+				newSet.delete(id);
+			} else {
+				newSet.add(id);
+			}
+			return newSet;
+		});
+	};
+
+	if (loading) {
+		return <Loading />;
+	}
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
@@ -46,14 +69,12 @@ export const Psychologists = () => {
 			</View>
 
 			<ScrollView showsVerticalScrollIndicator={false}>
-				{mockData.map((item) => (
+				{psychologists.map((item) => (
 					<PsychologistCard
 						key={item.id}
-						{...item}
-						onPress={() =>
-							console.log('Открыть профиль', item.name)
-						}
-						onFavorite={() => console.log('В избранное')}
+						psychologist={item}
+						isFavorite={favoriteIds.has(item.id)}
+						onFavoriteToggle={() => toggleFavorite(item.id)}
 					/>
 				))}
 			</ScrollView>

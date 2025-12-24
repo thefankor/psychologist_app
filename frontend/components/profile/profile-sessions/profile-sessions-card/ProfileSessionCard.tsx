@@ -6,30 +6,39 @@ import { Session } from '@/types/types';
 interface SessionCardProps {
 	session: Session;
 	onJoin?: () => void;
-	onCancel?: () => void;
-	onReschedule?: () => void;
 }
 
-export const ProfileSessionCard = ({
-	session,
-	onJoin,
-	onCancel,
-	onReschedule,
-}: SessionCardProps) => {
-	const { psychologistName, date, time, type, isUpcoming, avatarUri } =
-		session;
+export const ProfileSessionCard = ({ session, onJoin }: SessionCardProps) => {
+	const { start_at, is_group, attendees } = session;
+
+	const psychologist = attendees.find((a) => a.role === 'PSYCHOLOGIST');
+
+	const psychologistName = psychologist?.name ?? 'Психолог';
+	const avatarUri = psychologist?.avatar;
+
+	const dateObj = new Date(start_at);
+
+	const date = dateObj.toLocaleDateString('ru-RU', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+	});
+
+	const time = dateObj.toLocaleTimeString('ru-RU', {
+		hour: '2-digit',
+		minute: '2-digit',
+	});
+
+	const type = is_group ? 'Групповая сессия' : 'Индивидуальная сессия';
 
 	return (
 		<View style={styles.card}>
 			<View style={styles.header}>
 				<Image
-					source={
-						typeof avatarUri === 'string'
-							? { uri: avatarUri }
-							: avatarUri
-					}
+					source={require('@/assets/images/ad.png')}
 					style={styles.avatar}
 				/>
+
 				<View style={styles.info}>
 					<Text style={styles.name}>{psychologistName}</Text>
 					<Text style={styles.dateTime}>
@@ -41,32 +50,11 @@ export const ProfileSessionCard = ({
 
 			<Button
 				text='Подключиться к занятию'
-				disabled={!isUpcoming}
 				pressColor='#3a6bf5'
-				style={[styles.activeButton]}
-				textStyle={[styles.activeButtonText]}
-				onPress={isUpcoming ? onJoin : undefined}
+				style={styles.activeButton}
+				textStyle={styles.activeButtonText}
+				onPress={onJoin}
 			/>
-
-			{!isUpcoming && (
-				<View style={styles.pastActions}>
-					<Button
-						text='Отменить'
-						pressColor='#eff0f6ff'
-						style={styles.cancelButton}
-						textStyle={styles.cancelText}
-						onPress={onCancel}
-					/>
-					<View style={styles.separator} />
-					<Button
-						text='Перенести'
-						pressColor='#eff0f6ff'
-						style={styles.rescheduleButton}
-						textStyle={styles.rescheduleText}
-						onPress={onReschedule}
-					/>
-				</View>
-			)}
 		</View>
 	);
 };

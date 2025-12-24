@@ -2,6 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Dispatch } from '@reduxjs/toolkit';
 import { setMessage } from '@/store/slices/chatsSlice';
 import * as MediaLibrary from 'expo-media-library';
+import { MethodFormat } from '@/types/types';
 
 export const hidePart = (text: string, n: number, format?: string) => {
 	const replaced = text.substring(n);
@@ -117,4 +118,32 @@ export const messageHandler = (
 			images,
 		})
 	);
+};
+
+export const METHOD_DISPLAY_NAMES: Record<MethodFormat, string> = {
+	[MethodFormat.GESTALT]: 'Гештальт-терапия',
+	[MethodFormat.PSYHODRAM]: 'Психодрама',
+	[MethodFormat.PSYHOANALISE]: 'Психоанализ',
+	[MethodFormat.EXISTENAL]: 'Экзистенциальная терапия',
+	[MethodFormat.SYSTEM]: 'Системная терапия',
+};
+
+export const formatMethods = (methods: string[] | undefined): string => {
+	if (!methods || methods.length === 0) {
+		return 'Методы не указаны';
+	}
+
+	return methods
+		.map((method) => {
+			const key = method as keyof typeof MethodFormat;
+			const enumValue = MethodFormat[key];
+
+			if (enumValue) {
+				return METHOD_DISPLAY_NAMES[enumValue];
+			}
+
+			return method;
+		})
+		.filter(Boolean)
+		.join(', ');
 };

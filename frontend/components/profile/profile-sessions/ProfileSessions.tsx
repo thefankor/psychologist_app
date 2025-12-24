@@ -1,11 +1,13 @@
 import { View, Text, ScrollView } from 'react-native';
 import { styles } from './styles';
 import { ProfileSessionCard } from './profile-sessions-card/ProfileSessionCard';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createCall } from '@/api/calls/calls';
 import { getToken } from '@/helpers/helper';
 import { randomUUID } from 'expo-crypto';
 import { Loading } from '@/components/custom/ui/Loading';
+import { getAllAppointments } from '@/api/psychologists/psychologists';
+import { Session } from '@/types/types';
 
 const mockSessions = [
 	{
@@ -30,6 +32,11 @@ const mockSessions = [
 
 export const ProfileSessions = () => {
 	const [loading, setLoading] = useState(false);
+	const [data, setData] = useState<Session[]>([]);
+
+	useEffect(() => {
+		getAppointments();
+	}, []);
 
 	const makeCall = async () => {
 		try {
@@ -37,17 +44,22 @@ export const ProfileSessions = () => {
 			const localId = randomUUID();
 			const token = await getToken();
 			const res = await createCall(token!, localId);
-
-			// if (res) {
-			// 	router.push({
-			// 		pathname: '/calls',
-			// 		params: {
-			// 			token: res.token,
-			// 			ws_url: res.ws_url,
-			// 		},
-			// 	});
-			// }
 			console.log(res);
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const getAppointments = async () => {
+		try {
+			setLoading(true);
+			const token = await getToken();
+			const res = await getAllAppointments(token!);
+			if (res) {
+				setData(res);
+			}
 		} catch (error) {
 			console.log(error);
 		} finally {
@@ -65,22 +77,18 @@ export const ProfileSessions = () => {
 				showsVerticalScrollIndicator={false}
 				contentContainerStyle={styles.scrollContent}
 			>
-				{mockSessions.length === 0 ? (
+				{data.length === 0 ? (
 					<View style={styles.emptyContainer}>
 						<Text style={styles.emptyText}>
 							У вас пока нет сессий
 						</Text>
 					</View>
 				) : (
-					mockSessions.map((session) => (
+					data.map((session) => (
 						<ProfileSessionCard
 							key={session.id}
 							session={session}
 							onJoin={makeCall}
-							onCancel={() => console.log('Отменить', session.id)}
-							onReschedule={() =>
-								console.log('Перенести', session.id)
-							}
 						/>
 					))
 				)}

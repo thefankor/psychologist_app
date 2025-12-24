@@ -181,4 +181,56 @@ export const styles = StyleSheet.create({
 		borderRadius: '50%',
 		marginRight: 10,
 	},
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0,0,0,0.5)',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	modalBox: {
+		backgroundColor: '#fff',
+		borderRadius: 20,
+		padding: 20,
+		width: '85%',
+	},
+	modalTitle: {
+		fontFamily: 'Hezaedrus500',
+		fontSize: 18,
+		textAlign: 'center',
+		marginBottom: 16,
+		color: '#011443',
+	},
+	modalInput: {
+		borderWidth: 1,
+		borderColor: '#ddd',
+		borderRadius: 12,
+		paddingVertical: 12,
+		paddingHorizontal: 16,
+		fontSize: 16,
+		color: '#011443',
+		marginBottom: 20,
+	},
+	modalButtonsRow: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+	},
+	modalBtn: {
+		backgroundColor: '#eee',
+		paddingHorizontal: 24,
+		paddingVertical: 12,
+		borderRadius: 20,
+	},
+	modalBtnPrimary: {
+		backgroundColor: '#3E75FF',
+		paddingHorizontal: 24,
+		paddingVertical: 12,
+		borderRadius: 20,
+	},
+	modalBtnText: {
+		fontFamily: 'Hezaedrus500',
+	},
+	modalBtnPrimaryText: {
+		fontFamily: 'Hezaedrus500',
+		color: '#fff',
+	},
 });
