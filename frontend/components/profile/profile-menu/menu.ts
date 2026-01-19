@@ -1,7 +1,8 @@
 import { ImageProps, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { deleteToken, getToken } from '@/helpers/helper';
+import { deleteToken, getRole, getToken } from '@/helpers/helper';
 import { deleteUser } from '@/api/profile/profile';
+import { useEffect, useState } from 'react';
 
 export interface Menu {
 	image: ImageProps;
@@ -11,8 +12,19 @@ export interface Menu {
 }
 
 export const useMenu = (): Menu[] => {
+	const [role, setRole] = useState<'psychologist' | 'client' | null>(null);
 	const router = useRouter();
 
+	useEffect(() => {
+		checkRole();
+	}, []);
+
+	const checkRole = async () => {
+		const res = await getRole();
+		if (res) {
+			setRole(res);
+		}
+	};
 	const logout = async () => {
 		Alert.alert(
 			'Выход из аккаунта',
@@ -28,17 +40,17 @@ export const useMenu = (): Menu[] => {
 					onPress: async () => {
 						try {
 							await deleteToken();
-							router.push('/auth');
+							router.push('/role');
 						} catch (error) {
 							console.log('Ошибка при выходе из профиля:', error);
 							Alert.alert(
 								'Ошибка',
-								'Не удалось выйти из профиля'
+								'Не удалось выйти из профиля',
 							);
 						}
 					},
 				},
-			]
+			],
 		);
 	};
 
@@ -62,7 +74,7 @@ export const useMenu = (): Menu[] => {
 								await deleteUser(token);
 								await deleteToken();
 
-								router.push('/auth');
+								router.push('/role');
 							}
 						} catch (error) {
 							console.log('Ошибка при удаления профиля:', error);
@@ -70,7 +82,7 @@ export const useMenu = (): Menu[] => {
 						}
 					},
 				},
-			]
+			],
 		);
 	};
 
@@ -79,13 +91,19 @@ export const useMenu = (): Menu[] => {
 			name: 'Мои данные',
 			type: 'redirect',
 			image: require('@/assets/images/user.png'),
-			action: () => router.push('/profile/edit'),
+			action: () =>
+				role === 'client'
+					? router.push('/profile/edit')
+					: router.push('/profile/psycho'),
 		},
 		{
-			name: 'Мои сессии',
+			name: role === 'client' ? 'Мои сессии' : 'Мои записи',
 			type: 'redirect',
 			image: require('@/assets/images/sessions.png'),
-			action: () => router.push('/profile/sessions'),
+			action: () =>
+				role === 'client'
+					? router.push('/profile/sessions')
+					: router.push('/profile/appointments'),
 		},
 		{
 			name: 'Избранное',

@@ -33,7 +33,7 @@ export const Psychologists = () => {
 			setPsychologists(psychologistsRes || []);
 
 			const favIds = new Set<number>(
-				(favoritesRes || []).map((fav: any) => fav.id)
+				(favoritesRes || []).map((fav: any) => fav.id),
 			);
 			setFavoriteIds(favIds);
 		} catch (error) {
@@ -69,14 +69,20 @@ export const Psychologists = () => {
 			</View>
 
 			<ScrollView showsVerticalScrollIndicator={false}>
-				{psychologists.map((item) => (
-					<PsychologistCard
-						key={item.id}
-						psychologist={item}
-						isFavorite={favoriteIds.has(item.id)}
-						onFavoriteToggle={() => toggleFavorite(item.id)}
-					/>
-				))}
+				{psychologists.length === 0 ? (
+					<View>
+						<Text>Психологи временно недоступны</Text>
+					</View>
+				) : (
+					psychologists.map((item) => (
+						<PsychologistCard
+							key={item.id}
+							psychologist={item}
+							isFavorite={favoriteIds.has(item.id)}
+							onFavoriteToggle={() => toggleFavorite(item.id)}
+						/>
+					))
+				)}
 			</ScrollView>
 		</View>
 	);

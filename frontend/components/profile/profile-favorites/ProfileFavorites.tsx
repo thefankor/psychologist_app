@@ -54,7 +54,7 @@ const ProfileFavorites = () => {
 					style: 'destructive',
 					onPress: () => deleteFavorite(id),
 				},
-			]
+			],
 		);
 	};
 
@@ -73,7 +73,7 @@ const ProfileFavorites = () => {
 			console.log('Ошибка удаления из избранного:', error);
 			Alert.alert(
 				'Ошибка',
-				'Не удалось удалить специалиста из избранного'
+				'Не удалось удалить специалиста из избранного',
 			);
 		}
 	};
@@ -81,7 +81,7 @@ const ProfileFavorites = () => {
 	if (loading) {
 		return <Loading />;
 	}
-
+	console.log(favorites);
 	return (
 		<View style={styles.container}>
 			{favorites.length === 0 ? (

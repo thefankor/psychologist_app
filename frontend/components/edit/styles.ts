@@ -36,7 +36,7 @@ export const styles = StyleSheet.create({
 	container__inputs: {
 		width: '100%',
 		backgroundColor: '#fff',
-		height: 158,
+		height: 250,
 		borderRadius: 12,
 		position: 'relative',
 		paddingLeft: 0,
@@ -120,5 +120,19 @@ export const styles = StyleSheet.create({
 		paddingRight: 2,
 		marginTop: 0,
 		borderWidth: 0,
+	},
+	backButton: {
+		marginTop: 16,
+	},
+	backText: {
+		fontFamily: 'Hezaedrus500',
+		color: '#3565D9',
+		fontSize: 16,
+	},
+	card: {
+		backgroundColor: '#fff',
+		borderRadius: 12,
+		marginTop: 20,
+		paddingVertical: 6,
 	},
 });

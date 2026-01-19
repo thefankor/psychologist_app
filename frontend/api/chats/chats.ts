@@ -1,4 +1,4 @@
-const BASE_URL = 'https://api.simal.live';
+const BASE_URL = 'https://simul.cutecalls.pw';
 
 export const getChats = async (token: string) => {
 	const url = `${BASE_URL}/chats/`;

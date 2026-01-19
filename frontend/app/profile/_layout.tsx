@@ -7,6 +7,8 @@ export default function ProfileLayout() {
 			<Stack.Screen name='edit' />
 			<Stack.Screen name='favorites' />
 			<Stack.Screen name='methods' />
+			<Stack.Screen name='psycho' />
+			<Stack.Screen name='appointments' />
 		</Stack>
 	);
 }

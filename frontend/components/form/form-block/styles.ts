@@ -45,15 +45,18 @@ export const styles = StyleSheet.create({
 	},
 	form__badge: {
 		alignItems: 'center',
-		width: 74,
-		fontSize: 14,
+		minWidth: 60,
 		height: 44,
-		display: 'flex',
 		justifyContent: 'center',
 		borderRadius: 10,
+		paddingHorizontal: 8,
 	},
+
 	badge__text: {
 		fontFamily: 'Hezaedrus',
+		fontSize: 13,
+		textAlign: 'center',
+		lineHeight: 16,
 	},
 
 	emotion: {

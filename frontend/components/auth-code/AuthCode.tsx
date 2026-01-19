@@ -14,7 +14,7 @@ import {
 import { styles } from './styles';
 import { UI } from '@/types/ui';
 import { StatusBar } from 'expo-status-bar';
-import { formatTime, saveToken } from '@/helpers/helper';
+import { formatTime, getRole, saveToken } from '@/helpers/helper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '../custom';
 import { checkVerifyCode, getVerifyCode } from '@/api/auth/auth';
@@ -26,7 +26,7 @@ const AuthCode = () => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const inputRefs = useRef<(TextInput | null)[]>([]);
 	const [status, setStatus] = useState<'default' | 'error' | 'success'>(
-		'default'
+		'default',
 	);
 	const [timer, setTimer] = useState(60);
 	const { email } = useLocalSearchParams<{ email: string }>();
@@ -46,21 +46,28 @@ const AuthCode = () => {
 	}, [timer]);
 
 	const verifyCode = async (codesArray: string[]) => {
+		const role = await getRole();
 		const code = codesArray.join('');
 
 		if (code.length < 5) return;
 
 		try {
 			setLoading(true);
-			const res = await checkVerifyCode(email, code);
+			const res = await checkVerifyCode(email, code, role!);
 
 			setStatus('success');
 			Keyboard.dismiss();
 			if (res) {
 				await saveToken(res.token);
 			}
-			console.log(res.token);
-			router.push('/form');
+			if (role === 'client') {
+				router.push('/form');
+			} else {
+				router.push({
+					pathname: '/survey',
+					params: { email },
+				});
+			}
 		} catch (err) {
 			setStatus('error');
 			console.log(err);

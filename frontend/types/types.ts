@@ -203,3 +203,14 @@ export type Psychologist = {
 	price: number;
 	matches_count: number;
 };
+
+export interface SurveyForm {
+	email: string;
+	first_name: string;
+	last_name: string;
+	methods: string[];
+	experience: number;
+	price: number;
+	age: number | 'Указать';
+	gender: Gender;
+}

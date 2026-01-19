@@ -1,4 +1,4 @@
-const BASE_URL = 'https://api.simal.live';
+const BASE_URL = 'https://simul.cutecalls.pw';
 
 export const sendUserData = async (token: string, data: any) => {
 	const url = `${BASE_URL}/user/survey/`;

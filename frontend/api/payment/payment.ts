@@ -1,4 +1,4 @@
-const BASE_URL = 'https://api.simal.live';
+const BASE_URL = 'https://simul.cutecalls.pw';
 
 export const getPaymentMethods = async (token: string) => {
 	const url = `${BASE_URL}/user/methods/`;
@@ -25,7 +25,7 @@ export const getPaymentMethods = async (token: string) => {
 export const addPaymentMethod = async (
 	token: string,
 	phone: string,
-	bank: string
+	bank: string,
 ) => {
 	const url = `${BASE_URL}/user/methods/sbp/`;
 	try {
@@ -56,7 +56,7 @@ export const addPaymentMethod = async (
 export const verifyPaymentMethod = async (
 	token: string,
 	phone: string,
-	code: string
+	code: string,
 ) => {
 	const url = `${BASE_URL}/user/methods/sbp/verify/`;
 	try {

@@ -7,6 +7,7 @@ interface Navigator {
 	route: Href;
 	name: string;
 }
+
 export const navigationItems: Navigator[] = [
 	{
 		route: '/psychologists',

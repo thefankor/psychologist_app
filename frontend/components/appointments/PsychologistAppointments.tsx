@@ -1,14 +1,14 @@
 import { View, Text, ScrollView } from 'react-native';
 import { styles } from './styles';
-import { ProfileSessionCard } from './profile-sessions-card/ProfileSessionCard';
+import { ProfileSessionCard } from '../profile/profile-sessions/profile-sessions-card/ProfileSessionCard';
 import { useEffect, useState } from 'react';
 import { getToken } from '@/helpers/helper';
 import { Loading } from '@/components/custom/ui/Loading';
-import { getAllAppointments } from '@/api/psychologists/psychologists';
+import { getPsyshologistAppointments } from '@/api/psychologists/psychologists';
 import { Session } from '@/types/types';
 import { useRouter } from 'expo-router';
 
-export const ProfileSessions = () => {
+export const PsychologistAppointments = () => {
 	const [loading, setLoading] = useState(false);
 	const [data, setData] = useState<Session[]>([]);
 	const router = useRouter();
@@ -24,7 +24,7 @@ export const ProfileSessions = () => {
 		try {
 			setLoading(true);
 			const token = await getToken();
-			const res = await getAllAppointments(token!);
+			const res = await getPsyshologistAppointments(token!);
 			if (res) {
 				setData(res);
 			}
@@ -57,7 +57,7 @@ export const ProfileSessions = () => {
 							key={session.id}
 							session={session}
 							onJoin={makeCall}
-							role='PSYCHOLOGIST'
+							role='CLIENT'
 						/>
 					))
 				)}

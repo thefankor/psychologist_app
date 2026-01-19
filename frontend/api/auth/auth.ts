@@ -1,4 +1,4 @@
-const BASE_URL = 'https://api.simal.live';
+const BASE_URL = 'https://simul.cutecalls.pw';
 
 export const getVerifyCode = async (email: string) => {
 	const url = `${BASE_URL}/auth/login/`;
@@ -25,9 +25,13 @@ export const getVerifyCode = async (email: string) => {
 	}
 };
 
-export const checkVerifyCode = async (email: string, code: string) => {
-	const url = `${BASE_URL}/auth/verify/`;
-
+export const checkVerifyCode = async (
+	email: string,
+	code: string,
+	user_type: string = 'client',
+) => {
+	const url = `${BASE_URL}/auth/verify/?user_type=${user_type}`;
+	console.log(user_type);
 	try {
 		const res = await fetch(url, {
 			method: 'POST',

@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
 		paddingLeft: 16,
 		paddingRight: 16,
 		paddingTop: 70,
-		backgroundColor: '#fff',
+		backgroundColor: '#F8F9FD',
 	},
 	container__header: {
 		width: '100%',
@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
 	},
 
 	container__title: {
-		fontFamily: 'Hezaedrus',
+		fontFamily: 'Hezaedrus500',
 		fontSize: 28,
 		lineHeight: 28,
 		includeFontPadding: false,

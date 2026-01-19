@@ -1,4 +1,4 @@
-const BASE_URL = 'https://api.simal.live';
+const BASE_URL = 'https://simul.cutecalls.pw';
 
 export const createCall = async (token: string, appointment_id: string) => {
 	const url = `${BASE_URL}/calls/`;

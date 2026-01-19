@@ -1,6 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
 import { Dispatch } from '@reduxjs/toolkit';
-import { setMessage } from '@/store/slices/chatsSlice';
 import * as MediaLibrary from 'expo-media-library';
 import { MethodFormat } from '@/types/types';
 
@@ -22,7 +21,7 @@ export const formatTime = (timeInSeconds: number): string => {
 export const dataHandler = (
 	key: string,
 	value: string,
-	setData: (item: any) => void
+	setData: (item: any) => void,
 ) => {
 	return setData((prev: any) => ({ ...prev, [key]: value }));
 };
@@ -33,6 +32,10 @@ export async function saveToken(token: string) {
 
 export async function getToken() {
 	return await SecureStore.getItemAsync('auth_token');
+}
+
+export async function getRole(): Promise<'psychologist' | 'client' | null> {
+	return (await SecureStore.getItemAsync('user_role')) as any;
 }
 
 export async function deleteToken() {
@@ -74,7 +77,7 @@ export const formatDate = (dateString: string | Date | undefined): string => {
 
 export const loadImages = async (
 	setPhotos: React.Dispatch<React.SetStateAction<MediaLibrary.Asset[]>>,
-	inPopup?: boolean
+	inPopup?: boolean,
 ) => {
 	if (inPopup) {
 		return;
@@ -90,7 +93,7 @@ export const loadImages = async (
 export const requestPermissionsMedia = async (
 	setPhotos: React.Dispatch<React.SetStateAction<MediaLibrary.Asset[]>>,
 	requestPermission: () => Promise<MediaLibrary.PermissionResponse>,
-	inPopup?: boolean
+	inPopup?: boolean,
 ) => {
 	try {
 		const permission = await MediaLibrary.requestPermissionsAsync();
@@ -107,18 +110,13 @@ export const requestPermissionsMedia = async (
 	}
 };
 
-export const messageHandler = (
-	message: string,
-	dispatch: Dispatch,
-	images?: File[]
-) => {
-	return dispatch(
-		setMessage({
-			message,
-			images,
-		})
-	);
-};
+// export enum MethodFormat {
+//   GESTALT = 'GESTALT',
+//   PSYHODRAM = 'PSYHODRAM',
+//   PSYHOANALISE = 'PSYHOANALISE',
+//   EXISTENAL = 'EXISTENAL',
+//   SYSTEM = 'SYSTEM',
+// }
 
 export const METHOD_DISPLAY_NAMES: Record<MethodFormat, string> = {
 	[MethodFormat.GESTALT]: 'Гештальт-терапия',
@@ -135,11 +133,12 @@ export const formatMethods = (methods: string[] | undefined): string => {
 
 	return methods
 		.map((method) => {
-			const key = method as keyof typeof MethodFormat;
-			const enumValue = MethodFormat[key];
+			const upperMethod =
+				method.toUpperCase() as keyof typeof MethodFormat;
+			const enumKey = MethodFormat[upperMethod];
 
-			if (enumValue) {
-				return METHOD_DISPLAY_NAMES[enumValue];
+			if (enumKey && METHOD_DISPLAY_NAMES[enumKey]) {
+				return METHOD_DISPLAY_NAMES[enumKey];
 			}
 
 			return method;

@@ -40,6 +40,7 @@ export const PsychologistCard = ({
 		price,
 		experience,
 		matches_count,
+		avatar,
 	} = psychologist;
 	const [prevInput, setPrevInput] = useState('');
 
@@ -51,8 +52,8 @@ export const PsychologistCard = ({
 	const isArsen = fullName === 'Арсен Маркарян';
 	const methodsString = formatMethods(methods);
 
-	const avatarSource = isArsen
-		? require('@/assets/images/arsen.png')
+	const avatarSource = avatar
+		? { uri: avatar }
 		: require('@/assets/images/ad.png');
 
 	const heartSource = isFavorite
@@ -100,21 +101,21 @@ export const PsychologistCard = ({
 		} else if (digits.length <= 8) {
 			result = `${digits.slice(0, 2)}.${digits.slice(
 				2,
-				4
+				4,
 			)}.${digits.slice(4)}`;
 			if (digits.length === 8) result += ' ';
 		} else if (digits.length <= 10) {
 			result = `${digits.slice(0, 2)}.${digits.slice(
 				2,
-				4
+				4,
 			)}.${digits.slice(4, 8)} ${digits.slice(8)}`;
 			if (digits.length === 10) result += ':';
 		} else {
 			result = `${digits.slice(0, 2)}.${digits.slice(
 				2,
-				4
+				4,
 			)}.${digits.slice(4, 8)} ${digits.slice(8, 10)}:${digits.slice(
-				10
+				10,
 			)}`;
 		}
 
@@ -124,7 +125,7 @@ export const PsychologistCard = ({
 
 	const parseDate = (value: string) => {
 		const match = value.match(
-			/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/
+			/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/,
 		);
 		if (!match) return null;
 
@@ -157,7 +158,7 @@ export const PsychologistCard = ({
 		if (!parsedDate) {
 			Alert.alert(
 				'Ошибка',
-				'Введите корректную будущую дату в формате ДД.ММ.ГГГГ ЧЧ:ММ'
+				'Введите корректную будущую дату в формате ДД.ММ.ГГГГ ЧЧ:ММ',
 			);
 			return;
 		}
@@ -174,7 +175,7 @@ export const PsychologistCard = ({
 
 			Alert.alert(
 				'Вы успешно записались!',
-				parsedDate.toLocaleString('ru-RU')
+				parsedDate.toLocaleString('ru-RU'),
 			);
 			setModalVisible(false);
 		} catch (e: any) {
@@ -240,7 +241,9 @@ export const PsychologistCard = ({
 											от
 										</Text>
 										<Text style={styles.price}>
-											{price.toLocaleString('ru')}
+											{price != null
+												? price.toLocaleString('ru')
+												: '—'}
 										</Text>
 										<Text style={styles.priceLabel}>₽</Text>
 									</>

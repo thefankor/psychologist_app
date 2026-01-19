@@ -18,7 +18,7 @@ const connectWebSocket = (token: string) => {
 	if (ws) ws.close();
 
 	currentToken = token;
-	ws = new WebSocket(`wss://api.simal.live/ws/chats?token=${token}`);
+	ws = new WebSocket(`wss://simul.cutecalls.pw/ws/chats?token=${token}`);
 
 	ws.onopen = () => console.log('WebSocket подключён');
 	ws.onerror = (e) => console.log('WS ошибка:', e);
@@ -88,7 +88,7 @@ export const useChatWebSocket = () => {
 		chatId: string,
 		text: string,
 		replyTo?: string,
-		mediaId?: number
+		mediaId?: number,
 	) => {
 		if (!ws || ws.readyState !== WebSocket.OPEN) {
 			Alert.alert('Ошибка', 'Нет соединения с сервером');
@@ -137,7 +137,7 @@ export const useChatWebSocket = () => {
 					chat_id: chatId,
 					event: 'read',
 					before_message_id: beforeMessageId,
-				})
+				}),
 			);
 		}
 	};

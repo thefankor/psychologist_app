@@ -3,7 +3,7 @@ import { DatePickerModal } from 'react-native-paper-dates';
 import { useEffect, useState } from 'react';
 import { useKeyboard } from '@react-native-community/hooks';
 import { styles } from './styles';
-import { dataHandler, getToken } from '@/helpers/helper';
+import { dataHandler, getRole, getToken } from '@/helpers/helper';
 import { Select, Option } from '@/components/custom/ui/Select';
 import { StatusBar } from 'expo-status-bar';
 import { Button } from '@/components/custom/ui/Button';
@@ -79,7 +79,7 @@ export const FormInit = ({ setStep }: Props) => {
 		const birthSeconds = birthDate.getTime();
 
 		const age = Math.floor(
-			(currentDate - birthSeconds) / (365 * 24 * 60 * 60 * 1000)
+			(currentDate - birthSeconds) / (365 * 24 * 60 * 60 * 1000),
 		);
 
 		return age === 0 ? 'Указать' : age;
@@ -112,7 +112,7 @@ export const FormInit = ({ setStep }: Props) => {
 					name: formState.name,
 					birth_date: formState.birthDate,
 					gender: Gender[formState.gender]?.toUpperCase(),
-				})
+				}),
 			);
 			await AsyncStorage.setItem('init', 'true');
 			setStep(FormSteps.STEP_ONE);
@@ -180,8 +180,8 @@ export const FormInit = ({ setStep }: Props) => {
 						{typeof formState.birthDate === 'string'
 							? formState.birthDate
 							: JSON.stringify(
-									calculateData(formState.birthDate)
-							  ).replaceAll('"', '')}
+									calculateData(formState.birthDate),
+								).replaceAll('"', '')}
 					</Text>
 				</Pressable>
 				<Select

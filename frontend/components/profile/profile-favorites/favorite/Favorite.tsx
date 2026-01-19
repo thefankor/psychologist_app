@@ -11,14 +11,10 @@ interface FavoriteProps {
 }
 
 const Favorite = ({ full_name, avatar, methods, onDelete }: FavoriteProps) => {
-	const isArsen = full_name === 'Арсен Маркарян';
-
-	const avatarSource = isArsen
-		? require('@/assets/images/arsen.png')
-		: avatar && avatar.trim() !== ''
+	const avatarSource = avatar
 		? { uri: avatar }
 		: require('@/assets/images/ad.png');
-
+	console.log(avatarSource);
 	return (
 		<View style={styles.wrapper}>
 			<View style={styles.container}>

@@ -35,7 +35,41 @@ const compareNames = [
 	{ name: 'Личностное развитие', label: 'personal' },
 ];
 
-const parameters = ['Апатия1', 'Апатия2', 'Апатия3', 'Апатия4', 'Апатия5'];
+const BADGES_BY_CATEGORY: Record<DefaultLabel, string[]> = {
+	emotions: ['Тревога', 'Апатия', 'Грусть', 'Раздражительность', 'Выгорание'],
+
+	relations: [
+		'Конфликты с партнёром',
+		'Одиночество / нехватка близости',
+		'Сложности с родителями',
+		'Проблемы с друзьями / окружением',
+		'Ревность / недоверие',
+	],
+
+	work: [
+		'Выгорание на работе / учёбе',
+		'Страх провала / неуспеха',
+		'Перегрузка / постоянные дедлайны',
+		'Конфликты с коллегами / руководством',
+		'Потеря интереса к делу',
+	],
+
+	life: [
+		'Финансовые трудности',
+		'Переезд / смена места жительства',
+		'Потеря близкого человека',
+		'Проблемы со здоровьем',
+		'Неопределённость в будущем',
+	],
+
+	personal: [
+		'Низкая самооценка',
+		'Прокрастинация',
+		'Поиск смысла / цели в жизни',
+		'Страх перемен',
+		'Перфекционизм',
+	],
+};
 
 export const BadgesPopup = ({
 	visible,
@@ -51,14 +85,20 @@ export const BadgesPopup = ({
 	const isAnimating = useRef(false);
 	const opacity = useRef(new Animated.Value(0)).current;
 
+	const currentBadges = activeLabel
+		? BADGES_BY_CATEGORY[activeLabel] || []
+		: [];
+
 	useEffect(() => {
 		if (visible && !internalVisible) {
 			setInternalVisible(true);
+
 			if (activeLabel && formData[activeLabel]) {
 				setSelectedParameters(formData[activeLabel] as string[]);
 			} else {
 				setSelectedParameters([]);
 			}
+
 			translateY.setValue(height);
 			opacity.setValue(0);
 
@@ -99,10 +139,11 @@ export const BadgesPopup = ({
 				isAnimating.current = false;
 			});
 		}
+
 		if (visible) {
 			NavigationBar.setVisibilityAsync('hidden');
 		}
-	}, [visible]);
+	}, [visible, activeLabel, formData]);
 
 	const handleParameterToggle = (parameter: string) => {
 		setSelectedParameters((prev) => {
@@ -160,27 +201,7 @@ export const BadgesPopup = ({
 			setFormData(updatedFormData);
 		}
 
-		if (isAnimating.current) return;
-
-		isAnimating.current = true;
-		Animated.parallel([
-			Animated.timing(translateY, {
-				toValue: height,
-				duration: 250,
-				easing: Easing.in(Easing.ease),
-				useNativeDriver: true,
-			}),
-			Animated.timing(opacity, {
-				toValue: 0,
-				duration: 250,
-				useNativeDriver: true,
-			}),
-		]).start(() => {
-			setInternalVisible(false);
-			setVisible(false);
-			isAnimating.current = false;
-		});
-		NavigationBar.setVisibilityAsync('visible');
+		handleClose();
 	};
 
 	if (!internalVisible) return null;
@@ -199,6 +220,7 @@ export const BadgesPopup = ({
 					onPress={handleResetAndClose}
 					activeOpacity={1}
 				/>
+
 				<Animated.View
 					style={[
 						styles.modalContent,
@@ -207,29 +229,41 @@ export const BadgesPopup = ({
 					{...panResponder.panHandlers}
 				>
 					<View style={styles.swipeIndicator} />
+
 					<View style={styles.popup__container}>
 						<Text style={styles.popup__title}>
-							{
-								compareNames.find(
-									(item) => item.label === activeLabel
-								)?.name
-							}
+							{compareNames.find(
+								(item) => item.label === activeLabel,
+							)?.name || 'Выберите тему'}
 						</Text>
+
 						<View style={styles.popup__blocks}>
-							{parameters.map((parameter) => (
+							{currentBadges.map((badge) => (
 								<FormBlock
-									key={parameter}
+									key={badge}
 									checkbox
-									title={parameter}
+									title={badge}
 									isActive={selectedParameters.includes(
-										parameter
+										badge,
 									)}
-									onPress={() =>
-										handleParameterToggle(parameter)
-									}
+									onPress={() => handleParameterToggle(badge)}
 								/>
 							))}
+
+							{currentBadges.length === 0 && (
+								<Text
+									style={{
+										textAlign: 'center',
+										color: '#888',
+										marginTop: 20,
+										fontSize: 16,
+									}}
+								>
+									Нет доступных вариантов для этой категории
+								</Text>
+							)}
 						</View>
+
 						<Button
 							counter={selectedParameters.length}
 							text='Сохранить'
@@ -238,6 +272,7 @@ export const BadgesPopup = ({
 							pressColor={UI.colors.pressableColor}
 							onPress={handleSave}
 						/>
+
 						<Pressable
 							style={styles.reset__btn}
 							onPress={handleResetAndClose}

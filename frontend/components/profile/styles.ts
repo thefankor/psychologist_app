@@ -11,21 +11,25 @@ export const styles = StyleSheet.create({
 		paddingRight: 16,
 		backgroundColor: '#F8F9FD',
 	},
+
 	container__avatar: {
 		height: 100,
 		width: 100,
 		backgroundColor: '#d1d1d1',
 		borderRadius: 100,
 	},
+
 	container__name: {
 		fontFamily: 'Hezaedrus500',
 		fontSize: 22,
 		marginTop: 12,
 		marginBottom: 24,
 	},
+
 	container__menu: {
 		width: '100%',
 	},
+
 	container__section: {
 		width: '100%',
 		marginTop: 20,
@@ -42,10 +46,17 @@ export const styles = StyleSheet.create({
 		shadowRadius: 12,
 		elevation: 4,
 	},
+
 	first: {
 		marginTop: 0,
 		height: 180,
 	},
+
+	psychologistFirst: {
+		marginTop: 16,
+		height: 90,
+	},
+
 	second: {
 		height: 95,
 	},
