@@ -1,7 +1,6 @@
 from typing import Optional
 
 import redis.asyncio as redis
-
 from src.core.db.base import CacheWorker
 
 

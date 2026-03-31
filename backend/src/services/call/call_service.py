@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import Depends
-
 from src.config import settings
 from src.core.dependencies import get_store
 from src.crud import Store

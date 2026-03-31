@@ -3,7 +3,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from src.models import BaseWithTimestamps
 from src.models.enums import MethodFormat
 

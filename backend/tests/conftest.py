@@ -3,11 +3,10 @@ from typing import AsyncGenerator
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
+from main import app
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-
-from main import app
 from src.core.db.database import get_async_db
 from src.crud import Store
 from src.models import Base

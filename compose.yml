@@ -19,7 +19,7 @@ services:
   backend:
     container_name: backend
     build:
-      context: .
+      context: backend
       dockerfile: Dockerfile
     restart: always
     env_file:
@@ -65,7 +65,7 @@ services:
   celery_worker:
     container_name: celery-worker
     build:
-      context: .
+      context: backend
     restart: always
     env_file:
       - .env

@@ -2,7 +2,6 @@ import uuid
 
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-
 from src.models import BaseWithTimestamps
 
 

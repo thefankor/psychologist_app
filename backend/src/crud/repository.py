@@ -1,5 +1,4 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.crud.impl import (
     ClientDAO,
     FavoritesDAO,

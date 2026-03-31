@@ -2,7 +2,6 @@ import random
 from datetime import timedelta
 
 from fastapi import Depends
-
 from src.config import settings
 from src.core.auth import TokenService
 from src.core.dependencies import get_store

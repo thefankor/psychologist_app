@@ -1,5 +1,4 @@
 from sqlalchemy import select
-
 from src.crud.impl.base import BaseDAO
 from src.models import ClientProfile
 

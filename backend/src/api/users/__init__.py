@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-
 from src.api.users.favorites import router as favorites_router
 from src.api.users.payment_methods import router as payment_methods_router
 from src.api.users.user import router as user_router

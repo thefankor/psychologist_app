@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field, field_validator
-
 from src.utils.validators import normalize_and_validate_phone
 
 

@@ -1,5 +1,4 @@
 import pytest
-
 from src.crud import Store
 from src.models import User
 from src.services.auth import AuthService

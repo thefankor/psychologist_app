@@ -1,5 +1,4 @@
 import pytest
-
 from src.schemas.auth import AuthResponse
 from src.services.auth import AuthService
 
