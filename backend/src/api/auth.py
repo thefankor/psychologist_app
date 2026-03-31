@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-
 from src.schemas import AuthResponse, EmptyModel, LoginRequest, VerifyCodeRequest
 from src.services.auth import AuthService
 

@@ -3,7 +3,6 @@ from uuid import UUID
 from sqlalchemy import delete, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
 from src.core.exceptions import NotFoundException  # TODO
 from src.core.wrapper import handle_db_errors
 

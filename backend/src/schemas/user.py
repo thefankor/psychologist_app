@@ -1,7 +1,6 @@
 from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
-
 from src.models.enums import (
     ClientSessionFormat,
     DateFormat,

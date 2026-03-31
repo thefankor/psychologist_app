@@ -1,5 +1,4 @@
 from sqlalchemy import delete, select
-
 from src.crud.impl.base import BaseDAO
 from src.models import PsychologistProfile, UserFavorite
 

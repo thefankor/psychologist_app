@@ -1,6 +1,5 @@
 from sqlalchemy import Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
-
 from src.models import BaseWithTimestamps
 from src.models.enums.payment_methods import PaymentMethodType
 

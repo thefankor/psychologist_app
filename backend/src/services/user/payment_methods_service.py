@@ -1,7 +1,6 @@
 import random
 
 from fastapi import Depends
-
 from src.core.dependencies import get_store
 from src.core.exceptions import InvalidCodeException
 from src.crud import Store

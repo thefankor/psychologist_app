@@ -1,6 +1,5 @@
 from sqlalchemy import Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from src.models.base import BaseWithTimestamps
 from src.models.enums import UserRole
 
