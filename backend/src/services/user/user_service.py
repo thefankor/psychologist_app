@@ -1,8 +1,21 @@
+from datetime import datetime, timezone
+
 from fastapi import Depends, HTTPException, UploadFile
 from src.config import settings
 from src.core.dependencies import get_store
 from src.crud import Store
-from src.schemas.user import ProfileUpdateRequest, UserProfileResponse, UserSurvey
+from src.models import TransactionStatus, UserRole
+from src.schemas.user import (
+    AdminProfile,
+    ProfileUpdateRequest,
+    SessionSchema,
+    TransactionSchema,
+    UserDetailForAdmin,
+    UserForAdmin,
+    UserProfileResponse,
+    UserSurvey,
+    UserUpdateRequestForAdmin,
+)
 from src.utils import FileManager
 
 file_manager = FileManager(
@@ -79,6 +92,9 @@ class UserService:
             is_active=False,
         )
 
+    async def delete_client_profile(self, user_id: int):
+        await self._store.client.delete(model_id=user_id)
+
     async def update_profile(self, user_id: int, data: ProfileUpdateRequest):
         if data.email:
             await self._store.user.update(
@@ -94,7 +110,9 @@ class UserService:
         )
         return {}
 
-    async def upload_photo(self, user_id: int, image: UploadFile):
+    async def upload_photo(
+        self, user_id: int, image: UploadFile, user_role: UserRole = UserRole.CLIENT
+    ):
         if not image.content_type.startswith("image/"):
             raise HTTPException(
                 status_code=400,
@@ -106,10 +124,80 @@ class UserService:
 
         image_url = await file_manager.save_image(image)
 
-        await self._store.client.update(
-            model_id=user_id,
-            return_model=False,
-            avatar=image_url,
+        if user_role == UserRole.CLIENT:
+            await self._store.client.update(
+                model_id=user_id,
+                return_model=False,
+                avatar=image_url,
+            )
+        elif user_role == UserRole.PSYCHOLOGIST:
+            await self._store.psychologist.update(
+                model_id=user_id,
+                return_model=False,
+                avatar=image_url,
+            )
+        return {}
+
+    async def get_admin_info(self, user_id: int) -> AdminProfile:
+        role = await self._store.admin.get_admin_role(user_id=user_id)
+        return AdminProfile(role=role)
+
+    async def get_all_users(
+        self, limit: int = 100, offset: int = 0
+    ) -> list[UserForAdmin]:
+        users = await self._store.user.get_all_users(limit=limit, offset=offset)
+        return users
+
+    async def get_user_by_id(self, user_id: int) -> UserDetailForAdmin:
+        user = await self._store.user.get_user_by_id(user_id=user_id)
+        return UserDetailForAdmin(
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            phone=user.phone,
+            roles=user.roles,
+            age=user.age,
+            transactions=[
+                TransactionSchema(
+                    id=1,
+                    date=datetime.now(timezone.utc),
+                    method="Mock method",
+                    status=TransactionStatus.succeeded,
+                ),
+            ]
+            if "CLIENT" in user.roles
+            else [],
+            sessions=[
+                SessionSchema(
+                    id=1,
+                    date=datetime.now(timezone.utc),
+                    psychologist_id=9,
+                    how_long=59,
+                ),
+            ]
+            if "CLIENT" in user.roles
+            else [],
         )
 
+    async def update_user_admin(self, user_id: int, data: UserUpdateRequestForAdmin):
+        user_model_data = {}
+        print(user_id)
+        if data.email:
+            user_model_data["email"] = data.email
+        if data.roles:
+            user_model_data["roles"] = [role.value for role in data.roles]
+
+        if user_model_data:
+            await self._store.user.update(
+                model_id=user_id,
+                return_model=False,
+                **user_model_data,
+            )
+
+            del data.email
+            del data.roles
+
+        await self._store.client.upsert(
+            user_id=user_id, **data.model_dump(exclude_unset=True)
+        )
         return {}

@@ -7,6 +7,12 @@ class UserRole(enum.Enum):
     ADMIN = "ADMIN"
 
 
+class AdminRole(enum.Enum):
+    ADMIN = "ADMIN"
+    MODERATOR = "MODERATOR"
+    SUPPORT = "SUPPORT"
+
+
 class UserGender(enum.Enum):
     NOT_STATED = "NOT_STATED"
     MALE = "MALE"

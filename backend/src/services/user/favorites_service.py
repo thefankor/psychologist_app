@@ -1,4 +1,5 @@
 from fastapi import Depends
+from src.config import settings
 from src.core.dependencies import get_store
 from src.crud import Store
 from src.schemas import FavoritesPsychologistsResponse
@@ -27,7 +28,9 @@ class FavoriteService:
             FavoritesPsychologistsResponse(
                 id=psychologist.id,
                 full_name=f"{psychologist.first_name} {psychologist.last_name}",
-                avatar=psychologist.avatar,
+                avatar=settings.STATIC_BASE_URL + psychologist.avatar
+                if psychologist.avatar
+                else None,
                 methods=psychologist.methods,
             )
             for psychologist in psychologists

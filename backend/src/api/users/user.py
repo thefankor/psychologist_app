@@ -66,7 +66,7 @@ async def fill_survey(
 async def delete_profile(
     user_id: int = Depends(get_current_user_id), user_service: UserService = Depends()
 ):
-    await user_service.mark_account_as_deleted(user_id=user_id)
+    await user_service.delete_client_profile(user_id=user_id)
 
 
 @router.patch(

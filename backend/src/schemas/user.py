@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from src.models import AdminRole, TransactionStatus, UserRole
 from src.models.enums import (
     ClientSessionFormat,
     DateFormat,
@@ -53,6 +54,57 @@ class ProfileUpdateRequest(BaseModel):
     birth_date: datetime | None = None
     gender: UserGender | None = None
     timezone: UserTimezone | None = None
+
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v):
+        return normalize_and_validate_phone(v)
+
+
+class AdminProfile(BaseModel):
+    role: AdminRole
+
+
+class UserForAdmin(BaseModel):
+    id: int
+    email: EmailStr
+    name: str | None = None
+    phone: str | None = Field("+79994445678")
+    roles: list[UserRole]
+
+
+class TransactionSchema(BaseModel):
+    id: int
+    date: datetime
+    method: str
+    status: TransactionStatus
+
+
+class SessionSchema(BaseModel):
+    id: int
+    date: datetime
+    psychologist_id: int
+    how_long: int
+
+
+class UserDetailForAdmin(BaseModel):
+    id: int
+    email: EmailStr
+    name: str | None = None
+    phone: str | None = Field("+79994445678")
+    roles: list[UserRole]
+    age: int | None = None
+    transactions: list[TransactionSchema] = []
+    sessions: list[SessionSchema] = []
+
+
+class UserUpdateRequestForAdmin(BaseModel):
+    name: str | None = None
+    phone: str | None = Field("+79994445678")
+    email: EmailStr | None = None
+    birth_date: datetime | None = None
+    gender: UserGender | None = None
+    roles: list[UserRole] | None = None
 
     @field_validator("phone")
     @classmethod

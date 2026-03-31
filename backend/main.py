@@ -4,6 +4,7 @@ import redis.asyncio as redis
 import uvicorn
 from fastapi import FastAPI
 from src.api import router
+from src.api.ws import router as ws_router
 from src.config import settings
 from src.core.db.redis_cache import RedisCache, redis_cache, set_cache
 from starlette.middleware.cors import CORSMiddleware
@@ -42,6 +43,7 @@ app.add_middleware(
 )
 
 app.include_router(router)
+app.include_router(ws_router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":
