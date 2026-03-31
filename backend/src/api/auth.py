@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends
 from src.schemas import AuthResponse, EmptyModel, LoginRequest, VerifyCodeRequest
 from src.services.auth import AuthService
@@ -46,9 +48,12 @@ async def auth_login(
 )
 async def auth_verify(
     login_data: VerifyCodeRequest,
+    user_type: Literal["client", "psychologist"] = "client",
     auth_service: AuthService = Depends(),
 ) -> AuthResponse:
     response = await auth_service.verify_code(
-        email=login_data.email, code=login_data.code
+        email=login_data.email,
+        code=login_data.code,
+        user_type=user_type,
     )
     return response

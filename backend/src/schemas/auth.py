@@ -20,3 +20,8 @@ class VerifyCodeRequest(LoginRequest):
 
 class EmptyModel(BaseModel):
     pass
+
+
+class AdminLoginRequest(BaseModel):
+    email: EmailStr
+    password: str
