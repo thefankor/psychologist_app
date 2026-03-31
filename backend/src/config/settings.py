@@ -13,10 +13,8 @@ class Settings(BaseSettings):
     REDIS_PORT: int
     REDIS_PASSWORD: str
 
-    SMTP_HOST: str
-    SMTP_PORT: int
-    SMTP_USER: str
-    SMTP_PASS: str
+    RESEND_API_KEY: str
+    RESEND_EMAIL: str
 
     ACCESS_SECRET_KEY: str
     ALGORITHM: str
