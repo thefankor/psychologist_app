@@ -77,37 +77,37 @@ export default function Chats() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Chats List */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-3">Сообщения</h2>
+      <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Сообщения</h2>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Поиск клиентов..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              className="pl-9 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
           </div>
         </div>
 
         <ScrollArea className="flex-1">
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {filteredChats.map((chat) => (
               <div
                 key={chat.id}
                 onClick={() => setSelectedChatId(chat.id)}
                 className={`p-4 cursor-pointer transition-colors ${
                   selectedChatId === chat.id
-                    ? 'bg-blue-50 border-l-4 border-blue-600'
-                    : 'hover:bg-gray-50'
+                    ? 'bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-600'
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div className="relative flex-shrink-0">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold">
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 font-semibold">
                       {chat.clientName.split(' ').map((n) => n[0]).join('')}
                     </div>
                     {chat.isOnline && (
@@ -117,15 +117,15 @@ export default function Chats() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-gray-900 truncate">
+                      <h3 className="font-semibold text-gray-900 dark:text-white truncate">
                         {chat.clientName}
                       </h3>
-                      <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">
                         {formatTime(chat.lastMessageTime)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-600 truncate">{chat.lastMessage}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{chat.lastMessage}</p>
                       {chat.unreadCount > 0 && (
                         <Badge className="ml-2 bg-blue-600 text-white rounded-full h-5 min-w-5 flex items-center justify-center text-xs">
                           {chat.unreadCount}
@@ -145,10 +145,10 @@ export default function Chats() {
         {selectedChat ? (
           <>
             {/* Chat Header */}
-            <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 font-semibold">
                     {selectedChat.clientName.split(' ').map((n) => n[0]).join('')}
                   </div>
                   {selectedChat.isOnline && (
@@ -156,28 +156,28 @@ export default function Chats() {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">{selectedChat.clientName}</h3>
-                  <p className="text-xs text-gray-500">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{selectedChat.clientName}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {selectedChat.isOnline ? 'В сети' : 'Не в сети'}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
-                  <Phone className="w-5 h-5 text-gray-600" />
+                <Button variant="ghost" size="icon" className="dark:text-gray-400">
+                  <Phone className="w-5 h-5" />
                 </Button>
-                <Button variant="ghost" size="icon">
-                  <Video className="w-5 h-5 text-gray-600" />
+                <Button variant="ghost" size="icon" className="dark:text-gray-400">
+                  <Video className="w-5 h-5" />
                 </Button>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="w-5 h-5 text-gray-600" />
+                <Button variant="ghost" size="icon" className="dark:text-gray-400">
+                  <MoreVertical className="w-5 h-5" />
                 </Button>
               </div>
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4 bg-gray-50">
+            <ScrollArea className="flex-1 p-4 bg-gray-50 dark:bg-gray-900">
               <div className="space-y-4 max-w-4xl mx-auto">
                 {chatMessages.map((message, index) => {
                   const isTherapist = message.senderId === 'therapist';
@@ -190,7 +190,7 @@ export default function Chats() {
                     <div key={message.id}>
                       {showDate && (
                         <div className="flex justify-center my-4">
-                          <span className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-full">
                             {new Date(message.timestamp).toLocaleDateString('ru-RU', {
                               day: 'numeric',
                               month: 'long',
@@ -205,13 +205,13 @@ export default function Chats() {
                           className={`max-w-md px-4 py-2 rounded-2xl ${
                             isTherapist
                               ? 'bg-blue-600 text-white rounded-br-sm'
-                              : 'bg-white text-gray-900 rounded-bl-sm'
+                              : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-sm'
                           }`}
                         >
                           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                           <div
                             className={`flex items-center gap-1 mt-1 text-xs ${
-                              isTherapist ? 'text-blue-100 justify-end' : 'text-gray-500'
+                              isTherapist ? 'text-blue-100 justify-end' : 'text-gray-500 dark:text-gray-400'
                             }`}
                           >
                             <span>{formatMessageTime(message.timestamp)}</span>
@@ -226,14 +226,14 @@ export default function Chats() {
             </ScrollArea>
 
             {/* Message Input */}
-            <div className="bg-white border-t border-gray-200 p-4">
+            <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
               <div className="flex items-end gap-2 max-w-4xl mx-auto">
                 <Input
                   placeholder="Написать сообщение..."
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="flex-1"
+                  className="flex-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   multiline
                 />
                 <Button
@@ -248,15 +248,15 @@ export default function Chats() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-gray-50">
+          <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Send className="w-8 h-8 text-gray-400" />
+              <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Send className="w-8 h-8 text-gray-400 dark:text-gray-500" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Выберите чат
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-500 dark:text-gray-400">
                 Выберите клиента из списка, чтобы начать переписку
               </p>
             </div>

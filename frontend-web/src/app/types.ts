@@ -67,3 +67,30 @@ export interface Chat {
   unreadCount: number;
   isOnline: boolean;
 }
+
+export interface Transaction {
+  id: string;
+  type: 'income' | 'withdrawal';
+  amount: number;
+  status: 'completed' | 'pending' | 'cancelled';
+  description: string;
+  date: string;
+  sessionId?: string;
+  clientName?: string;
+}
+
+export interface WithdrawalRequest {
+  id: string;
+  amount: number;
+  method: 'card' | 'bank' | 'paypal';
+  status: 'pending' | 'approved' | 'rejected' | 'completed';
+  requestDate: string;
+  completedDate?: string;
+  notes?: string;
+}
+
+export interface Balance {
+  total: number;
+  available: number;
+  pending: number;
+}

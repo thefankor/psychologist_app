@@ -6,6 +6,7 @@ import ClientDetails from "./components/ClientDetails";
 import Sessions from "./components/Sessions";
 import WorkingHours from "./components/WorkingHours";
 import Chats from "./components/Chats";
+import Finances from "./components/Finances";
 import NotFound from "./components/NotFound";
 
 export const router = createBrowserRouter([
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
       { path: "sessions", Component: Sessions },
       { path: "working-hours", Component: WorkingHours },
       { path: "chats", Component: Chats },
+      { path: "finances", Component: Finances },
       { path: "*", Component: NotFound },
     ],
   },

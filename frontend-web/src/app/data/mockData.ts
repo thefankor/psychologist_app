@@ -1,4 +1,4 @@
-import { Client, Session, Note, WorkingHours, Chat, Message } from '../types';
+import { Client, Session, Note, WorkingHours, Chat, Message, Transaction, WithdrawalRequest, Balance } from '../types';
 
 export const mockClients: Client[] = [
   {
@@ -406,5 +406,132 @@ export const mockMessages: Message[] = [
     timestamp: '2026-03-30T13:00:00',
     isRead: true,
     type: 'text',
+  },
+];
+
+export const mockBalance: Balance = {
+  total: 287500,
+  available: 245000,
+  pending: 42500,
+};
+
+export const mockTransactions: Transaction[] = [
+  {
+    id: 't1',
+    type: 'income',
+    amount: 5000,
+    status: 'completed',
+    description: 'Оплата сессии',
+    date: '2026-03-31T10:00:00',
+    sessionId: 's5',
+    clientName: 'Анна Петрова',
+  },
+  {
+    id: 't2',
+    type: 'income',
+    amount: 5000,
+    status: 'completed',
+    description: 'Оплата сессии',
+    date: '2026-03-30T14:00:00',
+    sessionId: 's6',
+    clientName: 'Дмитрий Соколов',
+  },
+  {
+    id: 't3',
+    type: 'withdrawal',
+    amount: -50000,
+    status: 'completed',
+    description: 'Вывод средств на карту',
+    date: '2026-03-28T12:00:00',
+  },
+  {
+    id: 't4',
+    type: 'income',
+    amount: 6000,
+    status: 'completed',
+    description: 'Оплата сессии (совместная)',
+    date: '2026-03-27T11:00:00',
+    clientName: 'Елена Иванова',
+  },
+  {
+    id: 't5',
+    type: 'income',
+    amount: 5000,
+    status: 'pending',
+    description: 'Оплата сессии (ожидание)',
+    date: '2026-03-26T15:00:00',
+    clientName: 'Ольга Смирнова',
+  },
+  {
+    id: 't6',
+    type: 'income',
+    amount: 5000,
+    status: 'completed',
+    description: 'Оплата сессии',
+    date: '2026-03-25T10:00:00',
+    clientName: 'Анна Петрова',
+  },
+  {
+    id: 't7',
+    type: 'withdrawal',
+    amount: -75000,
+    status: 'completed',
+    description: 'Вывод средств на карту',
+    date: '2026-03-15T09:00:00',
+  },
+  {
+    id: 't8',
+    type: 'income',
+    amount: 5000,
+    status: 'completed',
+    description: 'Оплата сессии',
+    date: '2026-03-20T14:00:00',
+    clientName: 'Дмитрий Соколов',
+  },
+];
+
+export const mockWithdrawals: WithdrawalRequest[] = [
+  {
+    id: 'w1',
+    amount: 50000,
+    method: 'card',
+    status: 'completed',
+    requestDate: '2026-03-27T10:00:00',
+    completedDate: '2026-03-28T12:00:00',
+    notes: 'Вывод на карту **** 4256',
+  },
+  {
+    id: 'w2',
+    amount: 75000,
+    method: 'card',
+    status: 'completed',
+    requestDate: '2026-03-14T15:30:00',
+    completedDate: '2026-03-15T09:00:00',
+    notes: 'Вывод на карту **** 4256',
+  },
+  {
+    id: 'w3',
+    amount: 60000,
+    method: 'bank',
+    status: 'completed',
+    requestDate: '2026-02-28T11:00:00',
+    completedDate: '2026-03-01T10:00:00',
+    notes: 'Банковский перевод',
+  },
+  {
+    id: 'w4',
+    amount: 40000,
+    method: 'card',
+    status: 'approved',
+    requestDate: '2026-03-30T16:00:00',
+    notes: 'Ожидает обработки',
+  },
+  {
+    id: 'w5',
+    amount: 25000,
+    method: 'paypal',
+    status: 'pending',
+    requestDate: '2026-03-31T14:00:00',
+    notes: 'На рассмотрении',
   },
 ];
