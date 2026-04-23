@@ -23,7 +23,7 @@ export default defineConfig({
 		},
 	},
 	server: {
-		host: '0.0.0.0',
+		host: 'localhost',
 		port: 5173,
 	},
 	assetsInclude: ['**/*.svg', '**/*.csv'],

@@ -41,9 +41,9 @@ export default function Layout() {
 					<h1 className='text-xl font-semibold text-gray-900 dark:text-white'>
 						PsyConsult
 					</h1>
-					<p className='text-sm text-gray-500 dark:text-gray-400 mt-1'>
+					<h5 className='text-sm text-gray-500 dark:text-white mt-1'>
 						Рабочее пространство
-					</p>
+					</h5>
 				</div>
 
 				<nav className='flex-1 p-4 space-y-1'>
@@ -141,7 +141,7 @@ export default function Layout() {
 							<p className='text-sm font-medium text-gray-900 dark:text-white'>
 								Др. Смирнов
 							</p>
-							<p className='text-xs text-gray-500 dark:text-gray-400'>
+							<p className='text-xs text-gray-500 dark:text-gray-200'>
 								Психолог
 							</p>
 						</div>
@@ -177,7 +177,6 @@ export default function Layout() {
 				</div>
 			</aside>
 
-			{/* Main content */}
 			<main className='flex-1 overflow-auto'>
 				<Outlet />
 			</main>

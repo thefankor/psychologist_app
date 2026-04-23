@@ -37,10 +37,12 @@ import {
 } from './ui/select';
 import { Textarea } from './ui/textarea';
 import {
+	finacesCards,
 	mockBalance,
 	mockTransactions,
 	mockWithdrawals,
 } from '../data/mockData';
+import { InfoCard } from './ui/info-card';
 
 export default function Finances() {
 	const [balance] = useState(mockBalance);
@@ -77,15 +79,6 @@ export default function Finances() {
 			);
 		})
 		.reduce((sum, t) => sum + t.amount, 0);
-
-	const incomeGrowth =
-		lastMonthIncome > 0
-			? ((thisMonthIncome - lastMonthIncome) / lastMonthIncome) * 100
-			: 0;
-
-	const totalWithdrawn = transactions
-		.filter((t) => t.type === 'withdrawal' && t.status === 'completed')
-		.reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
 	const formatMoney = (amount: number) => {
 		return new Intl.NumberFormat('ru-RU', {
@@ -148,14 +141,14 @@ export default function Finances() {
 					<h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
 						Финансы
 					</h1>
-					<p className='text-gray-500 dark:text-gray-400 mt-1'>
+					<h5 className='text-gray-500 mt-1  dark:text-white'>
 						Управление доходами и выводом средств
-					</p>
+					</h5>
 				</div>
 
 				<Dialog>
 					<DialogTrigger asChild>
-						<Button className='bg-blue-600 hover:bg-blue-700'>
+						<Button className='bg-blue-600 hover:bg-blue-700 dark:text-white'>
 							<Download className='w-4 h-4 mr-2' />
 							Вывести средства
 						</Button>
@@ -180,7 +173,7 @@ export default function Finances() {
 									placeholder='Введите сумму'
 									className='dark:bg-gray-700 dark:border-gray-600 dark:text-white mt-2'
 								/>
-								<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+								<p className='text-xs text-gray-500 dark:text-gray-200 mt-1'>
 									Доступно для вывода:{' '}
 									{formatMoney(balance.available)}
 								</p>
@@ -223,7 +216,7 @@ export default function Finances() {
 									className='dark:bg-gray-700 dark:border-gray-600 dark:text-white mt-2'
 								/>
 							</div>
-							<Button className='w-full bg-blue-600 hover:bg-blue-700'>
+							<Button className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'>
 								Создать заявку
 							</Button>
 						</div>
@@ -231,88 +224,18 @@ export default function Finances() {
 				</Dialog>
 			</div>
 
-			{/* Balance Cards */}
 			<div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-8'>
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							Общий баланс
-						</CardTitle>
-						<Wallet className='w-4 h-4 text-gray-400 dark:text-gray-500' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-gray-900 dark:text-white'>
-							{formatMoney(balance.total)}
-						</div>
-						<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-							все средства
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							Доступно для вывода
-						</CardTitle>
-						<DollarSign className='w-4 h-4 text-gray-400 dark:text-gray-500' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-green-600 dark:text-green-400'>
-							{formatMoney(balance.available)}
-						</div>
-						<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-							можно вывести
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							В ожидании
-						</CardTitle>
-						<TrendingUp className='w-4 h-4 text-gray-400 dark:text-gray-500' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-yellow-600 dark:text-yellow-400'>
-							{formatMoney(balance.pending)}
-						</div>
-						<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-							ожидает обработки
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							Доход за месяц
-						</CardTitle>
-						<TrendingUp className='w-4 h-4 text-gray-400 dark:text-gray-500' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-gray-900 dark:text-white'>
-							{formatMoney(thisMonthIncome)}
-						</div>
-						<div className='flex items-center mt-1'>
-							{incomeGrowth >= 0 ? (
-								<TrendingUp className='w-3 h-3 text-green-500 mr-1' />
-							) : (
-								<TrendingDown className='w-3 h-3 text-red-500 mr-1' />
-							)}
-							<p
-								className={`text-xs ${incomeGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}
-							>
-								{incomeGrowth >= 0 ? '+' : ''}
-								{incomeGrowth.toFixed(1)}% от прошлого месяца
-							</p>
-						</div>
-					</CardContent>
-				</Card>
+				{finacesCards.map((card) => (
+					<InfoCard
+						key={card.title}
+						title={card.title}
+						value={card.value}
+						icon={card.icon}
+						footer={card.footer}
+					/>
+				))}
 			</div>
 
-			{/* Tabs */}
 			<Tabs defaultValue='transactions' className='w-full'>
 				<TabsList className='dark:bg-gray-800'>
 					<TabsTrigger
@@ -343,7 +266,7 @@ export default function Finances() {
 							<CardTitle className='dark:text-white'>
 								История транзакций
 							</CardTitle>
-							<CardDescription className='dark:text-gray-400'>
+							<CardDescription className='dark:text-gray-200'>
 								Все доходы и выводы средств
 							</CardDescription>
 						</CardHeader>
@@ -375,11 +298,11 @@ export default function Finances() {
 													{transaction.description}
 												</p>
 												{transaction.clientName && (
-													<p className='text-sm text-gray-500 dark:text-gray-400'>
+													<p className='text-sm text-gray-500 dark:text-gray-200'>
 														{transaction.clientName}
 													</p>
 												)}
-												<p className='text-xs text-gray-400 dark:text-gray-500'>
+												<p className='text-xs text-gray-400 dark:text-gray-200'>
 													{new Date(
 														transaction.date,
 													).toLocaleString('ru-RU', {
@@ -431,7 +354,7 @@ export default function Finances() {
 							<CardTitle className='dark:text-white'>
 								Заявки на вывод средств
 							</CardTitle>
-							<CardDescription className='dark:text-gray-400'>
+							<CardDescription className='dark:text-gray-200'>
 								История и статус заявок
 							</CardDescription>
 						</CardHeader>
@@ -461,7 +384,7 @@ export default function Finances() {
 															)}
 														</Badge>
 													</div>
-													<p className='text-sm text-gray-600 dark:text-gray-400'>
+													<p className='text-sm text-gray-600 dark:text-gray-200'>
 														{getMethodText(
 															withdrawal.method,
 														)}
@@ -472,7 +395,7 @@ export default function Finances() {
 
 											<div className='space-y-1 text-sm'>
 												<div className='flex justify-between'>
-													<span className='text-gray-500 dark:text-gray-400'>
+													<span className='text-gray-500 dark:text-gray-200'>
 														Дата заявки:
 													</span>
 													<span className='text-gray-900 dark:text-white'>
@@ -492,7 +415,7 @@ export default function Finances() {
 												</div>
 												{withdrawal.completedDate && (
 													<div className='flex justify-between'>
-														<span className='text-gray-500 dark:text-gray-400'>
+														<span className='text-gray-500 dark:text-gray-200'>
 															Дата завершения:
 														</span>
 														<span className='text-gray-900 dark:text-white'>
@@ -512,7 +435,7 @@ export default function Finances() {
 													</div>
 												)}
 												{withdrawal.notes && (
-													<p className='text-gray-600 dark:text-gray-400 mt-2 pt-2 border-t dark:border-gray-700'>
+													<p className='text-gray-600 dark:text-gray-200 mt-2 pt-2 border-t dark:border-gray-700'>
 														{withdrawal.notes}
 													</p>
 												)}
@@ -520,7 +443,7 @@ export default function Finances() {
 										</div>
 									))
 								) : (
-									<p className='text-center text-gray-500 dark:text-gray-400 py-8'>
+									<p className='text-center text-gray-500 dark:text-gray-200 py-8'>
 										Нет заявок на вывод
 									</p>
 								)}

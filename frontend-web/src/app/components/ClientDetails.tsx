@@ -83,7 +83,6 @@ export default function ClientDetails() {
 
 	return (
 		<div className='p-8'>
-			{/* Header */}
 			<div className='mb-6'>
 				<Link to='/clients'>
 					<Button variant='ghost' className='mb-4'>
@@ -101,7 +100,7 @@ export default function ClientDetails() {
 								.join('')}
 						</div>
 						<div>
-							<h1 className='text-3xl font-bold text-gray-900 dark:text-gray-400'>
+							<h1 className='text-3xl font-bold text-gray-900 dark:text-gray-200'>
 								{client.name}
 							</h1>
 							<Badge
@@ -111,23 +110,22 @@ export default function ClientDetails() {
 							</Badge>
 						</div>
 					</div>
-					<Button className='bg-blue-600 hover:bg-blue-700'>
+					<Button className='bg-blue-600 hover:bg-blue-700 dark:text-white'>
 						Редактировать
 					</Button>
 				</div>
 			</div>
 
-			{/* Info Cards */}
 			<div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-6'>
 				<Card className='dark:bg-gray-800 dark:border-gray-700'>
 					<CardContent className='p-6'>
 						<div className='flex items-center gap-3 mb-2'>
 							<Mail className='w-5 h-5 text-gray-400' />
-							<span className='text-sm text-gray-500 dark:text-gray-400'>
+							<span className='text-sm text-gray-500 dark:text-white'>
 								Email
 							</span>
 						</div>
-						<p className='text-gray-900 dark:text-gray-400'>
+						<p className='text-gray-900 dark:text-gray-200'>
 							{client.email}
 						</p>
 					</CardContent>
@@ -137,11 +135,11 @@ export default function ClientDetails() {
 					<CardContent className='p-6'>
 						<div className='flex items-center gap-3 mb-2'>
 							<Phone className='w-5 h-5 text-gray-400' />
-							<span className='text-sm text-gray-500 dark:text-gray-400'>
+							<span className='text-sm text-gray-500 dark:text-white'>
 								Телефон
 							</span>
 						</div>
-						<p className='text-gray-900 dark:text-gray-400'>
+						<p className='text-gray-900 dark:text-gray-200'>
 							{client.phone}
 						</p>
 					</CardContent>
@@ -151,11 +149,11 @@ export default function ClientDetails() {
 					<CardContent className='p-6'>
 						<div className='flex items-center gap-3 mb-2'>
 							<Calendar className='w-5 h-5 text-gray-400' />
-							<span className='text-sm text-gray-500 dark:text-gray-400'>
+							<span className='text-sm text-gray-500 dark:text-white'>
 								Дата рождения
 							</span>
 						</div>
-						<p className='text-gray-900 dark:text-gray-400'>
+						<p className='text-gray-900 dark:text-gray-200'>
 							{new Date(client.dateOfBirth).toLocaleDateString(
 								'ru-RU',
 							)}
@@ -164,7 +162,6 @@ export default function ClientDetails() {
 				</Card>
 			</div>
 
-			{/* Tabs */}
 			<Tabs defaultValue='sessions' className='w-full'>
 				<TabsList className='dark:bg-gray-800 dark:border-gray-700'>
 					<TabsTrigger value='sessions'>
@@ -184,7 +181,7 @@ export default function ClientDetails() {
 								<DialogTrigger asChild>
 									<Button
 										size='sm'
-										className='bg-blue-600 hover:bg-blue-700'
+										className='bg-blue-600 hover:bg-blue-700 dark:text-white'
 									>
 										<Plus className='w-4 h-4 mr-2' />
 										Запланировать
@@ -215,7 +212,7 @@ export default function ClientDetails() {
 												className='w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white mt-2 cursor-pointer'
 											/>
 										</div>
-										<Button className='w-full bg-blue-600 hover:bg-blue-700'>
+										<Button className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'>
 											Создать сессию
 										</Button>
 									</div>
@@ -233,7 +230,7 @@ export default function ClientDetails() {
 											<div className='flex items-start justify-between'>
 												<div className='flex-1'>
 													<div className='flex items-center gap-3 mb-2'>
-														<span className='font-medium text-gray-900 dark:text-gray-400'>
+														<span className='font-medium text-gray-900 dark:text-gray-200'>
 															{new Date(
 																session.date,
 															).toLocaleDateString(
@@ -248,7 +245,7 @@ export default function ClientDetails() {
 														<span className='text-gray-500'>
 															•
 														</span>
-														<span className='text-gray-600 dark:text-gray-400'>
+														<span className='text-gray-600 dark:text-gray-200'>
 															{session.time}
 														</span>
 														<Badge
@@ -262,12 +259,12 @@ export default function ClientDetails() {
 														</Badge>
 													</div>
 													{session.notes && (
-														<p className='text-sm text-gray-600 mt-2 dark:text-gray-400'>
+														<p className='text-sm text-gray-600 mt-2 dark:text-gray-200'>
 															{session.notes}
 														</p>
 													)}
 												</div>
-												<span className='text-sm text-gray-500'>
+												<span className='text-sm text-gray-500 dark:text-gray-200'>
 													{session.duration} мин
 												</span>
 											</div>
@@ -284,14 +281,14 @@ export default function ClientDetails() {
 				</TabsContent>
 
 				<TabsContent value='notes' className='mt-6'>
-					<Card>
+					<Card className='dark:bg-gray-800 dark:border-gray-700'>
 						<CardHeader className='flex flex-row items-center justify-between'>
 							<CardTitle>Заметки и наблюдения</CardTitle>
 							<Dialog>
 								<DialogTrigger asChild>
 									<Button
 										size='sm'
-										className='bg-blue-600 hover:bg-blue-700'
+										className='bg-blue-600 hover:bg-blue-700 dark:text-white'
 									>
 										<Plus className='w-4 h-4 mr-2' />
 										Добавить
@@ -312,7 +309,7 @@ export default function ClientDetails() {
 												rows={6}
 											/>
 										</div>
-										<Button className='w-full bg-blue-600 hover:bg-blue-700'>
+										<Button className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'>
 											Сохранить заметку
 										</Button>
 									</div>
@@ -363,36 +360,38 @@ export default function ClientDetails() {
 				</TabsContent>
 
 				<TabsContent value='info' className='mt-6'>
-					<Card>
+					<Card className='dark:bg-gray-800 dark:border-gray-700'>
 						<CardHeader>
 							<CardTitle>Общая информация</CardTitle>
 						</CardHeader>
 						<CardContent className='space-y-4'>
 							<div className='grid grid-cols-2 gap-4'>
 								<div>
-									<p className='text-sm text-gray-500 mb-1'>
+									<p className='text-sm text-gray-500 mb-1 dark:text-gray-200'>
 										Первая сессия
 									</p>
-									<p className='text-gray-900'>
+									<p className='text-gray-900 dark:text-white'>
 										{new Date(
 											client.firstSession,
 										).toLocaleDateString('ru-RU')}
 									</p>
 								</div>
 								<div>
-									<p className='text-sm text-gray-500 mb-1'>
+									<p className='text-sm text-gray-500 mb-1 dark:text-gray-200'>
 										Всего сессий
 									</p>
-									<p className='text-gray-900'>
+									<p className='text-gray-900 dark:text-white'>
 										{client.totalSessions}
 									</p>
 								</div>
 							</div>
 							<div>
-								<p className='text-sm text-gray-500 mb-1'>
+								<p className='text-sm text-gray-500 mb-1 dark:text-gray-200'>
 									Заметки терапевта
 								</p>
-								<p className='text-gray-900'>{client.notes}</p>
+								<p className='text-gray-900 dark:text-white'>
+									{client.notes}
+								</p>
 							</div>
 						</CardContent>
 					</Card>

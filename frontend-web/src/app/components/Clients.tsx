@@ -55,17 +55,17 @@ export default function Clients() {
 		<div className='p-8'>
 			<div className='mb-8 flex items-center justify-between'>
 				<div>
-					<h1 className='text-3xl font-bold text-gray-900'>
+					<h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
 						Клиенты
 					</h1>
-					<p className='text-gray-500 mt-1'>
+					<h5 className='text-gray-500 mt-1 dark:text-white'>
 						Управление клиентской базой
-					</p>
+					</h5>
 				</div>
 
 				<Dialog>
 					<DialogTrigger asChild>
-						<Button className='bg-blue-600 hover:bg-blue-700'>
+						<Button className='bg-blue-600 hover:bg-blue-700 dark:text-white'>
 							<Plus className='w-4 h-4 mr-2' />
 							Добавить клиента
 						</Button>
@@ -108,7 +108,7 @@ export default function Clients() {
 									className='dark:bg-gray-700 dark:border-gray-600 dark:text-white mt-2'
 								/>
 							</div>
-							<Button className='w-full bg-blue-600 hover:bg-blue-700'>
+							<Button className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'>
 								Создать клиента
 							</Button>
 						</div>
@@ -116,7 +116,6 @@ export default function Clients() {
 				</Dialog>
 			</div>
 
-			{/* Search */}
 			<div className='mb-6'>
 				<div className='relative'>
 					<Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 ' />
@@ -129,7 +128,6 @@ export default function Clients() {
 				</div>
 			</div>
 
-			{/* Clients Grid */}
 			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
 				{filteredClients.map((client) => (
 					<Card
@@ -146,7 +144,7 @@ export default function Clients() {
 											.join('')}
 									</div>
 									<div>
-										<h3 className='font-semibold text-gray-900 dark:text-gray-400'>
+										<h3 className='font-semibold text-gray-900 dark:text-gray-200'>
 											{client.name}
 										</h3>
 										<Badge
@@ -161,11 +159,11 @@ export default function Clients() {
 							</div>
 
 							<div className='space-y-2 mb-4'>
-								<div className='flex items-center text-sm text-gray-600 dark:text-gray-400'>
+								<div className='flex items-center text-sm text-gray-600 dark:text-gray-200'>
 									<Mail className='w-4 h-4 mr-2' />
 									{client.email}
 								</div>
-								<div className='flex items-center text-sm text-gray-600 dark:text-gray-400'>
+								<div className='flex items-center text-sm text-gray-600 dark:text-gray-200'>
 									<Phone className='w-4 h-4 mr-2' />
 									{client.phone}
 								</div>
@@ -173,7 +171,7 @@ export default function Clients() {
 
 							<div className='border-t pt-4 mb-4'>
 								<div className='flex justify-between text-sm'>
-									<span className='dark:text-gray-400'>
+									<span className='dark:text-gray-200'>
 										Первая сессия:
 									</span>
 									<span className='font-medium text-gray-400'>
@@ -183,7 +181,7 @@ export default function Clients() {
 									</span>
 								</div>
 								<div className='flex justify-between text-sm mt-2'>
-									<span className='text-gray-500 dark:text-gray-400'>
+									<span className='text-gray-500 dark:text-gray-200'>
 										Всего сессий:
 									</span>
 									<span className='font-medium text-gray-400'>
@@ -194,7 +192,7 @@ export default function Clients() {
 
 							<Link to={`/clients/${client.id}`}>
 								<Button
-									className='w-full dark:bg-gray-600'
+									className='w-full dark:bg-gray-600 dark:hover:bg-gray-700'
 									variant='outline'
 								>
 									Открыть профиль

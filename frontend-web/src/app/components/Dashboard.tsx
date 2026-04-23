@@ -6,9 +6,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from './ui/card';
-import { mockClients, mockSessions } from '../data/mockData';
+import { dashboardCards, mockClients, mockSessions } from '../data/mockData';
 import { Link } from 'react-router';
 import { Button } from './ui/button';
+import { InfoCard } from './ui/info-card';
 
 export default function Dashboard() {
 	const activeClients = mockClients.filter(
@@ -34,90 +35,30 @@ export default function Dashboard() {
 				<h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
 					Дашборд
 				</h1>
-				<p className='text-gray-500 dark:text-gray-400 mt-1'>
+				<h5 className='text-gray-500  mt-1 dark:text-white'>
 					Обзор вашей практики
-				</p>
+				</h5>
 			</div>
 
-			{/* Stats Grid */}
 			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							Активные клиенты
-						</CardTitle>
-						<Users className='w-4 h-4 text-gray-400 dark:text-gray-500' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-gray-900 dark:text-white'>
-							{activeClients}
-						</div>
-						<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-							из {mockClients.length} всего
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							Сессии сегодня
-						</CardTitle>
-						<Calendar className='w-4 h-4 text-gray-400 dark:text-gray-500' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-gray-900 dark:text-white'>
-							{todaySessions.length}
-						</div>
-						<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-							запланировано
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							Предстоящие
-						</CardTitle>
-						<Clock className='w-4 h-4 text-gray-400 dark:text-gray-500' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-gray-900 dark:text-white'>
-							{upcomingSessions.length}
-						</div>
-						<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-							в этом месяце
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							Всего сессий
-						</CardTitle>
-						<TrendingUp className='w-4 h-4 text-gray-400 dark:text-gray-500' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-gray-900 dark:text-white'>
-							{totalSessionsThisMonth}
-						</div>
-						<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-							за все время
-						</p>
-					</CardContent>
-				</Card>
+				{dashboardCards.map((card) => (
+					<InfoCard
+						key={card.title}
+						title={card.title}
+						value={card.value}
+						icon={card.icon}
+						footer={card.footer}
+					/>
+				))}
 			</div>
 
-			{/* Today's Sessions */}
 			<div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
 				<Card className='dark:bg-gray-800 dark:border-gray-700'>
 					<CardHeader>
 						<CardTitle className='dark:text-white'>
 							Сессии сегодня
 						</CardTitle>
-						<CardDescription className='dark:text-gray-400'>
+						<CardDescription className='dark:text-gray-200'>
 							Среда, 2 апреля 2026
 						</CardDescription>
 					</CardHeader>
@@ -134,7 +75,7 @@ export default function Dashboard() {
 												<div className='text-lg font-semibold text-gray-900 dark:text-white'>
 													{session.time}
 												</div>
-												<div className='text-xs text-gray-500 dark:text-gray-400'>
+												<div className='text-xs text-gray-500 dark:text-gray-200'>
 													{session.duration} мин
 												</div>
 											</div>
@@ -142,7 +83,7 @@ export default function Dashboard() {
 												<p className='font-medium text-gray-900 dark:text-white'>
 													{session.clientName}
 												</p>
-												<p className='text-sm text-gray-500 dark:text-gray-400'>
+												<p className='text-sm text-gray-500 dark:text-gray-200'>
 													{session.type ===
 														'initial' &&
 														'Первичная консультация'}
@@ -168,7 +109,7 @@ export default function Dashboard() {
 									</div>
 								))
 							) : (
-								<p className='text-gray-500 dark:text-gray-400 text-center py-8'>
+								<p className='text-gray-500 dark:text-gray-200 text-center py-8'>
 									Нет запланированных сессий
 								</p>
 							)}
@@ -176,13 +117,12 @@ export default function Dashboard() {
 					</CardContent>
 				</Card>
 
-				{/* Recent Clients */}
 				<Card className='dark:bg-gray-800 dark:border-gray-700'>
 					<CardHeader>
 						<CardTitle className='dark:text-white'>
 							Недавние клиенты
 						</CardTitle>
-						<CardDescription className='dark:text-gray-400'>
+						<CardDescription className='dark:text-gray-200'>
 							Последние активные клиенты
 						</CardDescription>
 					</CardHeader>
@@ -207,7 +147,7 @@ export default function Dashboard() {
 												<p className='font-medium text-gray-900 dark:text-white'>
 													{client.name}
 												</p>
-												<p className='text-sm text-gray-500 dark:text-gray-400'>
+												<p className='text-sm text-gray-500 dark:text-gray-200'>
 													{client.totalSessions}{' '}
 													сессий
 												</p>

@@ -93,10 +93,10 @@ export default function Sessions() {
 									.join('')}
 							</div>
 							<div>
-								<h3 className='font-semibold text-gray-900 dark:text-gray-400'>
+								<h3 className='font-semibold text-gray-900 dark:text-white'>
 									{session.clientName}
 								</h3>
-								<p className='text-sm text-gray-500'>
+								<p className='text-sm text-gray-500 dark:text-gray-200'>
 									{getSessionTypeText(session.type)}
 								</p>
 							</div>
@@ -107,7 +107,7 @@ export default function Sessions() {
 					</div>
 
 					<div className='space-y-2 mb-4'>
-						<div className='flex items-center text-sm text-gray-600 dark:text-gray-400'>
+						<div className='flex items-center text-sm text-gray-600 dark:text-gray-200'>
 							<CalendarIcon className='w-4 h-4 mr-2' />
 							{new Date(session.date).toLocaleDateString(
 								'ru-RU',
@@ -118,15 +118,15 @@ export default function Sessions() {
 								},
 							)}
 						</div>
-						<div className='flex items-center text-sm text-gray-600 dark:text-gray-400'>
+						<div className='flex items-center text-sm text-gray-600 dark:text-gray-200'>
 							<Clock className='w-4 h-4 mr-2' />
 							{session.time} ({session.duration} минут)
 						</div>
 					</div>
 
 					{session.notes && (
-						<div className='p-3 bg-gray-50 rounded-md mb-4'>
-							<p className='text-sm text-gray-700'>
+						<div className='p-3 bg-gray-50 rounded-md mb-4 dark:bg-gray-700'>
+							<p className='text-sm text-gray-700 dark:text-gray-200'>
 								{session.notes}
 							</p>
 						</div>
@@ -140,7 +140,7 @@ export default function Sessions() {
 							>
 								<Button
 									variant='outline'
-									className='w-full dark:bg-gray-600'
+									className='w-full dark:bg-gray-600 dark:hover:bg-gray-700'
 								>
 									<User className='w-4 h-4 mr-2' />
 									Профиль клиента
@@ -148,7 +148,7 @@ export default function Sessions() {
 							</Link>
 						)}
 						{session.status === 'scheduled' && (
-							<Button className='flex-1 bg-blue-600 hover:bg-blue-700'>
+							<Button className='flex-1 bg-blue-600 hover:bg-blue-700 dark:text-white'>
 								Начать сессию
 							</Button>
 						)}
@@ -162,17 +162,17 @@ export default function Sessions() {
 		<div className='p-8'>
 			<div className='mb-8 flex items-center justify-between'>
 				<div>
-					<h1 className='text-3xl font-bold text-gray-900'>
+					<h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
 						Расписание
 					</h1>
-					<p className='text-gray-500 mt-1'>
+					<h5 className='text-gray-500 mt-1 dark:text-white'>
 						Управление консультациями
-					</p>
+					</h5>
 				</div>
 
 				<Dialog>
 					<DialogTrigger asChild>
-						<Button className='bg-blue-600 hover:bg-blue-700'>
+						<Button className='bg-blue-600 hover:bg-blue-700 dark:text-white'>
 							<Plus className='w-4 h-4 mr-2' />
 							Новая сессия
 						</Button>
@@ -249,7 +249,7 @@ export default function Sessions() {
 									</SelectContent>
 								</Select>
 							</div>
-							<Button className='w-full bg-blue-600 hover:bg-blue-700'>
+							<Button className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'>
 								Создать сессию
 							</Button>
 						</div>

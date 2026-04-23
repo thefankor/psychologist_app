@@ -12,7 +12,8 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { mockWorkingHours } from '../data/mockData';
+import { InfoCard } from './ui/info-card';
+import { mockWorkingHours, workingScheduleCards } from '../data/mockData';
 import { WorkingDay } from '../types';
 
 export default function WorkingHours() {
@@ -77,120 +78,64 @@ export default function WorkingHours() {
 		return hours;
 	};
 
-	const totalWeeklyHours = workingHours.schedule.reduce(
-		(sum, day) => sum + calculateWorkingHours(day),
-		0,
-	);
-
-	const workingDaysCount = workingHours.schedule.filter(
-		(d) => d.isWorking,
-	).length;
-
 	return (
 		<div className='p-8'>
 			<div className='mb-8'>
-				<h1 className='text-3xl font-bold text-gray-900'>
+				<h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
 					Рабочее расписание
 				</h1>
-				<p className='text-gray-500 mt-1'>
+				<h5 className='text-gray-500 mt-1  dark:text-white'>
 					Настройте дни и часы работы
-				</p>
+				</h5>
 			</div>
 
-			{/* Stats */}
 			<div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							Рабочих дней
-						</CardTitle>
-						<Calendar className='w-4 h-4 text-gray-400' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-gray-900'>
-							{workingDaysCount}
-						</div>
-						<p className='text-xs text-gray-500 mt-1 dark:text-gray-400'>
-							в неделю
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							Часов в неделю
-						</CardTitle>
-						<Clock className='w-4 h-4 text-gray-400' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-gray-900'>
-							{totalWeeklyHours}
-						</div>
-						<p className='text-xs text-gray-500 mt-1 dark:text-gray-400'>
-							рабочих часов
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardHeader className='flex flex-row items-center justify-between pb-2'>
-						<CardTitle className='text-sm font-medium text-gray-600 dark:text-gray-400'>
-							Среднее в день
-						</CardTitle>
-						<Clock className='w-4 h-4 text-gray-400' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold text-gray-900'>
-							{workingDaysCount > 0
-								? (totalWeeklyHours / workingDaysCount).toFixed(
-										1,
-									)
-								: 0}
-						</div>
-						<p className='text-xs text-gray-500 mt-1 dark:text-gray-400'>
-							часов
-						</p>
-					</CardContent>
-				</Card>
+				{workingScheduleCards.map((card) => (
+					<InfoCard
+						key={card.title}
+						title={card.title}
+						value={card.value}
+						icon={card.icon}
+						footer={card.footer}
+					/>
+				))}
 			</div>
 
-			{/* Weekly Overview */}
 			<Card className='mb-8 dark:bg-gray-800 dark:border-gray-700'>
 				<CardHeader>
 					<CardTitle>Недельный обзор</CardTitle>
-					<CardDescription className='dark:text-gray-400'>
+					<CardDescription className='dark:text-gray-200'>
 						Быстрый просмотр рабочих дней
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className='grid grid-cols-7 gap-2'>
-						{workingHours.schedule.map((day, index) => (
+						{workingHours.schedule.map((day) => (
 							<div
 								key={day.day}
 								className={`p-4 rounded-lg border-2 text-center transition-all ${
 									day.isWorking
-										? 'bg-blue-50 border-blue-300'
-										: 'bg-gray-50 border-gray-200'
+										? 'bg-blue-50 border-blue-300 dark:bg-gray-700 dark:border-gray-500'
+										: 'bg-gray-50 border-gray-200 dark:bg-gray-500 dark:border-gray-600'
 								}`}
 							>
-								<div className='font-semibold text-gray-900 mb-2'>
+								<div className='font-semibold text-gray-900 mb-2 dark:text-white'>
 									{getDayShort(day.day)}
 								</div>
 								{day.isWorking ? (
 									<>
 										<CheckCircle2 className='w-6 h-6 text-green-600 mx-auto mb-1' />
-										<div className='text-xs text-gray-600'>
+										<div className='text-xs text-gray-600 dark:text-white'>
 											{day.startTime} - {day.endTime}
 										</div>
-										<div className='text-xs font-medium text-blue-600 mt-1'>
+										<div className='text-xs font-medium text-blue-600 mt-1 dark:text-blue-400'>
 											{calculateWorkingHours(day)}ч
 										</div>
 									</>
 								) : (
 									<>
 										<XCircle className='w-6 h-6 text-gray-400 mx-auto mb-1' />
-										<div className='text-xs text-gray-400'>
+										<div className='text-xs text-gray-400 dark:text-white'>
 											Выходной
 										</div>
 									</>
@@ -201,11 +146,10 @@ export default function WorkingHours() {
 				</CardContent>
 			</Card>
 
-			{/* Detailed Schedule */}
 			<Card className='dark:bg-gray-800 dark:border-gray-700'>
 				<CardHeader>
 					<CardTitle>Детальное расписание</CardTitle>
-					<CardDescription className='dark:text-gray-400'>
+					<CardDescription className='dark:text-gray-200'>
 						Настройте время работы для каждого дня недели
 					</CardDescription>
 				</CardHeader>
@@ -254,7 +198,7 @@ export default function WorkingHours() {
 											<div>
 												<Label
 													htmlFor={`start-${day.day}`}
-													className='text-sm text-gray-600 dark:text-gray-400'
+													className='text-sm text-gray-600 dark:text-gray-200'
 												>
 													Начало работы
 												</Label>
@@ -271,14 +215,14 @@ export default function WorkingHours() {
 																e.target.value,
 															)
 														}
-														className='flex-1'
+														className='flex-1 cursor-pointer'
 													/>
 												</div>
 											</div>
 											<div>
 												<Label
 													htmlFor={`end-${day.day}`}
-													className='text-sm text-gray-600 dark:text-gray-400'
+													className='text-sm text-gray-600 dark:text-gray-200'
 												>
 													Окончание работы
 												</Label>
@@ -295,7 +239,7 @@ export default function WorkingHours() {
 																e.target.value,
 															)
 														}
-														className='flex-1'
+														className='flex-1 cursor-pointer'
 													/>
 												</div>
 											</div>
@@ -305,7 +249,7 @@ export default function WorkingHours() {
 											<div>
 												<Label
 													htmlFor={`break-start-${day.day}`}
-													className='text-sm text-gray-600 dark:text-gray-400'
+													className='text-sm text-gray-600 dark:text-gray-200'
 												>
 													Начало перерыва
 												</Label>
@@ -324,14 +268,14 @@ export default function WorkingHours() {
 																e.target.value,
 															)
 														}
-														className='flex-1'
+														className='flex-1 cursor-pointer'
 													/>
 												</div>
 											</div>
 											<div>
 												<Label
 													htmlFor={`break-end-${day.day}`}
-													className='text-sm text-gray-600 dark:text-gray-400'
+													className='text-sm text-gray-600 dark:text-gray-200'
 												>
 													Окончание перерыва
 												</Label>
@@ -350,7 +294,7 @@ export default function WorkingHours() {
 																e.target.value,
 															)
 														}
-														className='flex-1'
+														className='flex-1 cursor-pointer'
 													/>
 												</div>
 											</div>
@@ -358,10 +302,10 @@ export default function WorkingHours() {
 
 										<div className='md:col-span-2 pt-2 border-t'>
 											<div className='flex items-center justify-between text-sm '>
-												<span className='text-gray-600 dark:text-gray-400'>
+												<span className='text-gray-600 dark:text-gray-200'>
 													Рабочих часов в этот день:
 												</span>
-												<span className='font-semibold text-gray-900 dark:text-gray-400'>
+												<span className='font-semibold text-gray-900 dark:text-gray-200'>
 													{calculateWorkingHours(day)}{' '}
 													часов
 												</span>
@@ -375,7 +319,7 @@ export default function WorkingHours() {
 
 					<div className='mt-6 pt-6 border-t flex justify-end gap-3'>
 						<Button variant='outline'>Отменить</Button>
-						<Button className='bg-blue-600 hover:bg-blue-700'>
+						<Button className='bg-blue-600 hover:bg-blue-700 dark:text-white'>
 							Сохранить расписание
 						</Button>
 					</div>
