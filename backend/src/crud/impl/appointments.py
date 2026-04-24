@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy import case, func, literal, select
 from sqlalchemy.dialects.postgresql import JSONB, aggregate_order_by
 from sqlalchemy.orm import aliased
@@ -26,6 +28,8 @@ class AppointmentDAO(BaseDAO):
         role: AppointmentRole,
         limit: int = 50,
         offset: int = 0,
+        is_upcoming: bool = True,
+        client_id: int | None = None,
     ):
         # 1) Фильтр: вернуть только те встречи, где этот user_id участвует с нужной ролью
         attendee_filter = (
@@ -38,6 +42,19 @@ class AppointmentDAO(BaseDAO):
             )
             .exists()
         )
+
+        # Дополнительный фильтр: только записи с конкретным клиентом
+        if client_id is not None:
+            client_filter = (
+                select(literal(1))
+                .select_from(AppointmentAttendee)
+                .where(
+                    AppointmentAttendee.appointment_id == Appointment.id,
+                    AppointmentAttendee.user_id == client_id,
+                    AppointmentAttendee.role == AppointmentRole.CLIENT,
+                )
+                .exists()
+            )
 
         # 2) Алиас для "всех участников" встречи (чтобы агрегировать)
         a = aliased(AppointmentAttendee)
@@ -92,10 +109,21 @@ class AppointmentDAO(BaseDAO):
             .outerjoin(cp, cp.id == a.user_id)  # если участник клиент — попадём в cp
             .outerjoin(pp, pp.id == a.user_id)  # если участник психолог — попадём в pp
             .where(attendee_filter)
-            .group_by(Appointment.id)
-            .order_by(Appointment.start_at.desc())  # новые -> старые
-            .limit(limit)
-            .offset(offset)
+        )
+
+        if client_id is not None:
+            query = query.where(client_filter)
+
+        now = datetime.now(timezone.utc)
+        if is_upcoming:
+            query = query.where(Appointment.ends_at > now)
+            order = Appointment.start_at.asc()
+        else:
+            query = query.where(Appointment.ends_at <= now)
+            order = Appointment.start_at.desc()
+
+        query = (
+            query.group_by(Appointment.id).order_by(order).limit(limit).offset(offset)
         )
 
         result = await self.session.execute(query)
@@ -108,3 +136,29 @@ class AppointmentAttendeeDAO(BaseDAO):
     """
 
     model = AppointmentAttendee
+
+    @handle_db_errors
+    async def has_shared_appointment(
+        self, psychologist_id: int, client_id: int
+    ) -> bool:
+        psychologist_attendee = aliased(AppointmentAttendee)
+        client_attendee = aliased(AppointmentAttendee)
+
+        query = (
+            select(literal(1))
+            .select_from(psychologist_attendee)
+            .join(
+                client_attendee,
+                psychologist_attendee.appointment_id == client_attendee.appointment_id,
+            )
+            .where(
+                psychologist_attendee.user_id == psychologist_id,
+                psychologist_attendee.role == AppointmentRole.PSYCHOLOGIST,
+                client_attendee.user_id == client_id,
+                client_attendee.role == AppointmentRole.CLIENT,
+            )
+            .exists()
+        )
+
+        result = await self.session.execute(select(query))
+        return result.scalar()
