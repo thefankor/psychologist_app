@@ -22,11 +22,15 @@ router = APIRouter(tags=["Psychologists Appointments"])
 async def get_all_appointments(
     limit: int = 25,
     offset: int = 0,
+    is_upcoming: bool = True,
+    client_id: int | None = None,
     current_psychologist: int = Depends(get_current_psychologist_id),
     service: AppointmentService = Depends(),
 ) -> list[AppointmentSchema]:
     return await service.get_psychologist_appointments(
         limit=limit,
         offset=offset,
-        client_id=current_psychologist,
+        psychologist_id=current_psychologist,
+        is_upcoming=is_upcoming,
+        client_id=client_id,
     )

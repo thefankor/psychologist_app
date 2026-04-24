@@ -6,6 +6,7 @@ from src.crud.impl import (
     ChatMessagesDAO,
     ChatsDAO,
     ClientDAO,
+    ClientNoteDAO,
     FavoritesDAO,
     PaymentMethodDAO,
     PsychologistDAO,
@@ -50,6 +51,7 @@ class Store:
         self._chat_messages_dao: ChatMessagesDAO | None = None
         self._appointment_dao: AppointmentDAO | None = None
         self._appointment_attendee_dao: AppointmentAttendeeDAO | None = None
+        self._client_note_dao: ClientNoteDAO | None = None
 
     @property
     def user(self) -> UserDAO:
@@ -173,3 +175,9 @@ class Store:
                 session=self._session
             )
         return self._appointment_attendee_dao
+
+    @property
+    def client_note(self) -> ClientNoteDAO:
+        if self._client_note_dao is None:
+            self._client_note_dao = ClientNoteDAO(session=self._session)
+        return self._client_note_dao

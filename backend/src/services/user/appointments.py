@@ -71,9 +71,16 @@ class AppointmentService:
         limit: int,
         offset: int,
         user_type: AppointmentRole,
+        is_upcoming: bool = True,
+        filter_client_id: int | None = None,
     ) -> list[AppointmentSchema]:
         data = await self._store.appointment.find_appointments(
-            user_id=client_id, limit=limit, offset=offset, role=user_type
+            user_id=client_id,
+            limit=limit,
+            offset=offset,
+            role=user_type,
+            is_upcoming=is_upcoming,
+            client_id=filter_client_id,
         )
         return [
             AppointmentSchema(
@@ -107,11 +114,18 @@ class AppointmentService:
         )
 
     async def get_psychologist_appointments(
-        self, client_id: int, limit: int, offset: int
+        self,
+        psychologist_id: int,
+        limit: int,
+        offset: int,
+        is_upcoming: bool = True,
+        client_id: int | None = None,
     ) -> list[AppointmentSchema]:
         return await self._get_user_appointments(
-            client_id=client_id,
+            client_id=psychologist_id,
             limit=limit,
             offset=offset,
             user_type=AppointmentRole.PSYCHOLOGIST,
+            is_upcoming=is_upcoming,
+            filter_client_id=client_id,
         )
