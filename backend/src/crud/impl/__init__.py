@@ -8,6 +8,7 @@ from src.crud.impl.favorites import FavoritesDAO
 from src.crud.impl.payment_method import PaymentMethodDAO
 from src.crud.impl.psychologist import PsychologistDAO
 from src.crud.impl.user import UserDAO
+from src.crud.impl.working_hours import WorkingHoursDAO
 
 __all__ = [
     "UserDAO",
@@ -21,4 +22,5 @@ __all__ = [
     "ChatMessagesDAO",
     "AppointmentDAO",
     "AppointmentAttendeeDAO",
+    "WorkingHoursDAO",
 ]

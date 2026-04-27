@@ -7,6 +7,14 @@ from src.models.enums import (
 )
 
 
+class PsychologistClientSchema(BaseModel):
+    client_id: int
+    name: str
+    avatar: str | None = None
+    first_session: date
+    total_sessions: int
+
+
 class ClientProfileForPsychologist(BaseModel):
     id: int
     name: str | None = None

@@ -7,6 +7,7 @@ from src.models.enums import AdminRole, TransactionStatus, UserGender, UserRole
 from src.models.favorites import UserFavorite
 from src.models.payment_method import PaymentMethod
 from src.models.psychologist import PsychologistProfile
+from src.models.psychologist_schedule import PsychologistWorkingHours
 from src.models.user import AdminProfile, User
 
 __all__ = [
@@ -19,6 +20,7 @@ __all__ = [
     "ClientProfile",
     "ClientNote",
     "PsychologistProfile",
+    "PsychologistWorkingHours",
     "UserFavorite",
     "AdminProfile",
     "AdminRole",
