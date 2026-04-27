@@ -308,7 +308,6 @@ function PsychologistProfile() {
 
 	return (
 		<div className='space-y-6'>
-			{/* Личные данные */}
 			<Card className='dark:bg-gray-800 dark:border-gray-700'>
 				<CardHeader className='flex flex-row items-center gap-3 pb-4'>
 					<div className='w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center'>
@@ -375,7 +374,6 @@ function PsychologistProfile() {
 				</CardContent>
 			</Card>
 
-			{/* Профессиональные данные */}
 			<Card className='dark:bg-gray-800 dark:border-gray-700'>
 				<CardHeader className='flex flex-row items-center gap-3 pb-4'>
 					<div className='w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center'>
@@ -500,7 +498,6 @@ export default function Profile() {
 	return (
 		<div className='p-8 bg-gray-50 dark:bg-gray-900 min-h-screen'>
 			<div className='max-w-2xl mx-auto'>
-				{/* Шапка */}
 				<div className='flex items-center gap-5 mb-8'>
 					<div
 						className={`w-16 h-16 rounded-full ${accentColor} flex items-center justify-center ${accentText} text-2xl font-bold flex-shrink-0`}

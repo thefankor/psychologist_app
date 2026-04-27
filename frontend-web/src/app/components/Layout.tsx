@@ -9,13 +9,15 @@ import {
 	LogOut,
 	Moon,
 	Sun,
+	Heart,
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { UserProvider, useUser } from '../context/UserContext';
 
-const NAV_ITEMS = [
+const NAV_ITEMS_PSYCHOLOGIST = [
 	{ to: '/', icon: LayoutDashboard, label: 'Дашборд', exact: true },
 	{ to: '/clients', icon: Users, label: 'Клиенты' },
 	{ to: '/sessions', icon: Calendar, label: 'Расписание' },
@@ -24,11 +26,61 @@ const NAV_ITEMS = [
 	{ to: '/working-hours', icon: Clock, label: 'Рабочие часы' },
 ];
 
+const NAV_ITEMS_CLIENT = [
+	{ to: '/', icon: LayoutDashboard, label: 'Дашборд', exact: true },
+	{ to: '/psychologists', icon: Users, label: 'Психологи' },
+	{ to: '/favorites', icon: Heart, label: 'Избранное' },
+	{ to: '/sessions', icon: Calendar, label: 'Расписание' },
+	{ to: '/chats', icon: MessageSquare, label: 'Сообщения' },
+	{ to: '/finances', icon: Wallet, label: 'Финансы' },
+];
+
+function ConfirmLogoutDialog({
+	open,
+	onConfirm,
+	onCancel,
+}: {
+	open: boolean;
+	onConfirm: () => void;
+	onCancel: () => void;
+}) {
+	return (
+		<Dialog open={open} onOpenChange={(v) => !v && onCancel()}>
+			<DialogContent className='dark:bg-gray-800 dark:border-gray-700 max-w-sm'>
+				<DialogHeader>
+					<DialogTitle className='dark:text-white'>
+						Выход из аккаунта
+					</DialogTitle>
+				</DialogHeader>
+				<p className='text-sm text-gray-600 dark:text-gray-300 mt-1'>
+					Вы уверены, что хотите выйти из аккаунта?
+				</p>
+				<div className='flex gap-3 mt-4'>
+					<Button
+						variant='outline'
+						className='flex-1 dark:border-gray-600 dark:text-gray-300'
+						onClick={onCancel}
+					>
+						Отмена
+					</Button>
+					<Button
+						className='flex-1 bg-red-600 hover:bg-red-700 dark:text-white'
+						onClick={onConfirm}
+					>
+						Выйти
+					</Button>
+				</div>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
 function LayoutInner() {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const { theme, setTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
+	const [open, setOpen] = useState(false);
 	const { profile } = useUser();
 
 	useEffect(() => {
@@ -36,9 +88,7 @@ function LayoutInner() {
 	}, []);
 
 	const isActive = (path: string, exact?: boolean) =>
-		exact
-			? location.pathname === path
-			: location.pathname.startsWith(path);
+		exact ? location.pathname === path : location.pathname.startsWith(path);
 
 	const navClass = (active: boolean) =>
 		`w-full justify-start cursor-pointer ${
@@ -54,6 +104,9 @@ function LayoutInner() {
 
 	const isPsychologist = profile?.role === 'PSYCHOLOGIST';
 	const roleLabel = isPsychologist ? 'Психолог' : 'Пользователь';
+	const NAV_ITEMS = isPsychologist
+		? NAV_ITEMS_PSYCHOLOGIST
+		: NAV_ITEMS_CLIENT;
 
 	return (
 		<div className='flex h-screen bg-gray-50 dark:bg-gray-900'>
@@ -137,12 +190,18 @@ function LayoutInner() {
 					<Button
 						variant='ghost'
 						className='w-full justify-start text-gray-700 dark:text-gray-300 cursor-pointer hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
-						onClick={handleLogout}
+						onClick={() => setOpen(true)}
 					>
 						<LogOut className='w-5 h-5 mr-3' />
 						Выход
 					</Button>
 				</div>
+
+				<ConfirmLogoutDialog
+					open={open}
+					onConfirm={handleLogout}
+					onCancel={() => setOpen(false)}
+				/>
 			</aside>
 
 			<main className='flex-1 overflow-auto'>
