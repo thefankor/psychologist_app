@@ -23,8 +23,14 @@ export default defineConfig({
 		},
 	},
 	server: {
-		host: 'localhost',
+		host: '0.0.0.0',
 		port: 5173,
+		proxy: {
+			'^/(auth|user|chats|calls|admin|psychologists)/.*': {
+				target: 'http://localhost:8000',
+				changeOrigin: true,
+			},
+		},
 	},
 	assetsInclude: ['**/*.svg', '**/*.csv'],
 });
