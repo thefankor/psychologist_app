@@ -73,3 +73,162 @@ export const updatePsychologistPhoto = async (token: string, image: any) => {
 		throw error;
 	}
 };
+
+export const createAppointment = async (
+	token: string,
+	psychologist_id: number,
+	start_at: string,
+) => {
+	const url = '/user/appointments/';
+	try {
+		const res = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({ psychologist_id, start_at }),
+		});
+
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+	} catch (error: any) {
+		console.log('Ошибка во время создания записей: ', error);
+		throw error;
+	}
+};
+
+export const getPsyshologistAppointments = async (token: string) => {
+	const url = '/psychologists/appointments/';
+	try {
+		const res = await fetch(url, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка во время получения записей психолога: ', error);
+		throw error;
+	}
+};
+
+export const getPsychologistsForClient = async (token: string) => {
+	const url = '/user/psychologists/';
+	try {
+		const res = await fetch(url, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка во время получения психологов: ', error);
+		throw error;
+	}
+};
+
+export const getAllAppointments = async (token: string) => {
+	const url = '/user/appointments/';
+	try {
+		const res = await fetch(url, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка во время получения всех записей: ', error);
+		throw error;
+	}
+};
+
+export const addToFavorite = async (token: string, id: number) => {
+	const url = '/user/psychologists/favorites/';
+	try {
+		const res = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({ id }),
+		});
+
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+	} catch (error: any) {
+		console.log(
+			'Ошибка во время добавления психологов в избранное: ',
+			error,
+		);
+		throw error;
+	}
+};
+
+export const getAllFavorites = async (token: string) => {
+	const url = '/user/psychologists/favorites/';
+	try {
+		const res = await fetch(url, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка во время получения избранных психологов: ', error);
+		throw error;
+	}
+};
+
+export const deleteFavoritePsychologist = async (token: string, id: number) => {
+	const url = `/user/psychologists/favorites/${id}/`;
+	try {
+		const res = await fetch(url, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+	} catch (error: any) {
+		console.log(
+			'Ошибка во время получения удаления психолога из избранного: ',
+			error,
+		);
+		throw error;
+	}
+};
