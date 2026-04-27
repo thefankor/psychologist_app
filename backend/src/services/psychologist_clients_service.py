@@ -6,7 +6,6 @@ from src.schemas.clients import ClientProfileForPsychologist, PsychologistClient
 
 
 class PsychologistClientsService:
-
     def __init__(self, store: Store = Depends(get_store)):
         self._store = store
 

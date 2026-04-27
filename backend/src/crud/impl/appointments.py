@@ -163,8 +163,7 @@ class AppointmentAttendeeDAO(BaseDAO):
             .select_from(psychologist_attendee)
             .join(
                 client_attendee,
-                psychologist_attendee.appointment_id
-                == client_attendee.appointment_id,
+                psychologist_attendee.appointment_id == client_attendee.appointment_id,
             )
             .join(
                 Appointment,

@@ -6,13 +6,10 @@ from src.schemas.working_hours import WorkingHoursSchema, WorkingHoursUpdate
 
 
 class WorkingHoursService:
-
     def __init__(self, store: Store = Depends(get_store)):
         self._store = store
 
-    async def get_working_hours(
-        self, psychologist_id: int
-    ) -> list[WorkingHoursSchema]:
+    async def get_working_hours(self, psychologist_id: int) -> list[WorkingHoursSchema]:
         rows = await self._store.working_hours.get_by_psychologist(
             psychologist_id=psychologist_id
         )
