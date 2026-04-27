@@ -11,6 +11,7 @@ from src.crud.impl import (
     PaymentMethodDAO,
     PsychologistDAO,
     UserDAO,
+    WorkingHoursDAO,
 )
 from src.crud.impl.admin import AdminDAO
 
@@ -52,6 +53,7 @@ class Store:
         self._appointment_dao: AppointmentDAO | None = None
         self._appointment_attendee_dao: AppointmentAttendeeDAO | None = None
         self._client_note_dao: ClientNoteDAO | None = None
+        self._working_hours_dao: WorkingHoursDAO | None = None
 
     @property
     def user(self) -> UserDAO:
@@ -181,3 +183,9 @@ class Store:
         if self._client_note_dao is None:
             self._client_note_dao = ClientNoteDAO(session=self._session)
         return self._client_note_dao
+
+    @property
+    def working_hours(self) -> WorkingHoursDAO:
+        if self._working_hours_dao is None:
+            self._working_hours_dao = WorkingHoursDAO(session=self._session)
+        return self._working_hours_dao

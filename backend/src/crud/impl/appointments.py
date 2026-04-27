@@ -138,6 +138,60 @@ class AppointmentAttendeeDAO(BaseDAO):
     model = AppointmentAttendee
 
     @handle_db_errors
+    async def get_psychologist_clients(
+        self,
+        psychologist_id: int,
+        limit: int = 25,
+        offset: int = 0,
+        name: str | None = None,
+    ):
+        """
+        Возвращает всех клиентов психолога с первой сессией и количеством сессий.
+        """
+        psychologist_attendee = aliased(AppointmentAttendee)
+        client_attendee = aliased(AppointmentAttendee)
+        cp = aliased(ClientProfile)
+
+        query = (
+            select(
+                client_attendee.user_id.label("client_id"),
+                cp.name,
+                cp.avatar,
+                func.min(Appointment.start_at).label("first_session"),
+                func.count(Appointment.id).label("total_sessions"),
+            )
+            .select_from(psychologist_attendee)
+            .join(
+                client_attendee,
+                psychologist_attendee.appointment_id
+                == client_attendee.appointment_id,
+            )
+            .join(
+                Appointment,
+                Appointment.id == psychologist_attendee.appointment_id,
+            )
+            .outerjoin(cp, cp.id == client_attendee.user_id)
+            .where(
+                psychologist_attendee.user_id == psychologist_id,
+                psychologist_attendee.role == AppointmentRole.PSYCHOLOGIST,
+                client_attendee.role == AppointmentRole.CLIENT,
+            )
+        )
+
+        if name is not None:
+            query = query.where(cp.name.ilike(f"%{name}%"))
+
+        query = (
+            query.group_by(client_attendee.user_id, cp.name, cp.avatar)
+            .order_by(func.min(Appointment.start_at).desc())
+            .limit(limit)
+            .offset(offset)
+        )
+
+        result = await self.session.execute(query)
+        return result.mappings().all()
+
+    @handle_db_errors
     async def has_shared_appointment(
         self, psychologist_id: int, client_id: int
     ) -> bool:

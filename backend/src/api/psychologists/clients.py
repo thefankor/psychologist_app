@@ -1,10 +1,29 @@
-from fastapi import APIRouter, Depends, HTTPException
-from src.config import settings
-from src.core.dependencies import get_current_psychologist_id, get_store
-from src.crud import Store
-from src.schemas.clients import ClientProfileForPsychologist
+from fastapi import APIRouter, Depends
+from src.core.dependencies import get_current_psychologist_id
+from src.schemas.clients import ClientProfileForPsychologist, PsychologistClientSchema
+from src.services.psychologist_clients_service import PsychologistClientsService
 
 router = APIRouter(tags=["Psychologists Clients"])
+
+
+@router.get(
+    "/",
+    summary="Get all clients",
+    description="Получить список всех клиентов психолога с информацией о сессиях",
+)
+async def get_clients(
+    limit: int = 25,
+    offset: int = 0,
+    name: str | None = None,
+    current_psychologist: int = Depends(get_current_psychologist_id),
+    service: PsychologistClientsService = Depends(),
+) -> list[PsychologistClientSchema]:
+    return await service.get_clients(
+        psychologist_id=current_psychologist,
+        limit=limit,
+        offset=offset,
+        name=name,
+    )
 
 
 @router.get(
@@ -37,34 +56,8 @@ router = APIRouter(tags=["Psychologists Clients"])
 async def get_client_profile(
     user_id: int,
     current_psychologist: int = Depends(get_current_psychologist_id),
-    store: Store = Depends(get_store),
+    service: PsychologistClientsService = Depends(),
 ) -> ClientProfileForPsychologist:
-    has_appointment = await store.appointment_attendee.has_shared_appointment(
-        psychologist_id=current_psychologist, client_id=user_id
-    )
-    if not has_appointment:
-        raise HTTPException(status_code=403, detail="Нет записей с этим клиентом")
-
-    client = await store.client.find_one_or_none(id=user_id)
-
-    if not client:
-        raise HTTPException(status_code=404, detail="Клиент не найден")
-
-    avatar = None
-    if client.avatar:
-        avatar = settings.STATIC_BASE_URL + client.avatar
-
-    return ClientProfileForPsychologist(
-        id=client.id,
-        name=client.name,
-        age=client.age,
-        gender=client.gender,
-        birth_date=client.birth_date,
-        avatar=avatar,
-        emotions=client.emotions or [],
-        relations=client.relations or [],
-        work=client.work or [],
-        life=client.life or [],
-        personal=client.personal or [],
-        format=client.format or [],
+    return await service.get_client_profile(
+        psychologist_id=current_psychologist, user_id=user_id
     )
