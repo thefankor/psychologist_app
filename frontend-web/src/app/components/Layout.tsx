@@ -30,7 +30,6 @@ const NAV_ITEMS_PSYCHOLOGIST: NavItem[] = [
 	{ to: '/clients', icon: Users, label: 'Клиенты' },
 	{ to: '/sessions', icon: Calendar, label: 'Расписание' },
 	{ to: '/chats', icon: MessageSquare, label: 'Сообщения' },
-	// { to: '/finances', icon: Wallet, label: 'Финансы' },
 	{ to: '/working-hours', icon: Clock, label: 'Рабочие часы' },
 ];
 
@@ -39,7 +38,6 @@ const NAV_ITEMS_CLIENT: NavItem[] = [
 	{ to: '/favorites', icon: Heart, label: 'Избранное' },
 	{ to: '/sessions', icon: Calendar, label: 'Расписание' },
 	{ to: '/chats', icon: MessageSquare, label: 'Сообщения' },
-	// { to: '/finances', icon: Wallet, label: 'Финансы' },
 ];
 
 function ConfirmLogoutDialog({

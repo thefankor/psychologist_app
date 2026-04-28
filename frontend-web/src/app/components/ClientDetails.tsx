@@ -60,6 +60,9 @@ const getInitials = (name: string | null) =>
 				.toUpperCase()
 		: '?';
 
+const fixUrl = (url: string | null) =>
+	url ? url.replace('http://0.0.0.0:', 'http://localhost:') : null;
+
 const formatDate = (iso: string) =>
 	new Date(iso).toLocaleDateString('ru-RU', {
 		day: 'numeric',
@@ -198,8 +201,16 @@ export default function ClientDetails() {
 			</Link>
 
 			<div className='flex items-center gap-4 mb-8'>
-				<div className='w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 font-semibold text-2xl flex-shrink-0'>
-					{getInitials(client.name)}
+				<div className='w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 font-semibold text-2xl flex-shrink-0 overflow-hidden'>
+					{fixUrl(client.avatar) ? (
+						<img
+							src={fixUrl(client.avatar)!}
+							alt=''
+							className='w-full h-full object-cover'
+						/>
+					) : (
+						getInitials(client.name)
+					)}
 				</div>
 				<div>
 					<h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
