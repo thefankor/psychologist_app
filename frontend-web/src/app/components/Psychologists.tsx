@@ -38,6 +38,9 @@ const METHOD_LABELS: Record<string, string> = {
 const getInitials = (firstName: string, lastName: string) =>
 	`${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || '?';
 
+const fixUrl = (url: string | null) =>
+	url ? url.replace('http://0.0.0.0:', 'http://localhost:') : null;
+
 function getYearsLabel(n: number) {
 	const mod10 = n % 10;
 	const mod100 = n % 100;
@@ -311,10 +314,18 @@ export default function Psychologists() {
 								<CardContent className='p-6'>
 									<div className='flex items-start justify-between mb-4'>
 										<div className='flex items-center gap-3'>
-											<div className='w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-700 dark:text-purple-400 font-semibold text-lg flex-shrink-0'>
-												{getInitials(
-													p.first_name,
-													p.last_name,
+											<div className='w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-700 dark:text-purple-400 font-semibold text-lg flex-shrink-0 overflow-hidden'>
+												{fixUrl(p.avatar) ? (
+													<img
+														src={fixUrl(p.avatar)!}
+														alt=''
+														className='w-full h-full object-cover'
+													/>
+												) : (
+													getInitials(
+														p.first_name,
+														p.last_name,
+													)
 												)}
 											</div>
 											<div className='min-w-0'>

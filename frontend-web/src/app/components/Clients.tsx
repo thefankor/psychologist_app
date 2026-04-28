@@ -16,6 +16,9 @@ const getInitials = (name: string | null) =>
 				.toUpperCase()
 		: '?';
 
+const fixUrl = (url: string | null) =>
+	url ? url.replace('http://0.0.0.0:', 'http://localhost:') : null;
+
 export default function Clients() {
 	const token = localStorage.getItem('token') ?? '';
 	const [clients, setClients] = useState<any[]>([]);
@@ -97,8 +100,16 @@ export default function Clients() {
 						>
 							<CardContent className='p-6'>
 								<div className='flex items-center gap-3 mb-4'>
-									<div className='w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 font-semibold text-lg flex-shrink-0'>
-										{getInitials(c.name)}
+									<div className='w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 font-semibold text-lg flex-shrink-0 overflow-hidden'>
+										{fixUrl(c.avatar) ? (
+											<img
+												src={fixUrl(c.avatar)!}
+												alt=''
+												className='w-full h-full object-cover'
+											/>
+										) : (
+											getInitials(c.name)
+										)}
 									</div>
 									<div>
 										<h3 className='font-semibold text-gray-900 dark:text-white'>

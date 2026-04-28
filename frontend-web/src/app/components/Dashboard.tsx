@@ -64,6 +64,9 @@ const getInitials = (name: string | null) =>
 				.toUpperCase()
 		: '?';
 
+const fixUrl = (url: string | null) =>
+	url ? url.replace('http://0.0.0.0:', 'http://localhost:') : null;
+
 export default function Dashboard() {
 	const token = localStorage.getItem('token') ?? '';
 
@@ -273,8 +276,16 @@ export default function Dashboard() {
 										className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'
 									>
 										<div className='flex items-center gap-3'>
-											<div className='w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 font-semibold flex-shrink-0'>
-												{getInitials(c.name)}
+											<div className='w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 font-semibold flex-shrink-0 overflow-hidden'>
+												{fixUrl(c.avatar) ? (
+													<img
+														src={fixUrl(c.avatar)!}
+														alt=''
+														className='w-full h-full object-cover'
+													/>
+												) : (
+													getInitials(c.name)
+												)}
 											</div>
 											<div>
 												<p className='font-medium text-gray-900 dark:text-white'>
