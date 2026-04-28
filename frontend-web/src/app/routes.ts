@@ -41,7 +41,7 @@ export const router = createBrowserRouter([
 					},
 					{ path: 'sessions', Component: Sessions },
 					{ path: 'chats', Component: Chats },
-					{ path: 'finances', Component: Finances },
+					// { path: 'finances', Component: Finances },
 					{ path: 'profile', Component: Profile },
 					{ path: '*', Component: NotFound },
 				],

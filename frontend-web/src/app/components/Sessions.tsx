@@ -290,9 +290,18 @@ function SessionCard({
 					{upcoming && (
 						<Button
 							disabled={!active}
+							onClick={() => {
+								if (active) {
+									window.open(
+										`https://meet.jit.si/psyconsult-${appointment.id}`,
+										'_blank',
+										'noopener,noreferrer',
+									);
+								}
+							}}
 							className={`flex-1 ${
 								active
-									? 'bg-green-600 hover:bg-green-700 dark:text-white'
+									? 'bg-green-600 hover:bg-green-700 dark:text-white cursor-pointer'
 									: 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed'
 							}`}
 						>

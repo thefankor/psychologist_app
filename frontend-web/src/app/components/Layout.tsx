@@ -18,14 +18,19 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { UserProvider, useUser } from '../context/UserContext';
 
-type NavItem = { to: string; icon: React.ComponentType<{ className?: string }>; label: string; exact?: boolean };
+type NavItem = {
+	to: string;
+	icon: React.ComponentType<{ className?: string }>;
+	label: string;
+	exact?: boolean;
+};
 
 const NAV_ITEMS_PSYCHOLOGIST: NavItem[] = [
 	{ to: '/', icon: LayoutDashboard, label: 'Дашборд', exact: true },
 	{ to: '/clients', icon: Users, label: 'Клиенты' },
 	{ to: '/sessions', icon: Calendar, label: 'Расписание' },
 	{ to: '/chats', icon: MessageSquare, label: 'Сообщения' },
-	{ to: '/finances', icon: Wallet, label: 'Финансы' },
+	// { to: '/finances', icon: Wallet, label: 'Финансы' },
 	{ to: '/working-hours', icon: Clock, label: 'Рабочие часы' },
 ];
 
@@ -34,7 +39,7 @@ const NAV_ITEMS_CLIENT: NavItem[] = [
 	{ to: '/favorites', icon: Heart, label: 'Избранное' },
 	{ to: '/sessions', icon: Calendar, label: 'Расписание' },
 	{ to: '/chats', icon: MessageSquare, label: 'Сообщения' },
-	{ to: '/finances', icon: Wallet, label: 'Финансы' },
+	// { to: '/finances', icon: Wallet, label: 'Финансы' },
 ];
 
 function ConfirmLogoutDialog({
