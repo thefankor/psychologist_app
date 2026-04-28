@@ -56,11 +56,9 @@ const getInitials = (name: string | null) =>
 				.toUpperCase()
 		: '?';
 
-/** Запись «предстоящая», пока окно [start−15м, start+15м] не закрылось */
 const isUpcoming = (startAt: string, now: Date) =>
 	now < new Date(new Date(startAt).getTime() + 15 * 60 * 1000);
 
-/** Кнопка «Начать» активна в окне [start−15м, start+15м] */
 const isInActiveWindow = (startAt: string, now: Date) => {
 	const start = new Date(startAt).getTime();
 	const t = now.getTime();
@@ -292,9 +290,18 @@ function SessionCard({
 					{upcoming && (
 						<Button
 							disabled={!active}
+							onClick={() => {
+								if (active) {
+									window.open(
+										`https://meet.jit.si/psyconsult-${appointment.id}`,
+										'_blank',
+										'noopener,noreferrer',
+									);
+								}
+							}}
 							className={`flex-1 ${
 								active
-									? 'bg-green-600 hover:bg-green-700 dark:text-white'
+									? 'bg-green-600 hover:bg-green-700 dark:text-white cursor-pointer'
 									: 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed'
 							}`}
 						>
@@ -319,7 +326,8 @@ export default function Sessions() {
 	const isPsychologist = profile?.role === 'PSYCHOLOGIST';
 	const token = localStorage.getItem('token') ?? '';
 
-	const [appointments, setAppointments] = useState<any[]>([]);
+	const [upcoming, setUpcoming] = useState<any[]>([]);
+	const [completed, setCompleted] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [now, setNow] = useState(new Date());
@@ -334,10 +342,47 @@ export default function Sessions() {
 		setLoading(true);
 		setError('');
 		try {
-			const data = isPsychologist
-				? await getPsyshologistAppointments(token)
-				: await getAllAppointments(token);
-			setAppointments(data);
+			if (isPsychologist) {
+				const [upcomingData, completedData] = await Promise.all([
+					getPsyshologistAppointments(token, true),
+					getPsyshologistAppointments(token, false),
+				]);
+				setUpcoming(
+					(upcomingData ?? []).sort(
+						(a: any, b: any) =>
+							new Date(a.start_at).getTime() -
+							new Date(b.start_at).getTime(),
+					),
+				);
+				setCompleted(
+					(completedData ?? []).sort(
+						(a: any, b: any) =>
+							new Date(b.start_at).getTime() -
+							new Date(a.start_at).getTime(),
+					),
+				);
+			} else {
+				const data = await getAllAppointments(token);
+				const all = data ?? [];
+				setUpcoming(
+					all
+						.filter((a: any) => isUpcoming(a.start_at, new Date()))
+						.sort(
+							(a: any, b: any) =>
+								new Date(a.start_at).getTime() -
+								new Date(b.start_at).getTime(),
+						),
+				);
+				setCompleted(
+					all
+						.filter((a: any) => !isUpcoming(a.start_at, new Date()))
+						.sort(
+							(a: any, b: any) =>
+								new Date(b.start_at).getTime() -
+								new Date(a.start_at).getTime(),
+						),
+				);
+			}
 		} catch (e: any) {
 			setError(e.message || 'Ошибка при загрузке записей');
 		} finally {
@@ -348,20 +393,6 @@ export default function Sessions() {
 	useEffect(() => {
 		fetchAppointments();
 	}, [profile]);
-
-	const upcoming = appointments
-		.filter((a) => isUpcoming(a.start_at, now))
-		.sort(
-			(a, b) =>
-				new Date(a.start_at).getTime() - new Date(b.start_at).getTime(),
-		);
-
-	const completed = appointments
-		.filter((a) => !isUpcoming(a.start_at, now))
-		.sort(
-			(a, b) =>
-				new Date(b.start_at).getTime() - new Date(a.start_at).getTime(),
-		);
 
 	const empty = (text: string) => (
 		<div className='col-span-full text-center py-16'>

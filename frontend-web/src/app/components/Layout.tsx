@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import {
 	LayoutDashboard,
@@ -17,22 +18,28 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { UserProvider, useUser } from '../context/UserContext';
 
-const NAV_ITEMS_PSYCHOLOGIST = [
+type NavItem = {
+	to: string;
+	icon: React.ComponentType<{ className?: string }>;
+	label: string;
+	exact?: boolean;
+};
+
+const NAV_ITEMS_PSYCHOLOGIST: NavItem[] = [
 	{ to: '/', icon: LayoutDashboard, label: 'Дашборд', exact: true },
 	{ to: '/clients', icon: Users, label: 'Клиенты' },
 	{ to: '/sessions', icon: Calendar, label: 'Расписание' },
 	{ to: '/chats', icon: MessageSquare, label: 'Сообщения' },
-	{ to: '/finances', icon: Wallet, label: 'Финансы' },
+	// { to: '/finances', icon: Wallet, label: 'Финансы' },
 	{ to: '/working-hours', icon: Clock, label: 'Рабочие часы' },
 ];
 
-const NAV_ITEMS_CLIENT = [
-	{ to: '/', icon: LayoutDashboard, label: 'Дашборд', exact: true },
+const NAV_ITEMS_CLIENT: NavItem[] = [
 	{ to: '/psychologists', icon: Users, label: 'Психологи' },
 	{ to: '/favorites', icon: Heart, label: 'Избранное' },
 	{ to: '/sessions', icon: Calendar, label: 'Расписание' },
 	{ to: '/chats', icon: MessageSquare, label: 'Сообщения' },
-	{ to: '/finances', icon: Wallet, label: 'Финансы' },
+	// { to: '/finances', icon: Wallet, label: 'Финансы' },
 ];
 
 function ConfirmLogoutDialog({
@@ -146,13 +153,21 @@ function LayoutInner() {
 							}`}
 						>
 							<div
-								className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold flex-shrink-0 ${
+								className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center font-semibold flex-shrink-0 ${
 									isPsychologist
 										? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-400'
 										: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-400'
 								}`}
 							>
-								{profile?.initials ?? '—'}
+								{profile?.avatar ? (
+									<img
+										src={profile.avatar}
+										alt='avatar'
+										className='w-full h-full object-cover'
+									/>
+								) : (
+									(profile?.initials ?? '—')
+								)}
 							</div>
 							<div className='ml-3 min-w-0'>
 								<p className='text-sm font-medium text-gray-900 dark:text-white truncate'>

@@ -1,211 +1,153 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { Plus, Search, Mail, Phone } from 'lucide-react';
+import { Search, Loader2, Calendar, Video } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
-import { Badge } from './ui/badge';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from './ui/dialog';
-import { Label } from './ui/label';
-import { mockClients } from '../data/mockData';
+import { getClientsForPsychologist } from '../../api/psychologist';
+
+const getInitials = (name: string | null) =>
+	name
+		? name
+				.split(' ')
+				.map((n) => n[0])
+				.join('')
+				.slice(0, 2)
+				.toUpperCase()
+		: '?';
 
 export default function Clients() {
-	const [searchQuery, setSearchQuery] = useState('');
-	const [clients] = useState(mockClients);
+	const token = localStorage.getItem('token') ?? '';
+	const [clients, setClients] = useState<any[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState('');
+	const [search, setSearch] = useState('');
 
-	const filteredClients = clients.filter(
-		(client) =>
-			client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			client.email.toLowerCase().includes(searchQuery.toLowerCase()),
+	const fetchClients = async () => {
+		setLoading(true);
+		setError('');
+		try {
+			const data = await getClientsForPsychologist(token);
+			setClients(data);
+		} catch (e: any) {
+			setError(e.message || 'Ошибка при загрузке клиентов');
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		fetchClients();
+	}, []);
+
+	const filtered = clients.filter((c) =>
+		(c.name ?? '').toLowerCase().includes(search.toLowerCase()),
 	);
 
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case 'active':
-				return 'bg-green-100 text-green-800';
-			case 'inactive':
-				return 'bg-gray-100 text-gray-800';
-			case 'completed':
-				return 'bg-blue-100 text-blue-800';
-			default:
-				return 'bg-gray-100 text-gray-800';
-		}
-	};
-
-	const getStatusText = (status: string) => {
-		switch (status) {
-			case 'active':
-				return 'Активный';
-			case 'inactive':
-				return 'Неактивный';
-			case 'completed':
-				return 'Завершен';
-			default:
-				return status;
-		}
-	};
-
 	return (
-		<div className='p-8'>
-			<div className='mb-8 flex items-center justify-between'>
-				<div>
-					<h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
-						Клиенты
-					</h1>
-					<h5 className='text-gray-500 mt-1 dark:text-white'>
-						Управление клиентской базой
-					</h5>
-				</div>
-
-				<Dialog>
-					<DialogTrigger asChild>
-						<Button className='bg-blue-600 hover:bg-blue-700 dark:text-white'>
-							<Plus className='w-4 h-4 mr-2' />
-							Добавить клиента
-						</Button>
-					</DialogTrigger>
-					<DialogContent className='dark:bg-gray-800 dark:border-gray-700'>
-						<DialogHeader>
-							<DialogTitle>Новый клиент</DialogTitle>
-						</DialogHeader>
-						<div className='space-y-4 mt-4'>
-							<div>
-								<Label htmlFor='name'>Имя</Label>
-								<Input
-									id='name'
-									placeholder='Введите имя клиента'
-									className='dark:bg-gray-700 dark:border-gray-600 dark:text-white mt-2'
-								/>
-							</div>
-							<div>
-								<Label htmlFor='email'>Email</Label>
-								<Input
-									id='email'
-									type='email'
-									placeholder='email@example.com'
-									className='dark:bg-gray-700 dark:border-gray-600 dark:text-white mt-2'
-								/>
-							</div>
-							<div>
-								<Label htmlFor='phone'>Телефон</Label>
-								<Input
-									id='phone'
-									placeholder='+7 (999) 123-45-67'
-									className='dark:bg-gray-700 dark:border-gray-600 dark:text-white mt-2'
-								/>
-							</div>
-							<div>
-								<Label htmlFor='dob'>Дата рождения</Label>
-								<Input
-									id='dob'
-									type='date'
-									className='dark:bg-gray-700 dark:border-gray-600 dark:text-white mt-2'
-								/>
-							</div>
-							<Button className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'>
-								Создать клиента
-							</Button>
-						</div>
-					</DialogContent>
-				</Dialog>
+		<div className='p-8 bg-gray-50 dark:bg-gray-900 min-h-screen'>
+			<div className='mb-8'>
+				<h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
+					Клиенты
+				</h1>
+				<p className='text-gray-500 dark:text-gray-400 mt-1'>
+					Управление клиентской базой
+				</p>
 			</div>
 
 			<div className='mb-6'>
 				<div className='relative'>
-					<Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 ' />
+					<Search className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5' />
 					<Input
-						placeholder='Поиск по имени или email...'
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
+						placeholder='Поиск по имени...'
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
 						className='pl-10 dark:bg-gray-800 dark:border-gray-700'
 					/>
 				</div>
 			</div>
 
-			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-				{filteredClients.map((client) => (
-					<Card
-						key={client.id}
-						className='hover:shadow-lg transition-shadow dark:bg-gray-800 dark:border-gray-700'
+			{loading ? (
+				<div className='flex items-center justify-center py-24'>
+					<Loader2 className='w-8 h-8 animate-spin text-blue-500' />
+				</div>
+			) : error ? (
+				<div className='text-center py-24'>
+					<p className='text-red-500'>{error}</p>
+					<Button
+						variant='outline'
+						className='mt-4 dark:border-gray-600 dark:text-gray-300'
+						onClick={fetchClients}
 					>
-						<CardContent className='p-6'>
-							<div className='flex items-start justify-between mb-4'>
-								<div className='flex items-center gap-3'>
-									<div className='w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold text-lg '>
-										{client.name
-											.split(' ')
-											.map((n) => n[0])
-											.join('')}
+						Повторить
+					</Button>
+				</div>
+			) : filtered.length === 0 ? (
+				<div className='text-center py-24'>
+					<p className='text-gray-500 dark:text-gray-400'>
+						{search ? 'Клиенты не найдены' : 'Нет клиентов'}
+					</p>
+				</div>
+			) : (
+				<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+					{filtered.map((c) => (
+						<Card
+							key={c.client_id}
+							className='hover:shadow-lg transition-shadow dark:bg-gray-800 dark:border-gray-700'
+						>
+							<CardContent className='p-6'>
+								<div className='flex items-center gap-3 mb-4'>
+									<div className='w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 font-semibold text-lg flex-shrink-0'>
+										{getInitials(c.name)}
 									</div>
 									<div>
-										<h3 className='font-semibold text-gray-900 dark:text-gray-200'>
-											{client.name}
+										<h3 className='font-semibold text-gray-900 dark:text-white'>
+											{c.name || '—'}
 										</h3>
-										<Badge
-											className={getStatusColor(
-												client.status,
-											)}
-										>
-											{getStatusText(client.status)}
-										</Badge>
+										<p className='text-sm text-gray-500 dark:text-gray-400'>
+											Клиент
+										</p>
 									</div>
 								</div>
-							</div>
 
-							<div className='space-y-2 mb-4'>
-								<div className='flex items-center text-sm text-gray-600 dark:text-gray-200'>
-									<Mail className='w-4 h-4 mr-2' />
-									{client.email}
+								<div className='space-y-2 mb-4 border-t border-gray-100 dark:border-gray-700 pt-4'>
+									<div className='flex justify-between text-sm'>
+										<span className='flex items-center gap-1.5 text-gray-500 dark:text-gray-400'>
+											<Calendar className='w-4 h-4' />
+											Первая сессия
+										</span>
+										<span className='font-medium text-gray-900 dark:text-gray-200'>
+											{c.first_session
+												? new Date(
+														c.first_session,
+													).toLocaleDateString(
+														'ru-RU',
+													)
+												: '—'}
+										</span>
+									</div>
+									<div className='flex justify-between text-sm'>
+										<span className='flex items-center gap-1.5 text-gray-500 dark:text-gray-400'>
+											<Video className='w-4 h-4' />
+											Всего сессий
+										</span>
+										<span className='font-medium text-gray-900 dark:text-gray-200'>
+											{c.total_sessions}
+										</span>
+									</div>
 								</div>
-								<div className='flex items-center text-sm text-gray-600 dark:text-gray-200'>
-									<Phone className='w-4 h-4 mr-2' />
-									{client.phone}
-								</div>
-							</div>
 
-							<div className='border-t pt-4 mb-4'>
-								<div className='flex justify-between text-sm'>
-									<span className='dark:text-gray-200'>
-										Первая сессия:
-									</span>
-									<span className='font-medium text-gray-400'>
-										{new Date(
-											client.firstSession,
-										).toLocaleDateString('ru-RU')}
-									</span>
-								</div>
-								<div className='flex justify-between text-sm mt-2'>
-									<span className='text-gray-500 dark:text-gray-200'>
-										Всего сессий:
-									</span>
-									<span className='font-medium text-gray-400'>
-										{client.totalSessions}
-									</span>
-								</div>
-							</div>
-
-							<Link to={`/clients/${client.id}`}>
-								<Button
-									className='w-full dark:bg-gray-600 dark:hover:bg-gray-700'
-									variant='outline'
-								>
-									Открыть профиль
-								</Button>
-							</Link>
-						</CardContent>
-					</Card>
-				))}
-			</div>
-
-			{filteredClients.length === 0 && (
-				<div className='text-center py-12'>
-					<p className='text-gray-500'>Клиенты не найдены</p>
+								<Link to={`/clients/${c.client_id}`}>
+									<Button
+										variant='outline'
+										className='w-full dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600'
+									>
+										Открыть профиль
+									</Button>
+								</Link>
+							</CardContent>
+						</Card>
+					))}
 				</div>
 			)}
 		</div>
