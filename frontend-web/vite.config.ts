@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { loadEnv } from 'vite';
 import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -15,22 +16,29 @@ function figmaAssetResolver() {
 	};
 }
 
-export default defineConfig({
-	plugins: [figmaAssetResolver(), react(), tailwindcss()],
-	resolve: {
-		alias: {
-			'@': path.resolve(__dirname, './src'),
-		},
-	},
-	server: {
-		host: '0.0.0.0',
-		port: 5173,
-		proxy: {
-			'^/(auth|user|chats|calls|admin|psychologists)/.*': {
-				target: 'http://localhost:8000',
-				changeOrigin: true,
+export default defineConfig(({ mode }) => {
+	const env = loadEnv(mode, __dirname, '');
+	const backendProxyUrl =
+		env.VITE_BACKEND_PROXY_URL || 'http://localhost:8000';
+
+	return {
+		plugins: [figmaAssetResolver(), react(), tailwindcss()],
+		resolve: {
+			alias: {
+				'@': path.resolve(__dirname, './src'),
 			},
 		},
-	},
-	assetsInclude: ['**/*.svg', '**/*.csv'],
+		server: {
+			host: '0.0.0.0',
+			port: 5173,
+			allowedHosts: true,
+			proxy: {
+				'^/(auth|user|chats|calls|admin|psychologists)/.*': {
+					target: backendProxyUrl,
+					changeOrigin: true,
+				},
+			},
+		},
+		assetsInclude: ['**/*.svg', '**/*.csv'],
+	};
 });
