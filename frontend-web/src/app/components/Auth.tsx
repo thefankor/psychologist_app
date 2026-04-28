@@ -148,7 +148,7 @@ export default function Auth() {
 				const profile = await getUser(newToken);
 				if (profile.name) {
 					localStorage.setItem('token', newToken);
-					navigate('/');
+					navigate('/psychologists');
 				} else {
 					setStep('survey');
 				}
@@ -187,7 +187,7 @@ export default function Auth() {
 				gender: clientGender,
 			});
 			localStorage.setItem('token', token);
-			navigate('/');
+			navigate('/psychologists');
 		} catch (e: any) {
 			setSurveyErrors({
 				submit: e.message || 'Ошибка при сохранении анкеты',
@@ -265,7 +265,6 @@ export default function Auth() {
 				</CardHeader>
 
 				<CardContent className='space-y-4'>
-					{/* ШАГ 1: Выбор роли */}
 					{step === 'role' && (
 						<>
 							<button
@@ -312,7 +311,6 @@ export default function Auth() {
 						</>
 					)}
 
-					{/* ШАГ 2: Ввод email */}
 					{step === 'email' && (
 						<>
 							<div className='space-y-2'>
@@ -367,7 +365,6 @@ export default function Auth() {
 						</>
 					)}
 
-					{/* ШАГ 3: Ввод кода */}
 					{step === 'code' && (
 						<>
 							<div className='space-y-2'>
@@ -432,7 +429,6 @@ export default function Auth() {
 						</>
 					)}
 
-					{/* ШАГ 4а: Анкета клиента */}
 					{step === 'survey' && role === 'client' && (
 						<>
 							<div className='space-y-2'>
@@ -514,7 +510,6 @@ export default function Auth() {
 						</>
 					)}
 
-					{/* ШАГ 4б: Анкета психолога */}
 					{step === 'survey' && role === 'psychologist' && (
 						<>
 							<div className='grid grid-cols-2 gap-3'>

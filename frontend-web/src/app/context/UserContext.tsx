@@ -15,6 +15,7 @@ export interface UserProfile {
 	role: UserRole;
 	displayName: string;
 	initials: string;
+	avatar: string | null;
 	data: any;
 }
 
@@ -42,14 +43,20 @@ function decodeToken(token: string): { sub: string; type: UserRole } | null {
 	}
 }
 
+function fixAvatarUrl(url: string | null): string | null {
+	if (!url) return null;
+	return url.replace('http://0.0.0.0:', 'http://localhost:');
+}
+
 function buildProfile(role: UserRole, data: any): UserProfile {
+	const avatar = fixAvatarUrl(data.avatar ?? null);
 	if (role === 'PSYCHOLOGIST') {
 		const first = data.first_name || '';
 		const last = data.last_name || '';
 		const displayName = last ? `Др. ${last}` : first || 'Психолог';
 		const initials =
 			[first[0], last[0]].filter(Boolean).join('').toUpperCase() || 'П';
-		return { role, displayName, initials, data };
+		return { role, displayName, initials, avatar, data };
 	} else {
 		const name: string = data.name || '';
 		const displayName = name || 'Пользователь';
@@ -60,7 +67,7 @@ function buildProfile(role: UserRole, data: any): UserProfile {
 				.join('')
 				.slice(0, 2)
 				.toUpperCase() || 'П';
-		return { role, displayName, initials, data };
+		return { role, displayName, initials, avatar, data };
 	}
 }
 

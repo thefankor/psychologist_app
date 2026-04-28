@@ -42,16 +42,12 @@ export const updatePsyshologistProfile = async (token: string, form: any) => {
 	}
 };
 
-export const updatePsychologistPhoto = async (token: string, image: any) => {
+export const updatePsychologistPhoto = async (token: string, file: File) => {
 	const url = '/psychologists/profile/upload_photo/';
 
 	try {
 		const formData = new FormData();
-		formData.append('image', {
-			uri: image.uri,
-			name: image.fileName || `photo.${image.uri.split('.').pop()}`,
-			type: image.type || 'image/jpeg',
-		} as any);
+		formData.append('image', file);
 
 		const res = await fetch(url, {
 			method: 'POST',
@@ -63,11 +59,10 @@ export const updatePsychologistPhoto = async (token: string, image: any) => {
 
 		if (!res.ok) {
 			const error = await res.json();
-			throw new Error(error?.message || 'API error');
+			throw new Error(error?.detail || error?.message || 'API error');
 		}
 
-		const data = await res.json();
-		return data;
+		return res.json();
 	} catch (error: any) {
 		console.log('Ошибка во время обновления аватара психолога: ', error);
 		throw error;
@@ -100,8 +95,13 @@ export const createAppointment = async (
 	}
 };
 
-export const getPsyshologistAppointments = async (token: string) => {
-	const url = '/psychologists/appointments/';
+export const getPsyshologistAppointments = async (
+	token: string,
+	isUpcoming?: boolean,
+) => {
+	const params = new URLSearchParams({ limit: '100', offset: '0' });
+	if (isUpcoming !== undefined) params.set('is_upcoming', String(isUpcoming));
+	const url = `/psychologists/appointments/?${params}`;
 	try {
 		const res = await fetch(url, {
 			headers: {
@@ -229,6 +229,191 @@ export const deleteFavoritePsychologist = async (token: string, id: number) => {
 			'Ошибка во время получения удаления психолога из избранного: ',
 			error,
 		);
+		throw error;
+	}
+};
+
+export const getWorkingHours = async (token: string) => {
+	const url = '/psychologists/working-hours/';
+	try {
+		const res = await fetch(url, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.detail || error?.message || 'API error');
+		}
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка при получении рабочих часов:', error);
+		throw error;
+	}
+};
+
+export const updateWorkingHours = async (token: string, schedule: any[]) => {
+	const url = '/psychologists/working-hours/';
+	try {
+		const res = await fetch(url, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify(schedule),
+		});
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.detail || error?.message || 'API error');
+		}
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка при обновлении рабочих часов:', error);
+		throw error;
+	}
+};
+
+export const getClientsForPsychologist = async (token: string) => {
+	const url = '/psychologists/clients/';
+	try {
+		const res = await fetch(url, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка во время получения клиентов: ', error);
+		throw error;
+	}
+};
+
+export const getPsychologistAppointmentsForClient = async (
+	token: string,
+	client_id: number,
+	isUpcoming?: boolean,
+) => {
+	const params = new URLSearchParams({
+		client_id: String(client_id),
+		limit: '100',
+		offset: '0',
+	});
+	if (isUpcoming !== undefined) params.set('is_upcoming', String(isUpcoming));
+	const url = `/psychologists/appointments/?${params}`;
+	try {
+		const res = await fetch(url, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.detail || error?.message || 'API error');
+		}
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка при получении сессий клиента:', error);
+		throw error;
+	}
+};
+
+export const getClientForPsychologistByID = async (
+	token: string,
+	user_id: number,
+) => {
+	const url = `/psychologists/clients/${user_id}`;
+	try {
+		const res = await fetch(url, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка во время получения клиента по ID: ', error);
+		throw error;
+	}
+};
+
+export const getClientNotes = async (token: string, client_id: number) => {
+	const url = `/psychologists/clients/${client_id}/notes`;
+	try {
+		const res = await fetch(url, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка во время получения записей о клиенте: ', error);
+		throw error;
+	}
+};
+
+export const createClientNote = async (
+	token: string,
+	client_id: number,
+	text: string,
+) => {
+	const url = `/psychologists/clients/${client_id}/notes`;
+	try {
+		const res = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({ text }),
+		});
+		if (!res.ok) {
+			const error = await res.json();
+			throw new Error(error?.message || 'API error');
+		}
+		return res.json();
+	} catch (error: any) {
+		console.log('Ошибка во время получения записей о клиенте: ', error);
+		throw error;
+	}
+};
+
+export const deleteClientNote = async (
+	token: string,
+	client_id: number,
+	note_id: number,
+) => {
+	const url = `/psychologists/clients/${client_id}/notes/${note_id}`;
+	try {
+		const res = await fetch(url, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		if (!res.ok && res.status !== 204) {
+			const error = await res.json();
+			throw new Error(error?.detail || error?.message || 'API error');
+		}
+	} catch (error: any) {
+		console.log('Ошибка при удалении заметки:', error);
 		throw error;
 	}
 };

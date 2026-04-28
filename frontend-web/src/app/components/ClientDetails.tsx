@@ -1,5 +1,14 @@
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { ArrowLeft, Mail, Phone, Calendar, FileText, Plus } from 'lucide-react';
+import {
+	ArrowLeft,
+	FileText,
+	Plus,
+	Trash2,
+	Loader2,
+	Calendar,
+	Clock,
+} from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -13,269 +22,343 @@ import {
 } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
-import { mockClients, mockSessions, mockNotes } from '../data/mockData';
+import {
+	getClientForPsychologistByID,
+	getPsychologistAppointmentsForClient,
+	getClientNotes,
+	createClientNote,
+	deleteClientNote,
+} from '../../api/psychologist';
+
+const GENDER_LABELS: Record<string, string> = {
+	MALE: 'Мужской',
+	FEMALE: 'Женский',
+	NOT_STATED: 'Не указан',
+};
+
+const FORMAT_LABELS: Record<string, string> = {
+	PERSONAL: 'Индивидуальный',
+	FAMILY: 'Семейный',
+	GROUP: 'Групповой',
+};
+
+const SURVEY_SECTIONS: { key: string; label: string }[] = [
+	{ key: 'emotions', label: 'Эмоции' },
+	{ key: 'relations', label: 'Отношения' },
+	{ key: 'work', label: 'Работа' },
+	{ key: 'life', label: 'Жизнь' },
+	{ key: 'personal', label: 'Личное' },
+];
+
+const getInitials = (name: string | null) =>
+	name
+		? name
+				.split(' ')
+				.map((n) => n[0])
+				.join('')
+				.slice(0, 2)
+				.toUpperCase()
+		: '?';
+
+const formatDate = (iso: string) =>
+	new Date(iso).toLocaleDateString('ru-RU', {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+	});
+
+const formatTime = (iso: string) =>
+	new Date(iso).toLocaleTimeString('ru-RU', {
+		hour: '2-digit',
+		minute: '2-digit',
+	});
+
+const getDurationMin = (startAt: string, endsAt: string) =>
+	Math.round(
+		(new Date(endsAt).getTime() - new Date(startAt).getTime()) / 60000,
+	);
 
 export default function ClientDetails() {
-	const { id } = useParams();
-	const client = mockClients.find((c) => c.id === id);
-	const clientSessions = mockSessions.filter((s) => s.clientId === id);
-	const clientNotes = mockNotes.filter((n) => n.clientId === id);
+	const { id } = useParams<{ id: string }>();
+	const token = localStorage.getItem('token') ?? '';
+	const clientId = parseInt(id ?? '0');
 
-	if (!client) {
+	const [client, setClient] = useState<any>(null);
+	const [appointments, setAppointments] = useState<any[]>([]);
+	const [notes, setNotes] = useState<any[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState('');
+
+	const [noteText, setNoteText] = useState('');
+	const [addingNote, setAddingNote] = useState(false);
+	const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+	const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null);
+
+	useEffect(() => {
+		if (!clientId) return;
+		(async () => {
+			try {
+				const [clientData, upcomingData, completedData, notesData] =
+					await Promise.all([
+						getClientForPsychologistByID(token, clientId),
+						getPsychologistAppointmentsForClient(
+							token,
+							clientId,
+							true,
+						),
+						getPsychologistAppointmentsForClient(
+							token,
+							clientId,
+							false,
+						),
+						getClientNotes(token, clientId),
+					]);
+				setClient(clientData);
+				const allAppointments = [
+					...(upcomingData ?? []),
+					...(completedData ?? []),
+				];
+				setAppointments(
+					allAppointments.sort(
+						(a: any, b: any) =>
+							new Date(b.start_at).getTime() -
+							new Date(a.start_at).getTime(),
+					),
+				);
+				setNotes(notesData ?? []);
+			} catch (e: any) {
+				setError(e.message || 'Ошибка при загрузке данных');
+			} finally {
+				setLoading(false);
+			}
+		})();
+	}, [clientId]);
+
+	const handleAddNote = async () => {
+		if (!noteText.trim()) return;
+		setAddingNote(true);
+		try {
+			const created = await createClientNote(
+				token,
+				clientId,
+				noteText.trim(),
+			);
+			setNotes((prev) => [created, ...prev]);
+			setNoteText('');
+			setNoteDialogOpen(false);
+		} catch {
+		} finally {
+			setAddingNote(false);
+		}
+	};
+
+	const handleDeleteNote = async (noteId: number) => {
+		setDeletingNoteId(noteId);
+		try {
+			await deleteClientNote(token, clientId, noteId);
+			setNotes((prev) => prev.filter((n) => n.id !== noteId));
+		} catch {
+		} finally {
+			setDeletingNoteId(null);
+		}
+	};
+
+	if (loading) {
 		return (
-			<div className='p-8'>
-				<p className='text-gray-500'>Клиент не найден</p>
+			<div className='flex items-center justify-center min-h-screen'>
+				<Loader2 className='w-8 h-8 animate-spin text-blue-500' />
 			</div>
 		);
 	}
 
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case 'active':
-				return 'bg-green-100 text-green-800';
-			case 'inactive':
-				return 'bg-gray-100 text-gray-800';
-			case 'completed':
-				return 'bg-blue-100 text-blue-800';
-			default:
-				return 'bg-gray-100 text-gray-800';
-		}
-	};
-
-	const getStatusText = (status: string) => {
-		switch (status) {
-			case 'active':
-				return 'Активный';
-			case 'inactive':
-				return 'Неактивный';
-			case 'completed':
-				return 'Завершен';
-			default:
-				return status;
-		}
-	};
-
-	const getSessionStatusColor = (status: string) => {
-		switch (status) {
-			case 'scheduled':
-				return 'bg-blue-100 text-blue-800';
-			case 'completed':
-				return 'bg-green-100 text-green-800';
-			case 'cancelled':
-				return 'bg-red-100 text-red-800';
-			default:
-				return 'bg-gray-100 text-gray-800';
-		}
-	};
-
-	const getSessionStatusText = (status: string) => {
-		switch (status) {
-			case 'scheduled':
-				return 'Запланировано';
-			case 'completed':
-				return 'Завершено';
-			case 'cancelled':
-				return 'Отменено';
-			default:
-				return status;
-		}
-	};
-
-	return (
-		<div className='p-8'>
-			<div className='mb-6'>
+	if (error || !client) {
+		return (
+			<div className='p-8 text-center'>
+				<p className='text-red-500'>{error || 'Клиент не найден'}</p>
 				<Link to='/clients'>
-					<Button variant='ghost' className='mb-4'>
+					<Button variant='outline' className='mt-4'>
 						<ArrowLeft className='w-4 h-4 mr-2' />
 						Назад к клиентам
 					</Button>
 				</Link>
+			</div>
+		);
+	}
 
-				<div className='flex items-start justify-between'>
-					<div className='flex items-center gap-4'>
-						<div className='w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold text-2xl'>
-							{client.name
-								.split(' ')
-								.map((n) => n[0])
-								.join('')}
-						</div>
-						<div>
-							<h1 className='text-3xl font-bold text-gray-900 dark:text-gray-200'>
-								{client.name}
-							</h1>
-							<Badge
-								className={`mt-2 ${getStatusColor(client.status)}`}
-							>
-								{getStatusText(client.status)}
+	return (
+		<div className='p-8 bg-gray-50 dark:bg-gray-900 min-h-screen'>
+			<Link to='/clients'>
+				<Button
+					variant='ghost'
+					className='mb-6 dark:text-gray-300 dark:hover:bg-gray-800'
+				>
+					<ArrowLeft className='w-4 h-4 mr-2' />
+					Назад к клиентам
+				</Button>
+			</Link>
+
+			<div className='flex items-center gap-4 mb-8'>
+				<div className='w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 font-semibold text-2xl flex-shrink-0'>
+					{getInitials(client.name)}
+				</div>
+				<div>
+					<h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
+						{client.name || '—'}
+					</h1>
+					<div className='flex flex-wrap gap-2 mt-2'>
+						{client.gender && client.gender !== 'NOT_STATED' && (
+							<Badge className='bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'>
+								{GENDER_LABELS[client.gender] ?? client.gender}
 							</Badge>
-						</div>
+						)}
+						{client.age != null && (
+							<Badge className='bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'>
+								{client.age} лет
+							</Badge>
+						)}
+						{client.birth_date && (
+							<Badge className='bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'>
+								{new Date(client.birth_date).toLocaleDateString(
+									'ru-RU',
+								)}
+							</Badge>
+						)}
 					</div>
-					<Button className='bg-blue-600 hover:bg-blue-700 dark:text-white'>
-						Редактировать
-					</Button>
 				</div>
 			</div>
 
-			<div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-6'>
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardContent className='p-6'>
-						<div className='flex items-center gap-3 mb-2'>
-							<Mail className='w-5 h-5 text-gray-400' />
-							<span className='text-sm text-gray-500 dark:text-white'>
-								Email
-							</span>
-						</div>
-						<p className='text-gray-900 dark:text-gray-200'>
-							{client.email}
+			{client.format && client.format.length > 0 && (
+				<Card className='mb-6 dark:bg-gray-800 dark:border-gray-700'>
+					<CardContent className='p-5'>
+						<p className='text-sm text-gray-500 dark:text-gray-400 mb-2'>
+							Форматы сессий
 						</p>
+						<div className='flex flex-wrap gap-2'>
+							{client.format.map((f: string) => (
+								<Badge
+									key={f}
+									className='bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+								>
+									{FORMAT_LABELS[f] ?? f}
+								</Badge>
+							))}
+						</div>
 					</CardContent>
 				</Card>
+			)}
 
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardContent className='p-6'>
-						<div className='flex items-center gap-3 mb-2'>
-							<Phone className='w-5 h-5 text-gray-400' />
-							<span className='text-sm text-gray-500 dark:text-white'>
-								Телефон
-							</span>
-						</div>
-						<p className='text-gray-900 dark:text-gray-200'>
-							{client.phone}
-						</p>
+			{SURVEY_SECTIONS.some(
+				(s) => client[s.key] && client[s.key].length > 0,
+			) && (
+				<Card className='mb-6 dark:bg-gray-800 dark:border-gray-700'>
+					<CardHeader>
+						<CardTitle className='text-base dark:text-white'>
+							Запросы клиента
+						</CardTitle>
+					</CardHeader>
+					<CardContent className='pt-0 space-y-3'>
+						{SURVEY_SECTIONS.filter(
+							(s) => client[s.key] && client[s.key].length > 0,
+						).map((s) => (
+							<div key={s.key}>
+								<p className='text-xs text-gray-500 dark:text-gray-400 mb-1'>
+									{s.label}
+								</p>
+								<div className='flex flex-wrap gap-1.5'>
+									{client[s.key].map(
+										(item: string, i: number) => (
+											<Badge
+												key={i}
+												className='bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 text-xs'
+											>
+												{item}
+											</Badge>
+										),
+									)}
+								</div>
+							</div>
+						))}
 					</CardContent>
 				</Card>
-
-				<Card className='dark:bg-gray-800 dark:border-gray-700'>
-					<CardContent className='p-6'>
-						<div className='flex items-center gap-3 mb-2'>
-							<Calendar className='w-5 h-5 text-gray-400' />
-							<span className='text-sm text-gray-500 dark:text-white'>
-								Дата рождения
-							</span>
-						</div>
-						<p className='text-gray-900 dark:text-gray-200'>
-							{new Date(client.dateOfBirth).toLocaleDateString(
-								'ru-RU',
-							)}
-						</p>
-					</CardContent>
-				</Card>
-			</div>
+			)}
 
 			<Tabs defaultValue='sessions' className='w-full'>
 				<TabsList className='dark:bg-gray-800 dark:border-gray-700'>
 					<TabsTrigger value='sessions'>
-						Сессии ({clientSessions.length})
+						Сессии ({appointments.length})
 					</TabsTrigger>
 					<TabsTrigger value='notes'>
-						Заметки ({clientNotes.length})
+						Заметки ({notes.length})
 					</TabsTrigger>
-					<TabsTrigger value='info'>Информация</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value='sessions' className='mt-6'>
 					<Card className='dark:bg-gray-800 dark:border-gray-700'>
-						<CardHeader className='flex flex-row items-center justify-between'>
-							<CardTitle>История сессий</CardTitle>
-							<Dialog>
-								<DialogTrigger asChild>
-									<Button
-										size='sm'
-										className='bg-blue-600 hover:bg-blue-700 dark:text-white'
-									>
-										<Plus className='w-4 h-4 mr-2' />
-										Запланировать
-									</Button>
-								</DialogTrigger>
-								<DialogContent className='dark:bg-gray-800 dark:border-gray-700'>
-									<DialogHeader>
-										<DialogTitle>Новая сессия</DialogTitle>
-									</DialogHeader>
-									<div className='space-y-4 mt-4'>
-										<div>
-											<Label htmlFor='session-date'>
-												Дата
-											</Label>
-											<input
-												type='date'
-												id='session-date'
-												className='w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white mt-2 cursor-pointer'
-											/>
-										</div>
-										<div>
-											<Label htmlFor='session-time'>
-												Время
-											</Label>
-											<input
-												type='time'
-												id='session-time'
-												className='w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white mt-2 cursor-pointer'
-											/>
-										</div>
-										<Button className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'>
-											Создать сессию
-										</Button>
-									</div>
-								</DialogContent>
-							</Dialog>
+						<CardHeader>
+							<CardTitle className='dark:text-white'>
+								История сессий
+							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className='space-y-4'>
-								{clientSessions.length > 0 ? (
-									clientSessions.map((session) => (
-										<div
-											key={session.id}
-											className='p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:dark:bg-gray-700 cursor-pointer'
-										>
-											<div className='flex items-start justify-between'>
-												<div className='flex-1'>
-													<div className='flex items-center gap-3 mb-2'>
-														<span className='font-medium text-gray-900 dark:text-gray-200'>
-															{new Date(
-																session.date,
-															).toLocaleDateString(
-																'ru-RU',
-																{
-																	day: 'numeric',
-																	month: 'long',
-																	year: 'numeric',
-																},
+							{appointments.length === 0 ? (
+								<p className='text-center text-gray-500 dark:text-gray-400 py-8'>
+									Нет записей о сессиях
+								</p>
+							) : (
+								<div className='space-y-3'>
+									{appointments.map((a) => {
+										const isUpcoming =
+											new Date(a.start_at) > new Date();
+										const duration = a.ends_at
+											? getDurationMin(
+													a.start_at,
+													a.ends_at,
+												)
+											: null;
+										return (
+											<div
+												key={a.id}
+												className='p-4 border border-gray-200 dark:border-gray-700 rounded-lg'
+											>
+												<div className='flex items-center justify-between'>
+													<div className='flex items-center gap-4'>
+														<div className='flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300'>
+															<Calendar className='w-4 h-4 text-gray-400' />
+															{formatDate(
+																a.start_at,
 															)}
-														</span>
-														<span className='text-gray-500'>
-															•
-														</span>
-														<span className='text-gray-600 dark:text-gray-200'>
-															{session.time}
-														</span>
-														<Badge
-															className={getSessionStatusColor(
-																session.status,
+														</div>
+														<div className='flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300'>
+															<Clock className='w-4 h-4 text-gray-400' />
+															{formatTime(
+																a.start_at,
 															)}
-														>
-															{getSessionStatusText(
-																session.status,
+															{duration !=
+																null && (
+																<span className='text-gray-400'>
+																	({duration}{' '}
+																	мин)
+																</span>
 															)}
-														</Badge>
+														</div>
 													</div>
-													{session.notes && (
-														<p className='text-sm text-gray-600 mt-2 dark:text-gray-200'>
-															{session.notes}
-														</p>
-													)}
+													<Badge
+														className={
+															isUpcoming
+																? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+																: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+														}
+													>
+														{isUpcoming
+															? 'Предстоит'
+															: 'Завершена'}
+													</Badge>
 												</div>
-												<span className='text-sm text-gray-500 dark:text-gray-200'>
-													{session.duration} мин
-												</span>
 											</div>
-										</div>
-									))
-								) : (
-									<p className='text-center text-gray-500 py-8'>
-										Нет записей о сессиях
-									</p>
-								)}
-							</div>
+										);
+									})}
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				</TabsContent>
@@ -283,8 +366,13 @@ export default function ClientDetails() {
 				<TabsContent value='notes' className='mt-6'>
 					<Card className='dark:bg-gray-800 dark:border-gray-700'>
 						<CardHeader className='flex flex-row items-center justify-between'>
-							<CardTitle>Заметки и наблюдения</CardTitle>
-							<Dialog>
+							<CardTitle className='dark:text-white'>
+								Заметки и наблюдения
+							</CardTitle>
+							<Dialog
+								open={noteDialogOpen}
+								onOpenChange={setNoteDialogOpen}
+							>
 								<DialogTrigger asChild>
 									<Button
 										size='sm'
@@ -294,22 +382,37 @@ export default function ClientDetails() {
 										Добавить
 									</Button>
 								</DialogTrigger>
-								<DialogContent>
+								<DialogContent className='dark:bg-gray-800 dark:border-gray-700'>
 									<DialogHeader>
-										<DialogTitle>Новая заметка</DialogTitle>
+										<DialogTitle className='dark:text-white'>
+											Новая заметка
+										</DialogTitle>
 									</DialogHeader>
-									<div className='space-y-4 mt-4'>
-										<div>
-											<Label htmlFor='note'>
+									<div className='space-y-4 mt-2'>
+										<div className='space-y-2'>
+											<Label className='dark:text-gray-200'>
 												Содержание
 											</Label>
 											<Textarea
-												id='note'
+												value={noteText}
+												onChange={(e) =>
+													setNoteText(e.target.value)
+												}
 												placeholder='Введите заметку...'
-												rows={6}
+												rows={5}
+												className='dark:bg-gray-700 dark:border-gray-600 dark:text-white'
 											/>
 										</div>
-										<Button className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'>
+										<Button
+											onClick={handleAddNote}
+											disabled={
+												addingNote || !noteText.trim()
+											}
+											className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'
+										>
+											{addingNote && (
+												<Loader2 className='w-4 h-4 mr-2 animate-spin' />
+											)}
 											Сохранить заметку
 										</Button>
 									</div>
@@ -317,82 +420,56 @@ export default function ClientDetails() {
 							</Dialog>
 						</CardHeader>
 						<CardContent>
-							<div className='space-y-4'>
-								{clientNotes.length > 0 ? (
-									clientNotes.map((note) => (
+							{notes.length === 0 ? (
+								<p className='text-center text-gray-500 dark:text-gray-400 py-8'>
+									Нет заметок
+								</p>
+							) : (
+								<div className='space-y-3'>
+									{notes.map((note) => (
 										<div
 											key={note.id}
-											className='p-4 border border-gray-200 rounded-lg bg-yellow-50'
+											className='p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-amber-50 dark:bg-gray-700'
 										>
-											<div className='flex items-start justify-between mb-2'>
-												<div className='flex items-center gap-2'>
-													<FileText className='w-4 h-4 text-gray-500' />
-													<span className='text-sm text-gray-600'>
-														{new Date(
-															note.date,
-														).toLocaleDateString(
-															'ru-RU',
-														)}
-													</span>
+											<div className='flex items-start justify-between gap-3'>
+												<div className='flex-1 min-w-0'>
+													<div className='flex items-center gap-2 mb-2'>
+														<FileText className='w-4 h-4 text-gray-400 flex-shrink-0' />
+														<span className='text-xs text-gray-500 dark:text-gray-400'>
+															{formatDate(
+																note.created_at,
+															)}
+														</span>
+													</div>
+													<p className='text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap'>
+														{note.text}
+													</p>
 												</div>
-												{note.private && (
-													<Badge
-														variant='outline'
-														className='text-xs'
-													>
-														Приватная
-													</Badge>
-												)}
+												<button
+													onClick={() =>
+														handleDeleteNote(
+															note.id,
+														)
+													}
+													disabled={
+														deletingNoteId ===
+														note.id
+													}
+													className='cursor-pointer p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex-shrink-0 disabled:opacity-50'
+													title='Удалить заметку'
+												>
+													{deletingNoteId ===
+													note.id ? (
+														<Loader2 className='w-4 h-4 animate-spin' />
+													) : (
+														<Trash2 className='w-4 h-4' />
+													)}
+												</button>
 											</div>
-											<p className='text-gray-900'>
-												{note.content}
-											</p>
 										</div>
-									))
-								) : (
-									<p className='text-center text-gray-500 py-8'>
-										Нет заметок
-									</p>
-								)}
-							</div>
-						</CardContent>
-					</Card>
-				</TabsContent>
-
-				<TabsContent value='info' className='mt-6'>
-					<Card className='dark:bg-gray-800 dark:border-gray-700'>
-						<CardHeader>
-							<CardTitle>Общая информация</CardTitle>
-						</CardHeader>
-						<CardContent className='space-y-4'>
-							<div className='grid grid-cols-2 gap-4'>
-								<div>
-									<p className='text-sm text-gray-500 mb-1 dark:text-gray-200'>
-										Первая сессия
-									</p>
-									<p className='text-gray-900 dark:text-white'>
-										{new Date(
-											client.firstSession,
-										).toLocaleDateString('ru-RU')}
-									</p>
+									))}
 								</div>
-								<div>
-									<p className='text-sm text-gray-500 mb-1 dark:text-gray-200'>
-										Всего сессий
-									</p>
-									<p className='text-gray-900 dark:text-white'>
-										{client.totalSessions}
-									</p>
-								</div>
-							</div>
-							<div>
-								<p className='text-sm text-gray-500 mb-1 dark:text-gray-200'>
-									Заметки терапевта
-								</p>
-								<p className='text-gray-900 dark:text-white'>
-									{client.notes}
-								</p>
-							</div>
+							)}
 						</CardContent>
 					</Card>
 				</TabsContent>

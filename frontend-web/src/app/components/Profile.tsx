@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Loader2, Save, User, Briefcase } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Loader2, Save, User, Briefcase, Camera } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { useUser } from '../context/UserContext';
-import { updateUser } from '../../api/profile';
-import { updatePsyshologistProfile } from '../../api/psychologist';
+import { updateUser, updateUserPhoto } from '../../api/profile';
+import {
+	updatePsyshologistProfile,
+	updatePsychologistPhoto,
+} from '../../api/psychologist';
 
 const METHODS = [
 	{ value: 'GESTALT', label: 'Гештальт' },
@@ -474,7 +477,9 @@ function PsychologistProfile() {
 }
 
 export default function Profile() {
-	const { profile, loading } = useUser();
+	const { profile, loading, refreshProfile } = useUser();
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [uploading, setUploading] = useState(false);
 
 	if (loading) {
 		return (
@@ -495,15 +500,64 @@ export default function Profile() {
 		? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
 		: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300';
 
+	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		const token = localStorage.getItem('token') ?? '';
+		setUploading(true);
+		try {
+			if (isPsychologist) {
+				await updatePsychologistPhoto(token, file);
+			} else {
+				await updateUserPhoto(token, file);
+			}
+			await refreshProfile();
+		} catch {
+		} finally {
+			setUploading(false);
+			e.target.value = '';
+		}
+	};
+
 	return (
 		<div className='p-8 bg-gray-50 dark:bg-gray-900 min-h-screen'>
 			<div className='max-w-2xl mx-auto'>
 				<div className='flex items-center gap-5 mb-8'>
-					<div
-						className={`w-16 h-16 rounded-full ${accentColor} flex items-center justify-center ${accentText} text-2xl font-bold flex-shrink-0`}
-					>
-						{profile?.initials ?? '—'}
+					<div className='relative flex-shrink-0 cursor-pointer'>
+						<div
+							className={`w-16 h-16 rounded-full overflow-hidden ${accentColor} flex items-center justify-center ${accentText} text-2xl font-bold`}
+						>
+							{profile?.avatar ? (
+								<img
+									src={profile.avatar}
+									alt='avatar'
+									className='w-full h-full object-cover'
+								/>
+							) : (
+								(profile?.initials ?? '—')
+							)}
+						</div>
+						<button
+							onClick={() => fileInputRef.current?.click()}
+							disabled={uploading}
+							className=' cursor-pointer absolute inset-0 rounded-full flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity disabled:cursor-not-allowed'
+							title='Загрузить фото'
+						>
+							{uploading ? (
+								<Loader2 className='w-5 h-5 text-white animate-spin' />
+							) : (
+								<Camera className='w-5 h-5 text-white' />
+							)}
+						</button>
+						<input
+							ref={fileInputRef}
+							type='file'
+							accept='image/*'
+							className='hidden'
+							onChange={handleFileChange}
+						/>
 					</div>
+
 					<div>
 						<h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
 							{profile?.displayName ?? ''}
