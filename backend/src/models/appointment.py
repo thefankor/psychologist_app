@@ -22,6 +22,6 @@ class Appointment(BaseWithTimestamps):
 class AppointmentAttendee(BaseWithTimestamps):
     __tablename__ = "appointments_attendees"
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     appointment_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("appointments.id"))
     role: Mapped[AppointmentRole] = mapped_column(Enum(AppointmentRole))

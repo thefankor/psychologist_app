@@ -191,24 +191,20 @@ class AppointmentAttendeeDAO(BaseDAO):
         return result.mappings().all()
 
     @handle_db_errors
-    async def has_shared_appointment(
-        self, psychologist_id: int, client_id: int
-    ) -> bool:
-        psychologist_attendee = aliased(AppointmentAttendee)
-        client_attendee = aliased(AppointmentAttendee)
+    async def has_shared_appointment(self, user_id_a: int, user_id_b: int) -> bool:
+        attendee_a = aliased(AppointmentAttendee)
+        attendee_b = aliased(AppointmentAttendee)
 
         query = (
             select(literal(1))
-            .select_from(psychologist_attendee)
+            .select_from(attendee_a)
             .join(
-                client_attendee,
-                psychologist_attendee.appointment_id == client_attendee.appointment_id,
+                attendee_b,
+                attendee_a.appointment_id == attendee_b.appointment_id,
             )
             .where(
-                psychologist_attendee.user_id == psychologist_id,
-                psychologist_attendee.role == AppointmentRole.PSYCHOLOGIST,
-                client_attendee.user_id == client_id,
-                client_attendee.role == AppointmentRole.CLIENT,
+                attendee_a.user_id == user_id_a,
+                attendee_b.user_id == user_id_b,
             )
             .exists()
         )

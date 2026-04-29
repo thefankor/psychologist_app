@@ -11,6 +11,10 @@ class GroupRequest(BaseModel):
     rules: str
 
 
+class DirectChatRequest(BaseModel):
+    other_user_id: int
+
+
 class AuthorSchema(BaseModel):
     id: int
     name: str
@@ -66,8 +70,8 @@ class MessageSchema(BaseModel):
 class ChatSchema(BaseModel):
     id: UUID
     type: ChatType
-    image: str
+    image: str | None
     name: str
-    description: str
-    rules: str
+    description: str | None
+    rules: str | None
     last_messages: list[MessageSchema]
