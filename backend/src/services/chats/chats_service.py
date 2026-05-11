@@ -163,9 +163,11 @@ class ChatsService:
             )
 
         result.sort(
-            key=lambda c: c.last_message.created_at
-            if c.last_message
-            else datetime.min.replace(tzinfo=timezone.utc),
+            key=lambda c: (
+                c.last_message.created_at
+                if c.last_message
+                else datetime.min.replace(tzinfo=timezone.utc)
+            ),
             reverse=True,
         )
         return result
