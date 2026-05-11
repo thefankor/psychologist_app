@@ -38,9 +38,16 @@ class ReadEvent(BaseEvent):
     before_message_id: UUID
 
 
+class MessagesFetchEvent(BaseEvent):
+    event: Literal["messages_fetch"]
+    chat_id: UUID
+    before_message_id: UUID | None = None
+    limit: int = Field(default=50, ge=1, le=100)
+
+
 # alias для union-типа с дискриминатором
 EventInType = Annotated[
-    MessageSendEvent | TypingEvent | ReadEvent,
+    MessageSendEvent | TypingEvent | ReadEvent | MessagesFetchEvent,
     Field(discriminator="event"),
 ]
 
@@ -91,3 +98,9 @@ class MessageReadEvent(BaseEvent):
     event: Literal["message_read"] = "message_read"
     chat_id: UUID
     before_message_id: UUID
+
+
+class MessagesHistoryEvent(BaseEvent):
+    event: Literal["messages_history"] = "messages_history"
+    chat_id: UUID
+    messages: list[MessageGetEvent]

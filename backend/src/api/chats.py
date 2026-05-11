@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from src.core.dependencies import get_any_user_id, get_any_user_id_and_type, TokenInfo
-from src.schemas.groups import ChatSchema, DirectChatRequest
+from src.core.dependencies import TokenInfo, get_any_user_id, get_any_user_id_and_type
+from src.schemas.groups import ChatSchema, DirectChatCreatedSchema, DirectChatRequest
 from src.services.chats import ChatsService
 
 router = APIRouter(tags=["Chats"])
@@ -34,9 +34,9 @@ async def get_or_create_direct_chat(
     data: DirectChatRequest,
     user_info: TokenInfo = Depends(get_any_user_id_and_type),
     service: ChatsService = Depends(),
-) -> ChatSchema:
+) -> DirectChatCreatedSchema:
     return await service.get_or_create_direct_chat(
         caller_id=user_info.user_id,
         caller_type=user_info.user_type,
-        other_user_id=data.other_user_id
+        other_user_id=data.other_user_id,
     )

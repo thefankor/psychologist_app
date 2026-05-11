@@ -1,9 +1,9 @@
 from uuid import UUID
 
-from sqlalchemy import and_, func, insert, select
+from sqlalchemy import and_, case, func, insert, select
 from src.core.wrapper import handle_db_errors
 from src.crud.impl.base import BaseDAO
-from src.models import Chat, ChatMember, ChatMessage
+from src.models import Chat, ChatMember, ChatMessage, ClientProfile, PsychologistProfile
 from src.models.enums import ChatType
 
 
@@ -88,7 +88,6 @@ class ChatsDAO(BaseDAO):
     async def get_last_messages_by_chat_ids(
         self,
         chat_ids: list[UUID],
-        limit_per_chat: int = 20,
     ):
         if not chat_ids:
             return {}
@@ -115,22 +114,31 @@ class ChatsDAO(BaseDAO):
             .subquery()
         )
 
-        stmt = select(messages_sub).where(messages_sub.c.rn <= limit_per_chat)
+        cp = ClientProfile.__table__.alias("cp")
+        pp = PsychologistProfile.__table__.alias("pp")
+
+        stmt = (
+            select(
+                messages_sub,
+                case(
+                    (cp.c.id.is_not(None), cp.c.name),
+                    else_=func.concat(pp.c.first_name, " ", pp.c.last_name),
+                ).label("author_name"),
+                func.coalesce(cp.c.avatar, pp.c.avatar).label("author_avatar"),
+                case(
+                    (cp.c.id.is_not(None), "CLIENT"),
+                    else_="PSYCHOLOGIST",
+                ).label("author_role"),
+            )
+            .outerjoin(cp, cp.c.id == messages_sub.c.author_id)
+            .outerjoin(pp, pp.c.id == messages_sub.c.author_id)
+            .where(messages_sub.c.rn == 1)
+        )
 
         result = await self.session.execute(stmt)
         rows = result.mappings().all()
 
-        msgs_by_chat: dict[UUID, list[ChatMessage]] = {}
-
-        for row in rows:
-            chat_id: UUID = row["chat_id"]
-
-            msgs_by_chat.setdefault(chat_id, []).append(row)
-
-        for chat_id, msgs in msgs_by_chat.items():
-            msgs.sort(key=lambda m: m.created_at, reverse=True)
-
-        return msgs_by_chat
+        return {row["chat_id"]: row for row in rows}
 
     @handle_db_errors
     async def get_or_create_direct_chat(self, user_id_a: int, user_id_b: int) -> Chat:

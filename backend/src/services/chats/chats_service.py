@@ -6,7 +6,7 @@ from src.core.dependencies import get_store
 from src.crud import Store
 from src.models.enums import ChatType
 from src.schemas import GroupRequest
-from src.schemas.groups import ChatSchema, MessageSchema
+from src.schemas.groups import ChatSchema, DirectChatCreatedSchema, MessageSchema
 from src.utils import FileManager
 
 file_manager = FileManager(
@@ -62,12 +62,15 @@ class ChatsService:
                     user_id=other_user_id
                 )
                 if other_info is not None:
-                    display_name = f"{other_info['first_name']} {other_info['last_name']}"
+                    display_name = (
+                        f"{other_info['first_name']} {other_info['last_name']}"
+                    )
                     avatar = other_info["avatar"]
 
             case "PSYCHOLOGIST":
                 other_info = await self._store.client.get_name_and_avatar(
-                    user_id=other_user_id)
+                    user_id=other_user_id
+                )
                 if other_info is not None:
                     display_name = other_info["name"] or f"Клиент {other_user_id}"
                     avatar = other_info["avatar"]
@@ -87,7 +90,7 @@ class ChatsService:
             user_id_a=caller_id, user_id_b=other_user_id
         )
 
-        return ChatSchema(
+        return DirectChatCreatedSchema(
             id=chat.id,
             type=chat.type,
             name=display_name,
@@ -108,8 +111,8 @@ class ChatsService:
         result: list[ChatSchema] = []
 
         for c in groups:
-            orm_msgs = msgs_by_chat.get(c["id"], [])
-            last_messages = [MessageSchema.custom_validate(**m) for m in orm_msgs]
+            raw_msg = msgs_by_chat.get(c["id"])
+            last_message = MessageSchema.custom_validate(**raw_msg) if raw_msg else None
 
             result.append(
                 ChatSchema(
@@ -119,7 +122,7 @@ class ChatsService:
                     description=c["description"],
                     image=settings.STATIC_BASE_URL + c["image"] if c["image"] else None,
                     rules=c["rules"],
-                    last_messages=last_messages,
+                    last_message=last_message,
                 )
             )
 
@@ -144,8 +147,8 @@ class ChatsService:
                     display_name = "Пользователь"
                     avatar = None
 
-            orm_msgs = msgs_by_chat.get(c["id"], [])
-            last_messages = [MessageSchema.custom_validate(**m) for m in orm_msgs]
+            raw_msg = msgs_by_chat.get(c["id"])
+            last_message = MessageSchema.custom_validate(**raw_msg) if raw_msg else None
 
             result.append(
                 ChatSchema(
@@ -155,13 +158,13 @@ class ChatsService:
                     image=settings.STATIC_BASE_URL + avatar if avatar else None,
                     description=None,
                     rules=None,
-                    last_messages=last_messages,
+                    last_message=last_message,
                 )
             )
 
         result.sort(
-            key=lambda c: c.last_messages[0].created_at
-            if c.last_messages
+            key=lambda c: c.last_message.created_at
+            if c.last_message
             else datetime.min.replace(tzinfo=timezone.utc),
             reverse=True,
         )

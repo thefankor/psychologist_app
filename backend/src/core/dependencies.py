@@ -34,7 +34,7 @@ async def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     store: Store = Depends(get_store),
 ) -> int:
-    token_info =  await _get_current_entity(
+    token_info = await _get_current_entity(
         credentials=credentials,
         expected_type="CLIENT",
         store=store,
@@ -85,7 +85,9 @@ async def get_ws_user(
     if token is None:
         raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
     try:
-        token_info = await check_token_info(token=token, expected_type=None, store=store)
+        token_info = await check_token_info(
+            token=token, expected_type=None, store=store
+        )
         user_id = token_info.user_id
 
         match token_info.user_type:

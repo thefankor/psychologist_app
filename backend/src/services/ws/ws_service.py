@@ -8,6 +8,8 @@ from src.schemas.ws import (
     MessageGetEvent,
     MessageReadEvent,
     MessageSendEvent,
+    MessagesFetchEvent,
+    MessagesHistoryEvent,
     TypingEvent,
     TypingIndicatorEvent,
     WSUser,
@@ -67,8 +69,10 @@ class WSService:
             recipients = await self._store.chat_member.find_all_members(
                 chat_id=event.chat_id, sender_id=user.id
             )
+            unique_receipts = set(map(lambda r: r["user_id"], recipients))
+
             await manager.broadcast_to_users(
-                user_ids=recipients,
+                user_ids=unique_receipts,
                 data=msg_event.model_dump(mode="json"),
             )
 
@@ -126,6 +130,49 @@ class WSService:
                 "code": "unknown_chat",
                 "message": f"Чат '{chat_id}' не найден или у вас отсутствует к нему доступ",
             },
+        )
+
+    async def handle_messages_fetch(self, event: MessagesFetchEvent, user: WSUser):
+        chat = await self._store.chat.check_chat_access(
+            user_id=user.id, chat_id=event.chat_id
+        )
+        if not chat:
+            await self._send_access_error_msg(user_id=user.id, chat_id=event.chat_id)
+            return
+
+        rows = await self._store.chat_message.get_history(
+            chat_id=event.chat_id,
+            before_message_id=event.before_message_id,
+            limit=event.limit,
+        )
+
+        messages = [
+            MessageGetEvent(
+                event="message_new",
+                message_id=row["id"],
+                chat_id=row["chat_id"],
+                author=AuthorSchema.custom_validate(
+                    id=row["author_id"],
+                    name=row["author_name"] or "",
+                    role=row["author_role"],
+                    avatar=row["author_avatar"],
+                ),
+                text=row["text"],
+                media_url=row["media_url"],
+                created_at=row["created_at"],
+                read_at=row["read_at"],
+                reply_to=row["reply_to"],
+            )
+            for row in rows
+        ]
+
+        history_event = MessagesHistoryEvent(
+            chat_id=event.chat_id,
+            messages=messages,
+        )
+        await manager.send_to_user(
+            user_id=user.id,
+            data=history_event.model_dump(mode="json"),
         )
 
     async def handle_reading(self, event: TypingEvent, user: WSUser):

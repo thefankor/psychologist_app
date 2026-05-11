@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
+from src.config import settings
 from src.models.enums import ChatType
 
 
@@ -46,6 +47,9 @@ class MessageSchema(BaseModel):
         created_at: datetime,
         updated_at: datetime,
         read_at: datetime | None,
+        author_name: str | None = None,
+        author_avatar: str | None = None,
+        author_role: str = "CLIENT",
         reply_to: UUID | None = None,
         **kwargs,
     ):
@@ -54,9 +58,11 @@ class MessageSchema(BaseModel):
             chat_id=chat_id,
             author=AuthorSchema(
                 id=author_id,
-                name="Mock Test Name",
-                role="CLIENT",
-                avatar=None,
+                name=author_name or "",
+                role=author_role,
+                avatar=settings.STATIC_BASE_URL + author_avatar
+                if author_avatar
+                else None,
             ),
             text=text,
             media_url=media_url,
@@ -67,6 +73,15 @@ class MessageSchema(BaseModel):
         )
 
 
+class DirectChatCreatedSchema(BaseModel):
+    id: UUID
+    type: ChatType
+    image: str | None
+    name: str
+    description: str | None
+    rules: str | None
+
+
 class ChatSchema(BaseModel):
     id: UUID
     type: ChatType
@@ -74,3 +89,4 @@ class ChatSchema(BaseModel):
     name: str
     description: str | None
     rules: str | None
+    last_message: MessageSchema | None = None

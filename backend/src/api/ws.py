@@ -5,6 +5,7 @@ from pydantic import ValidationError
 from src.core.dependencies import get_ws_user
 from src.schemas.ws import (
     MessageSendEvent,
+    MessagesFetchEvent,
     ReadEvent,
     TypingEvent,
     WSUser,
@@ -57,9 +58,10 @@ async def websocket_endpoint(
                 await service.handle_message_send(event=event_obj, user=user)
             elif isinstance(event_obj, TypingEvent):
                 await service.handle_typing(event=event_obj, user=user)
-
             elif isinstance(event_obj, ReadEvent):
                 await service.handle_reading(event=event_obj, user=user)
+            elif isinstance(event_obj, MessagesFetchEvent):
+                await service.handle_messages_fetch(event=event_obj, user=user)
             else:
                 await manager.send_to_user(
                     user.id,
