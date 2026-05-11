@@ -43,25 +43,39 @@ class ChatsService:
         return {}
 
     async def get_or_create_direct_chat(
-        self, caller_id: int, other_user_id: int
+        self,
+        caller_id: int,
+        caller_type: str,
+        other_user_id: int,
     ) -> ChatSchema:
         if caller_id == other_user_id:
             raise HTTPException(
                 status_code=400, detail="Нельзя создать чат с самим собой"
             )
 
-        other_info = await self._store.client.get_name_and_avatar(user_id=other_user_id)
-        if other_info is not None:
-            display_name = other_info["name"] or f"Клиент {other_user_id}"
-            avatar = other_info["avatar"]
-        else:
-            other_info = await self._store.psychologist.get_name_and_avatar(
-                user_id=other_user_id
-            )
-            if other_info is None:
-                raise HTTPException(status_code=404, detail="User not found")
-            display_name = f"{other_info['first_name']} {other_info['last_name']}"
-            avatar = other_info["avatar"]
+        display_name = None
+        avatar = None
+
+        match caller_type:
+            case "CLIENT":
+                other_info = await self._store.psychologist.get_name_and_avatar(
+                    user_id=other_user_id
+                )
+                if other_info is not None:
+                    display_name = f"{other_info['first_name']} {other_info['last_name']}"
+                    avatar = other_info["avatar"]
+
+            case "PSYCHOLOGIST":
+                other_info = await self._store.client.get_name_and_avatar(
+                    user_id=other_user_id)
+                if other_info is not None:
+                    display_name = other_info["name"] or f"Клиент {other_user_id}"
+                    avatar = other_info["avatar"]
+            case _:
+                other_info = None
+
+        if other_info is None:
+            raise HTTPException(status_code=404, detail="User not found")
 
         has_appointment = await self._store.appointment_attendee.has_shared_appointment(
             user_id_a=caller_id, user_id_b=other_user_id
@@ -72,11 +86,6 @@ class ChatsService:
         chat = await self._store.chat.get_or_create_direct_chat(
             user_id_a=caller_id, user_id_b=other_user_id
         )
-        msgs_by_chat = await self._store.chat.get_last_messages_by_chat_ids(
-            chat_ids=[chat.id]
-        )
-        orm_msgs = msgs_by_chat.get(chat.id, [])
-        last_messages = [MessageSchema.custom_validate(**m) for m in orm_msgs]
 
         return ChatSchema(
             id=chat.id,
@@ -85,7 +94,6 @@ class ChatsService:
             image=settings.STATIC_BASE_URL + avatar if avatar else None,
             description=None,
             rules=None,
-            last_messages=last_messages,
         )
 
     async def get_all_chats(self, user_id: int) -> list[ChatSchema]:

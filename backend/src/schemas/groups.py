@@ -74,4 +74,3 @@ class ChatSchema(BaseModel):
     name: str
     description: str | None
     rules: str | None
-    last_messages: list[MessageSchema]
