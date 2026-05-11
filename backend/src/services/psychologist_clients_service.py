@@ -39,7 +39,7 @@ class PsychologistClientsService:
         self, psychologist_id: int, user_id: int
     ) -> ClientProfileForPsychologist:
         has_appointment = await self._store.appointment_attendee.has_shared_appointment(
-            psychologist_id=psychologist_id, client_id=user_id
+            user_id_a=psychologist_id, user_id_b=user_id
         )
         if not has_appointment:
             raise HTTPException(status_code=403, detail="Нет записей с этим клиентом")

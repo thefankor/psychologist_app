@@ -21,7 +21,7 @@ async def _check_shared_appointment(
     store: Store = Depends(get_store),
 ):
     has_appointment = await store.appointment_attendee.has_shared_appointment(
-        psychologist_id=current_psychologist, client_id=client_id
+        user_id_a=current_psychologist, user_id_b=client_id
     )
     if not has_appointment:
         raise HTTPException(status_code=403, detail="Нет записей с этим клиентом")
