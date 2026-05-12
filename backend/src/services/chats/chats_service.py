@@ -132,9 +132,7 @@ class ChatsService:
                 user_id=other_user_id
             )
             if psych_info is not None:
-                display_name = (
-                    f"{psych_info['first_name']} {psych_info['last_name']}"
-                )
+                display_name = f"{psych_info['first_name']} {psych_info['last_name']}"
                 avatar = psych_info["avatar"]
             else:
                 client_info = await self._store.client.get_name_and_avatar(
