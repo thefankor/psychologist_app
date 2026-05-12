@@ -48,7 +48,7 @@ interface Chat {
 	name: string;
 	description: string | null;
 	image: string | null;
-	last_messages: Message[];
+	last_message: Message | null;
 }
 
 const fixUrl = (url: string | null) =>
@@ -295,7 +295,9 @@ export default function Chats() {
 				setChats(data);
 				const initial: Record<string, Message[]> = {};
 				data.forEach((chat) => {
-					initial[chat.id] = sortAsc(chat.last_messages ?? []);
+					initial[chat.id] = chat.last_message
+						? [chat.last_message]
+						: [];
 				});
 				setMessages(initial);
 				if (openChatId && data.some((c) => c.id === openChatId)) {
@@ -520,12 +522,18 @@ export default function Chats() {
 		)
 			return;
 
-		const localId = typeof crypto.randomUUID === 'function'
-			? crypto.randomUUID()
-			: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-				const r = Math.random() * 16 | 0;
-				return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-			});
+		const localId =
+			typeof crypto.randomUUID === 'function'
+				? crypto.randomUUID()
+				: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+						/[xy]/g,
+						(c) => {
+							const r = (Math.random() * 16) | 0;
+							return (c === 'x' ? r : (r & 0x3) | 0x8).toString(
+								16,
+							);
+						},
+					);
 		setInput('');
 
 		const optimistic: Message = {
@@ -642,7 +650,7 @@ export default function Chats() {
 								<button
 									key={chat.id}
 									onClick={() => setSelectedId(chat.id)}
-									className={`w-full p-4 flex items-center gap-3 transition-colors text-left ${
+									className={`cursor-pointer w-full p-4 flex items-center gap-3 transition-colors text-left ${
 										isSelected
 											? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500'
 											: 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border-l-4 border-transparent'
