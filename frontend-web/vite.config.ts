@@ -37,6 +37,11 @@ export default defineConfig(({ mode }) => {
 					target: backendProxyUrl,
 					changeOrigin: true,
 				},
+				'/ws': {
+					target: backendProxyUrl.replace(/^http/, 'ws'),
+					ws: true,
+					changeOrigin: true,
+				},
 			},
 		},
 		assetsInclude: ['**/*.svg', '**/*.csv'],

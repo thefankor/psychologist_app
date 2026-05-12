@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import {
 	Search,
 	Star,
@@ -6,6 +7,7 @@ import {
 	Loader2,
 	CalendarPlus,
 	Heart,
+	MessageSquare,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
@@ -26,6 +28,7 @@ import {
 	getAllFavorites,
 	deleteFavoritePsychologist,
 } from '../../api/psychologist';
+import { createDirectChat } from '../../api/chats';
 
 const METHOD_LABELS: Record<string, string> = {
 	GESTALT: 'Гештальт',
@@ -185,6 +188,7 @@ function BookingDialog({
 
 export default function Psychologists() {
 	const token = localStorage.getItem('token') ?? '';
+	const navigate = useNavigate();
 	const [psychologists, setPsychologists] = useState<any[]>([]);
 	const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
 	const [loading, setLoading] = useState(true);
@@ -192,6 +196,7 @@ export default function Psychologists() {
 	const [search, setSearch] = useState('');
 	const [bookedId, setBookedId] = useState<number | null>(null);
 	const [togglingId, setTogglingId] = useState<number | null>(null);
+	const [startingChatId, setStartingChatId] = useState<number | null>(null);
 	const [confirmRemove, setConfirmRemove] = useState<{
 		id: number;
 		name: string;
@@ -246,6 +251,17 @@ export default function Psychologists() {
 		} catch {
 		} finally {
 			setTogglingId(null);
+		}
+	};
+
+	const handleStartChat = async (id: number) => {
+		setStartingChatId(id);
+		try {
+			const chat = await createDirectChat(token, id);
+			navigate('/chats', { state: { openChatId: chat.id } });
+		} catch {
+		} finally {
+			setStartingChatId(null);
 		}
 	};
 
@@ -337,24 +353,38 @@ export default function Psychologists() {
 												</p>
 											</div>
 										</div>
-										<button
-											onClick={() => handleHeartClick(p)}
-											disabled={isToggling}
-											className='cursor-pointer p-1.5 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 flex-shrink-0'
-											title={
-												isFav
-													? 'Убрать из избранного'
-													: 'Добавить в избранное'
-											}
-										>
-											<Heart
-												className={`w-5 h-5 transition-colors ${
+										<div className='flex items-center gap-1 flex-shrink-0'>
+											<button
+												onClick={() => handleStartChat(p.id)}
+												disabled={startingChatId === p.id}
+												className='cursor-pointer p-1.5 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50'
+												title='Написать сообщение'
+											>
+												{startingChatId === p.id ? (
+													<Loader2 className='w-5 h-5 animate-spin text-purple-500' />
+												) : (
+													<MessageSquare className='w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-purple-500 dark:hover:text-purple-400 transition-colors' />
+												)}
+											</button>
+											<button
+												onClick={() => handleHeartClick(p)}
+												disabled={isToggling}
+												className='cursor-pointer p-1.5 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50'
+												title={
 													isFav
-														? 'fill-red-500 text-red-500'
-														: 'text-gray-400 dark:text-gray-500'
-												}`}
-											/>
-										</button>
+														? 'Убрать из избранного'
+														: 'Добавить в избранное'
+												}
+											>
+												<Heart
+													className={`w-5 h-5 transition-colors ${
+														isFav
+															? 'fill-red-500 text-red-500'
+															: 'text-gray-400 dark:text-gray-500'
+													}`}
+												/>
+											</button>
+										</div>
 									</div>
 
 									{p.methods && p.methods.length > 0 && (

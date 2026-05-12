@@ -1,7 +1,9 @@
+import { apiFetch } from './client';
+
 export const sendUserData = async (token: string, data: any) => {
 	const url = '/user/survey/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -26,7 +28,7 @@ export const getUser = async (token: string) => {
 	console.log(token);
 	const url = '/user/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -49,7 +51,7 @@ export const updateUser = async (token: string, data: any) => {
 	const url = '/user/';
 
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json',
@@ -77,7 +79,7 @@ export const updateUserPhoto = async (token: string, file: File) => {
 		const formData = new FormData();
 		formData.append('image', file);
 
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${token}`,
@@ -100,7 +102,7 @@ export const updateUserPhoto = async (token: string, file: File) => {
 export const deleteUser = async (token: string) => {
 	const url = '/user/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',

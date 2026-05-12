@@ -28,6 +28,9 @@ import {
 	getPsychologistsForClient,
 } from '../../api/psychologist';
 
+const fixUrl = (url: string | null) =>
+	url ? url.replace('http://0.0.0.0:', 'http://localhost:') : null;
+
 const formatDate = (iso: string) =>
 	new Date(iso).toLocaleDateString('ru-RU', {
 		day: 'numeric',
@@ -223,9 +226,17 @@ function SessionCard({
 				<div className='flex items-start justify-between mb-4'>
 					<div className='flex items-center gap-3'>
 						<div
-							className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold ${avatarColor}`}
+							className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold overflow-hidden ${avatarColor}`}
 						>
-							{initials}
+							{fixUrl(otherParty?.avatar ?? null) ? (
+								<img
+									src={fixUrl(otherParty.avatar)!}
+									alt=''
+									className='w-full h-full object-cover'
+								/>
+							) : (
+								initials
+							)}
 						</div>
 						<div>
 							<h3 className='font-semibold text-gray-900 dark:text-white'>
