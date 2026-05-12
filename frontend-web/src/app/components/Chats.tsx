@@ -309,132 +309,151 @@ export default function Chats() {
 	}, []);
 
 	useEffect(() => {
-		const wsProtocol =
-			window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-		const ws = new WebSocket(
-			`${wsProtocol}//${window.location.host}/ws/chats?token=${token}`,
-		);
-		wsRef.current = ws;
+		let destroyed = false;
+		let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
-		ws.onopen = () => setWsReady(true);
-		ws.onclose = () => setWsReady(false);
+		const connect = () => {
+			const wsProtocol =
+				window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+			const ws = new WebSocket(
+				`${wsProtocol}//${window.location.host}/ws/chats?token=${encodeURIComponent(token)}`,
+			);
+			wsRef.current = ws;
 
-		ws.onmessage = (event) => {
-			const data = JSON.parse(event.data);
+			ws.onopen = () => setWsReady(true);
+			ws.onerror = () => console.error('[WS] connection error');
+			ws.onclose = () => {
+				setWsReady(false);
+				fetchedHistoryRef.current.clear();
+				if (!destroyed) {
+					reconnectTimer = setTimeout(connect, 3000);
+				}
+			};
 
-			if (data.event === 'messages_history') {
-				const chatId: string = data.chat_id;
-				const incoming: Message[] = sortAsc(data.messages ?? []);
-				setLoadingHistory(false);
+			ws.onmessage = (event) => {
+				const data = JSON.parse(event.data);
+				console.log('[WS] received:', data.event, data);
 
-				setMessages((prev) => {
-					if (isLoadMoreRef.current) {
-						isLoadMoreRef.current = false;
-						const existing = prev[chatId] ?? [];
+				if (data.event === 'messages_history') {
+					const chatId: string = data.chat_id;
+					const incoming: Message[] = sortAsc(data.messages ?? []);
+					setLoadingHistory(false);
+
+					setMessages((prev) => {
+						if (isLoadMoreRef.current) {
+							isLoadMoreRef.current = false;
+							const existing = prev[chatId] ?? [];
+							return {
+								...prev,
+								[chatId]: [...incoming, ...existing],
+							};
+						}
+						fetchedHistoryRef.current.add(chatId);
+						return { ...prev, [chatId]: incoming };
+					});
+
+					setHasMore((prev) => ({
+						...prev,
+						[chatId]: incoming.length >= 50,
+					}));
+
+					if (!isLoadMoreRef.current) {
+						setTimeout(() => scrollToBottom('instant'), 0);
+					}
+				}
+
+				if (data.event === 'message_new') {
+					setMessages((prev) => {
+						const chatMsgs = prev[data.chat_id] ?? [];
+						if (chatMsgs.some((m) => m.id === data.message_id))
+							return prev;
+						const msg: Message = {
+							id: data.message_id,
+							chat_id: data.chat_id,
+							author: data.author,
+							text: data.text,
+							media_url: data.media_url,
+							created_at: data.created_at,
+							read_at: data.read_at ?? null,
+							reply_to: data.reply_to ?? null,
+						};
 						return {
 							...prev,
-							[chatId]: [...incoming, ...existing],
+							[data.chat_id]: [...chatMsgs, msg],
 						};
-					}
-					fetchedHistoryRef.current.add(chatId);
-					return { ...prev, [chatId]: incoming };
-				});
-
-				setHasMore((prev) => ({
-					...prev,
-					[chatId]: incoming.length >= 50,
-				}));
-
-				if (!isLoadMoreRef.current) {
-					setTimeout(() => scrollToBottom('instant'), 0);
-				}
-			}
-
-			if (data.event === 'message_new') {
-				setMessages((prev) => {
-					const chatMsgs = prev[data.chat_id] ?? [];
-					if (chatMsgs.some((m) => m.id === data.message_id))
-						return prev;
-					const msg: Message = {
-						id: data.message_id,
-						chat_id: data.chat_id,
-						author: data.author,
-						text: data.text,
-						media_url: data.media_url,
-						created_at: data.created_at,
-						read_at: data.read_at ?? null,
-						reply_to: data.reply_to ?? null,
-					};
-					return {
-						...prev,
-						[data.chat_id]: [...chatMsgs, msg],
-					};
-				});
-				scrollToBottom();
-			}
-
-			if (data.event === 'message_delivered') {
-				setMessages((prev) => {
-					const chatMsgs = prev[data.chat_id] ?? [];
-					const withoutLocal = chatMsgs.filter(
-						(m) => m._localId !== data.local_message_id,
-					);
-					if (withoutLocal.some((m) => m.id === data.message_id))
-						return { ...prev, [data.chat_id]: withoutLocal };
-					const msg: Message = {
-						id: data.message_id,
-						chat_id: data.chat_id,
-						author: data.author,
-						text: data.text,
-						media_url: data.media_url,
-						created_at: data.created_at,
-						read_at: data.read_at ?? null,
-						reply_to: data.reply_to ?? null,
-					};
-					return {
-						...prev,
-						[data.chat_id]: [...withoutLocal, msg],
-					};
-				});
-				scrollToBottom();
-			}
-
-			if (data.event === 'typing_indicator') {
-				const chatId = data.chat_id;
-				clearTimeout(typingTimers.current[chatId]);
-				setTypingMap((prev) => ({
-					...prev,
-					[chatId]: data.author.name,
-				}));
-				typingTimers.current[chatId] = setTimeout(() => {
-					setTypingMap((prev) => {
-						const next = { ...prev };
-						delete next[chatId];
-						return next;
 					});
-				}, 3000);
-			}
+					scrollToBottom();
+				}
 
-			if (data.event === 'message_read') {
-				setMessages((prev) => {
-					const chatMsgs = prev[data.chat_id];
-					if (!chatMsgs) return prev;
-					const pivot = chatMsgs.find(
-						(m) => m.id === data.before_message_id,
-					);
-					if (!pivot) return prev;
-					const pivotTime = new Date(pivot.created_at).getTime();
-					const updated = chatMsgs.map((m) =>
-						new Date(m.created_at).getTime() <= pivotTime
-							? { ...m, read_at: new Date().toISOString() }
-							: m,
-					);
-					return { ...prev, [data.chat_id]: updated };
-				});
-			}
+				if (data.event === 'message_delivered') {
+					setMessages((prev) => {
+						const chatMsgs = prev[data.chat_id] ?? [];
+						const withoutLocal = chatMsgs.filter(
+							(m) => m._localId !== data.local_message_id,
+						);
+						if (withoutLocal.some((m) => m.id === data.message_id))
+							return { ...prev, [data.chat_id]: withoutLocal };
+						const msg: Message = {
+							id: data.message_id,
+							chat_id: data.chat_id,
+							author: data.author,
+							text: data.text,
+							media_url: data.media_url,
+							created_at: data.created_at,
+							read_at: data.read_at ?? null,
+							reply_to: data.reply_to ?? null,
+						};
+						return {
+							...prev,
+							[data.chat_id]: [...withoutLocal, msg],
+						};
+					});
+					scrollToBottom();
+				}
+
+				if (data.event === 'typing_indicator') {
+					const chatId = data.chat_id;
+					clearTimeout(typingTimers.current[chatId]);
+					setTypingMap((prev) => ({
+						...prev,
+						[chatId]: data.author.name,
+					}));
+					typingTimers.current[chatId] = setTimeout(() => {
+						setTypingMap((prev) => {
+							const next = { ...prev };
+							delete next[chatId];
+							return next;
+						});
+					}, 3000);
+				}
+
+				if (data.event === 'message_read') {
+					setMessages((prev) => {
+						const chatMsgs = prev[data.chat_id];
+						if (!chatMsgs) return prev;
+						const pivot = chatMsgs.find(
+							(m) => m.id === data.before_message_id,
+						);
+						if (!pivot) return prev;
+						const pivotTime = new Date(pivot.created_at).getTime();
+						const updated = chatMsgs.map((m) =>
+							new Date(m.created_at).getTime() <= pivotTime
+								? { ...m, read_at: new Date().toISOString() }
+								: m,
+						);
+						return { ...prev, [data.chat_id]: updated };
+					});
+				}
+			};
 		};
 
-		return () => ws.close();
+		connect();
+
+		return () => {
+			destroyed = true;
+			if (reconnectTimer) clearTimeout(reconnectTimer);
+			wsRef.current?.close();
+		};
 	}, [token, scrollToBottom]);
 
 	useEffect(() => {
@@ -503,7 +522,10 @@ export default function Chats() {
 
 		const localId = typeof crypto.randomUUID === 'function'
 			? crypto.randomUUID()
-			: `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+			: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+				const r = Math.random() * 16 | 0;
+				return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+			});
 		setInput('');
 
 		const optimistic: Message = {
@@ -524,14 +546,14 @@ export default function Chats() {
 		}));
 		scrollToBottom();
 
-		wsRef.current.send(
-			JSON.stringify({
-				event: 'message_send',
-				chat_id: selectedId,
-				local_message_id: localId,
-				text,
-			}),
-		);
+		const payload = JSON.stringify({
+			event: 'message_send',
+			chat_id: selectedId,
+			local_message_id: localId,
+			text,
+		});
+		console.log('[WS] sending:', payload);
+		wsRef.current.send(payload);
 	}, [input, selectedId, myUserId, scrollToBottom]);
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
