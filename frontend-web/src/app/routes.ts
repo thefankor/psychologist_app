@@ -13,11 +13,13 @@ import Profile from './components/Profile';
 import Psychologists from './components/Psychologists';
 import Favorites from './components/Favorites';
 import { PsychologistRoute, ClientRoute } from './components/RoleRoute';
+import RouteError from './components/RouteError';
 
 export const router = createBrowserRouter([
 	{
 		path: '/',
 		Component: ProtectedRoute,
+		ErrorBoundary: RouteError,
 		children: [
 			{
 				Component: Layout,
@@ -49,5 +51,6 @@ export const router = createBrowserRouter([
 	{
 		path: '/auth',
 		Component: Auth,
+		ErrorBoundary: RouteError,
 	},
 ]);

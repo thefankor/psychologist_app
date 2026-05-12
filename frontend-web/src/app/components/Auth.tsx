@@ -312,7 +312,14 @@ export default function Auth() {
 					)}
 
 					{step === 'email' && (
-						<>
+						<form
+							autoComplete='off'
+							onSubmit={(e) => {
+								e.preventDefault();
+								handleSendCode();
+							}}
+							className='space-y-4'
+						>
 							<div className='space-y-2'>
 								<Label
 									htmlFor='email'
@@ -324,17 +331,15 @@ export default function Auth() {
 									<Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
 									<Input
 										id='email'
-										type='email'
+										type='text'
+										inputMode='email'
 										placeholder='example@mail.ru'
 										value={email}
+										autoComplete='off'
 										onChange={(e) => {
 											setEmail(e.target.value);
 											setEmailError('');
 										}}
-										onKeyDown={(e) =>
-											e.key === 'Enter' &&
-											handleSendCode()
-										}
 										className={`pl-10 ${inputClass(emailError)}`}
 									/>
 								</div>
@@ -345,7 +350,7 @@ export default function Auth() {
 								)}
 							</div>
 							<Button
-								onClick={handleSendCode}
+								type='submit'
 								disabled={loading}
 								className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'
 							>
@@ -355,6 +360,7 @@ export default function Auth() {
 								Отправить код
 							</Button>
 							<Button
+								type='button'
 								variant='ghost'
 								onClick={() => setStep('role')}
 								className='w-full dark:text-gray-300 dark:hover:text-white'
@@ -362,7 +368,7 @@ export default function Auth() {
 								<ArrowLeft className='w-4 h-4 mr-2' />
 								Назад
 							</Button>
-						</>
+						</form>
 					)}
 
 					{step === 'code' && (
