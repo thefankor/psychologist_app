@@ -128,21 +128,21 @@ class ChatsService:
 
         for c in directs:
             other_user_id = c["other_user_id"]
-            other_info = await self._store.client.get_name_and_avatar(
+            psych_info = await self._store.psychologist.get_name_and_avatar(
                 user_id=other_user_id
             )
-            if other_info is not None:
-                display_name = other_info["name"] or f"Клиент {str(other_user_id)}"
-                avatar = other_info["avatar"]
+            if psych_info is not None:
+                display_name = (
+                    f"{psych_info['first_name']} {psych_info['last_name']}"
+                )
+                avatar = psych_info["avatar"]
             else:
-                other_info = await self._store.psychologist.get_name_and_avatar(
+                client_info = await self._store.client.get_name_and_avatar(
                     user_id=other_user_id
                 )
-                if other_info is not None:
-                    display_name = (
-                        f"{other_info['first_name']} {other_info['last_name']}"
-                    )
-                    avatar = other_info["avatar"]
+                if client_info is not None:
+                    display_name = client_info["name"] or f"Клиент {str(other_user_id)}"
+                    avatar = client_info["avatar"]
                 else:
                     display_name = "Пользователь"
                     avatar = None

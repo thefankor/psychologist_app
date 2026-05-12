@@ -1,7 +1,9 @@
+import { apiFetch } from './client';
+
 export const getPsyshologistProfile = async (token: string) => {
 	const url = '/psychologists/profile/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -22,7 +24,7 @@ export const getPsyshologistProfile = async (token: string) => {
 export const updatePsyshologistProfile = async (token: string, form: any) => {
 	const url = '/psychologists/profile/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json',
@@ -49,7 +51,7 @@ export const updatePsychologistPhoto = async (token: string, file: File) => {
 		const formData = new FormData();
 		formData.append('image', file);
 
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${token}`,
@@ -76,7 +78,7 @@ export const createAppointment = async (
 ) => {
 	const url = '/user/appointments/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -103,7 +105,7 @@ export const getPsyshologistAppointments = async (
 	if (isUpcoming !== undefined) params.set('is_upcoming', String(isUpcoming));
 	const url = `/psychologists/appointments/?${params}`;
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -124,7 +126,7 @@ export const getPsyshologistAppointments = async (
 export const getPsychologistsForClient = async (token: string) => {
 	const url = '/user/psychologists/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -144,7 +146,7 @@ export const getPsychologistsForClient = async (token: string) => {
 export const getAllAppointments = async (token: string) => {
 	const url = '/user/appointments/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -165,7 +167,7 @@ export const getAllAppointments = async (token: string) => {
 export const addToFavorite = async (token: string, id: number) => {
 	const url = '/user/psychologists/favorites/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -190,7 +192,7 @@ export const addToFavorite = async (token: string, id: number) => {
 export const getAllFavorites = async (token: string) => {
 	const url = '/user/psychologists/favorites/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -212,7 +214,7 @@ export const getAllFavorites = async (token: string) => {
 export const deleteFavoritePsychologist = async (token: string, id: number) => {
 	const url = `/user/psychologists/favorites/${id}/`;
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
@@ -236,7 +238,7 @@ export const deleteFavoritePsychologist = async (token: string, id: number) => {
 export const getWorkingHours = async (token: string) => {
 	const url = '/psychologists/working-hours/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -256,7 +258,7 @@ export const getWorkingHours = async (token: string) => {
 export const updateWorkingHours = async (token: string, schedule: any[]) => {
 	const url = '/psychologists/working-hours/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
@@ -278,7 +280,7 @@ export const updateWorkingHours = async (token: string, schedule: any[]) => {
 export const getClientsForPsychologist = async (token: string) => {
 	const url = '/psychologists/clients/';
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -308,7 +310,7 @@ export const getPsychologistAppointmentsForClient = async (
 	if (isUpcoming !== undefined) params.set('is_upcoming', String(isUpcoming));
 	const url = `/psychologists/appointments/?${params}`;
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -331,7 +333,7 @@ export const getClientForPsychologistByID = async (
 ) => {
 	const url = `/psychologists/clients/${user_id}`;
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -351,7 +353,7 @@ export const getClientForPsychologistByID = async (
 export const getClientNotes = async (token: string, client_id: number) => {
 	const url = `/psychologists/clients/${client_id}/notes`;
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
@@ -375,7 +377,7 @@ export const createClientNote = async (
 ) => {
 	const url = `/psychologists/clients/${client_id}/notes`;
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -401,7 +403,7 @@ export const deleteClientNote = async (
 ) => {
 	const url = `/psychologists/clients/${client_id}/notes/${note_id}`;
 	try {
-		const res = await fetch(url, {
+		const res = await apiFetch(url, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
-import { Search, Loader2, Calendar, Video } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
+import { Search, Loader2, Calendar, Video, MessageSquare } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
 import { getClientsForPsychologist } from '../../api/psychologist';
+import { createDirectChat } from '../../api/chats';
 
 const getInitials = (name: string | null) =>
 	name
@@ -21,10 +22,23 @@ const fixUrl = (url: string | null) =>
 
 export default function Clients() {
 	const token = localStorage.getItem('token') ?? '';
+	const navigate = useNavigate();
 	const [clients, setClients] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [search, setSearch] = useState('');
+	const [startingChatId, setStartingChatId] = useState<number | null>(null);
+
+	const handleStartChat = async (clientId: number) => {
+		setStartingChatId(clientId);
+		try {
+			const chat = await createDirectChat(token, clientId);
+			navigate('/chats', { state: { openChatId: chat.id } });
+		} catch {
+		} finally {
+			setStartingChatId(null);
+		}
+	};
 
 	const fetchClients = async () => {
 		setLoading(true);
@@ -148,14 +162,28 @@ export default function Clients() {
 									</div>
 								</div>
 
-								<Link to={`/clients/${c.client_id}`}>
-									<Button
-										variant='outline'
-										className='w-full dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600'
+								<div className='flex gap-2'>
+									<Link to={`/clients/${c.client_id}`} className='flex-1'>
+										<Button
+											variant='outline'
+											className='w-full dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600'
+										>
+											Открыть профиль
+										</Button>
+									</Link>
+									<button
+										onClick={() => handleStartChat(c.client_id)}
+										disabled={startingChatId === c.client_id}
+										className='group cursor-pointer p-2 rounded-md border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors flex-shrink-0'
+										title='Написать сообщение'
 									>
-										Открыть профиль
-									</Button>
-								</Link>
+										{startingChatId === c.client_id ? (
+											<Loader2 className='w-5 h-5 animate-spin text-blue-500' />
+										) : (
+											<MessageSquare className='w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors' />
+										)}
+									</button>
+								</div>
 							</CardContent>
 						</Card>
 					))}
