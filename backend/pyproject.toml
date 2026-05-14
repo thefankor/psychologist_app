@@ -1,0 +1,14 @@
+# Ruff configuration for the backend package.
+#
+# The codebase uses a `src/`-layout Python project rooted at this directory.
+# Without explicit configuration, different ruff versions disagree on whether
+# `src.*` and `tests.*` are first-party (project) or third-party imports,
+# which produces inconsistent I001 (isort) results between local dev and CI.
+#
+# This file fixes that by declaring the project's first-party packages.
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint.isort]
+known-first-party = ["src", "tests", "main"]
