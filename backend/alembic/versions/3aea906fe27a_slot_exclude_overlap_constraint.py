@@ -13,6 +13,7 @@ This is the canonical correctness layer for slot overlap; application-level
 checks (the pre-filter in SlotGenerationService) are performance optimisations
 on top of it.
 """
+
 from typing import Sequence, Union
 
 from alembic import op

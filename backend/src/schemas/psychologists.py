@@ -1,6 +1,7 @@
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, ConfigDict, field_validator
+
 from src.models import UserGender
 
 

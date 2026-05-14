@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
+
 from src.models.enums.appointments import AppointmentRole
 
 

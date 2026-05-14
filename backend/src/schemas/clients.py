@@ -1,6 +1,7 @@
 from datetime import date
 
 from pydantic import BaseModel
+
 from src.models.enums import (
     ClientSessionFormat,
     UserGender,

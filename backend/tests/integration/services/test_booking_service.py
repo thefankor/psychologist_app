@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 import pytest_asyncio
+
 from src.core.exceptions import (
     AppointmentAlreadyCancelledError,
     NotAppointmentAttendeeError,
@@ -62,52 +63,36 @@ async def test_book_free_slot_creates_appointment_and_marks_booked(
 ):
     _, client_id = psy_and_client
     service = BookingService(store=store)
-    appt = await service.book_slot(
-        client_id=client_id, slot_id=free_slot.id
-    )
+    appt = await service.book_slot(client_id=client_id, slot_id=free_slot.id)
     refreshed = await store.session.get(AvailabilitySlot, free_slot.id)
     assert refreshed.status == SlotStatus.BOOKED
     assert appt.slot_id == free_slot.id
 
-    attendees = await store.appointment_attendee.find_all(
-        appointment_id=appt.id
-    )
+    attendees = await store.appointment_attendee.find_all(appointment_id=appt.id)
     roles = {a.role for a in attendees}
     assert roles == {AppointmentRole.CLIENT, AppointmentRole.PSYCHOLOGIST}
 
 
 async def test_book_non_free_slot_raises(store, psy_and_client, free_slot):
     _, client_id = psy_and_client
-    await store.availability_slot.set_status(
-        free_slot.id, SlotStatus.CANCELLED
-    )
+    await store.availability_slot.set_status(free_slot.id, SlotStatus.CANCELLED)
     service = BookingService(store=store)
     with pytest.raises(SlotNotAvailableError):
-        await service.book_slot(
-            client_id=client_id, slot_id=free_slot.id
-        )
+        await service.book_slot(client_id=client_id, slot_id=free_slot.id)
 
 
 async def test_book_missing_slot_raises(store, psy_and_client):
     _, client_id = psy_and_client
     service = BookingService(store=store)
     with pytest.raises(SlotNotFoundError):
-        await service.book_slot(
-            client_id=client_id, slot_id=uuid.uuid4()
-        )
+        await service.book_slot(client_id=client_id, slot_id=uuid.uuid4())
 
 
-async def test_client_cancel_returns_slot_to_free(
-    store, psy_and_client, free_slot
-):
+async def test_client_cancel_returns_slot_to_free(store, psy_and_client, free_slot):
     _, client_id = psy_and_client
     service = BookingService(store=store)
-    appt = await service.book_slot(
-        client_id=client_id, slot_id=free_slot.id
-    )
-    await service.cancel_by_client(
-        client_id=client_id, appointment_id=appt.id
-    )
+    appt = await service.book_slot(client_id=client_id, slot_id=free_slot.id)
+    await service.cancel_by_client(client_id=client_id, appointment_id=appt.id)
     refreshed = await store.session.get(AvailabilitySlot, free_slot.id)
     assert refreshed.status == SlotStatus.FREE
     refreshed_appt = await store.session.get(Appointment, appt.id)
@@ -115,9 +100,7 @@ async def test_client_cancel_returns_slot_to_free(
     assert refreshed_appt.cancelled_at is not None
 
 
-async def test_psy_cancel_marks_slot_cancelled(
-    store, psy_and_client, free_slot
-):
+async def test_psy_cancel_marks_slot_cancelled(store, psy_and_client, free_slot):
     psy_id, client_id = psy_and_client
     service = BookingService(store=store)
     await service.book_slot(client_id=client_id, slot_id=free_slot.id)
@@ -128,20 +111,14 @@ async def test_psy_cancel_marks_slot_cancelled(
     assert refreshed.status == SlotStatus.CANCELLED
 
 
-async def test_psy_cancel_not_booked_raises(
-    store, psy_and_client, free_slot
-):
+async def test_psy_cancel_not_booked_raises(store, psy_and_client, free_slot):
     psy_id, _ = psy_and_client
     service = BookingService(store=store)
     with pytest.raises(SlotNotBookedError):
-        await service.cancel_by_psy(
-            psychologist_id=psy_id, slot_id=free_slot.id
-        )
+        await service.cancel_by_psy(psychologist_id=psy_id, slot_id=free_slot.id)
 
 
-async def test_psy_cancel_not_owner_raises(
-    store, psy_and_client, free_slot
-):
+async def test_psy_cancel_not_owner_raises(store, psy_and_client, free_slot):
     _, client_id = psy_and_client
     other_psy = await store.user.add(
         return_model=True,
@@ -151,31 +128,19 @@ async def test_psy_cancel_not_owner_raises(
     service = BookingService(store=store)
     await service.book_slot(client_id=client_id, slot_id=free_slot.id)
     with pytest.raises(NotSlotOwnerError):
-        await service.cancel_by_psy(
-            psychologist_id=other_psy.id, slot_id=free_slot.id
-        )
+        await service.cancel_by_psy(psychologist_id=other_psy.id, slot_id=free_slot.id)
 
 
-async def test_cancel_already_cancelled_raises(
-    store, psy_and_client, free_slot
-):
+async def test_cancel_already_cancelled_raises(store, psy_and_client, free_slot):
     _, client_id = psy_and_client
     service = BookingService(store=store)
-    appt = await service.book_slot(
-        client_id=client_id, slot_id=free_slot.id
-    )
-    await service.cancel_by_client(
-        client_id=client_id, appointment_id=appt.id
-    )
+    appt = await service.book_slot(client_id=client_id, slot_id=free_slot.id)
+    await service.cancel_by_client(client_id=client_id, appointment_id=appt.id)
     with pytest.raises(AppointmentAlreadyCancelledError):
-        await service.cancel_by_client(
-            client_id=client_id, appointment_id=appt.id
-        )
+        await service.cancel_by_client(client_id=client_id, appointment_id=appt.id)
 
 
-async def test_cancel_by_non_attendee_raises(
-    store, psy_and_client, free_slot
-):
+async def test_cancel_by_non_attendee_raises(store, psy_and_client, free_slot):
     _, client_id = psy_and_client
     other = await store.user.add(
         return_model=True,
@@ -183,18 +148,12 @@ async def test_cancel_by_non_attendee_raises(
         roles=[UserRole.CLIENT.value],
     )
     service = BookingService(store=store)
-    appt = await service.book_slot(
-        client_id=client_id, slot_id=free_slot.id
-    )
+    appt = await service.book_slot(client_id=client_id, slot_id=free_slot.id)
     with pytest.raises(NotAppointmentAttendeeError):
-        await service.cancel_by_client(
-            client_id=other.id, appointment_id=appt.id
-        )
+        await service.cancel_by_client(client_id=other.id, appointment_id=appt.id)
 
 
-async def test_second_book_same_slot_raises(
-    store, psy_and_client, free_slot
-):
+async def test_second_book_same_slot_raises(store, psy_and_client, free_slot):
     _, client_id = psy_and_client
     second_client = await store.user.add(
         return_model=True,
@@ -204,6 +163,4 @@ async def test_second_book_same_slot_raises(
     service = BookingService(store=store)
     await service.book_slot(client_id=client_id, slot_id=free_slot.id)
     with pytest.raises(SlotNotAvailableError):
-        await service.book_slot(
-            client_id=second_client.id, slot_id=free_slot.id
-        )
+        await service.book_slot(client_id=second_client.id, slot_id=free_slot.id)

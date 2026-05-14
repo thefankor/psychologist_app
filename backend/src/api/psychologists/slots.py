@@ -2,6 +2,7 @@ from datetime import date, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
+
 from src.core.dependencies import get_current_psychologist_id, get_store
 from src.crud import Store
 from src.models.enums.slots import SlotStatus
@@ -85,9 +86,7 @@ async def generate_slots(
 @router.patch(
     "/{slot_id}",
     summary="Изменить время FREE-слота",
-    description=(
-        "Меняет starts_at у FREE-слота, сохраняя его исходную длительность."
-    ),
+    description=("Меняет starts_at у FREE-слота, сохраняя его исходную длительность."),
 )
 async def patch_slot(
     slot_id: UUID,

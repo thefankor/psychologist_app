@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from src.api.admin.auth import router as auth_router
 from src.api.admin.groups import router as groups_router
 from src.api.admin.users import router as users_router

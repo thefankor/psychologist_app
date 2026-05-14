@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import pytest
 from fastapi import HTTPException
+
 from src.core.dependencies import get_current_user_id
 from src.services.auth import AuthService
 
@@ -23,6 +24,7 @@ class TestAuthDependencies:
     async def test_get_current_user_no_credentials(self):
         """Тест извлечения пользователя без учетных данных"""
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.crud import Store
 
@@ -44,6 +46,7 @@ class TestAuthDependencies:
     async def test_get_current_user_invalid_token(self):
         """Тест извлечения пользователя с невалидным токеном"""
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.crud import Store
 
@@ -67,6 +70,7 @@ class TestAuthDependencies:
     async def test_get_current_user_wrong_token_type(self):
         """Тест извлечения пользователя с токеном неправильного типа"""
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.crud import Store
 
@@ -92,6 +96,7 @@ class TestAuthDependencies:
     async def test_get_current_user_not_found(self):
         """Тест извлечения несуществующего пользователя"""
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.crud import Store
 
@@ -123,6 +128,7 @@ class TestAuthDependencies:
         from datetime import timedelta
 
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.core.auth.token import TokenService
         from src.crud import Store
@@ -157,6 +163,7 @@ class TestAuthDependencies:
         from datetime import timedelta
 
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.core.auth.token import TokenService
         from src.crud import Store
@@ -193,6 +200,7 @@ class TestAuthDependencies:
         from datetime import timedelta
 
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.core.auth.token import TokenService
         from src.crud import Store

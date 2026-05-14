@@ -1,4 +1,5 @@
 from sqlalchemy import delete, select
+
 from src.core.wrapper import handle_db_errors
 from src.crud.impl.base import BaseDAO
 from src.models.psychologist_schedule import PsychologistWorkingHours
@@ -40,7 +41,5 @@ class WorkingHoursDAO(BaseDAO):
     async def delete_all_for_psy(self, psychologist_id: int) -> None:
         """Удаляет все диапазоны шаблона психолога (для атомарной замены)."""
         await self.session.execute(
-            delete(self.model).where(
-                self.model.psychologist_id == psychologist_id
-            )
+            delete(self.model).where(self.model.psychologist_id == psychologist_id)
         )

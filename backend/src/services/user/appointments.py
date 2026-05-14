@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import Depends
+
 from src.config import settings
 from src.core.dependencies import get_store
 from src.crud import Store
@@ -23,17 +24,13 @@ class AppointmentService:
     ):
         self._store = store
 
-    async def book_slot(
-        self, client_id: int, slot_id: UUID
-    ) -> AppointmentSchema:
+    async def book_slot(self, client_id: int, slot_id: UUID) -> AppointmentSchema:
         """Клиент бронирует слот. Возвращает созданную запись."""
         booking = BookingService(store=self._store)
         appt = await booking.book_slot(client_id=client_id, slot_id=slot_id)
         # Загружаем слот явно, чтобы избежать lazy-load на relationship
         # (async-сессия не делает синхронный IO для отложенных связей).
-        slot = await self._store.availability_slot.find_by_id(
-            model_id=appt.slot_id
-        )
+        slot = await self._store.availability_slot.find_by_id(model_id=appt.slot_id)
         return AppointmentSchema(
             id=appt.id,
             slot_id=appt.slot_id,
@@ -54,9 +51,7 @@ class AppointmentService:
             ],
         )
 
-    async def cancel_appointment(
-        self, client_id: int, appointment_id: UUID
-    ) -> None:
+    async def cancel_appointment(self, client_id: int, appointment_id: UUID) -> None:
         """Клиент отменяет свою запись."""
         booking = BookingService(store=self._store)
         await booking.cancel_by_client(

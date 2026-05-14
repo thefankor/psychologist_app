@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+
 from src.core.dependencies import get_current_admin_id
 from src.schemas import (
     EmptyModel,

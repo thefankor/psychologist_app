@@ -1,5 +1,6 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.core.db.database import get_async_db
 from src.crud import Store
 from src.services.auth import AuthService

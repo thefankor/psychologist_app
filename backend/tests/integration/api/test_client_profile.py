@@ -1,7 +1,7 @@
 import pytest
+
 from src.crud import Store
 from src.services.auth import AuthService
-
 from tests.utils import get_random_user_email
 
 

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import TIMESTAMP, Enum, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
+
 from src.models import BaseWithTimestamps
 from src.models.enums import ChatType
 

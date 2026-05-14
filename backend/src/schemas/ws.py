@@ -3,6 +3,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, TypeAdapter
+
 from src.config import settings
 
 

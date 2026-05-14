@@ -2,6 +2,7 @@ import json
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from pydantic import ValidationError
+
 from src.core.dependencies import get_ws_user
 from src.schemas.ws import (
     MessageSendEvent,

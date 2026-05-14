@@ -6,6 +6,7 @@ from sqlalchemy import TIMESTAMP, Boolean, Enum, ForeignKey, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from src.models.base import BaseWithTimestamps
 from src.models.enums.appointments import AppointmentRole
 
@@ -25,9 +26,7 @@ class Appointment(BaseWithTimestamps):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     slot_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey(
-            "psychologist_availability_slots.id", ondelete="RESTRICT"
-        ),
+        ForeignKey("psychologist_availability_slots.id", ondelete="RESTRICT"),
         nullable=False,
     )
     is_group: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -37,9 +36,7 @@ class Appointment(BaseWithTimestamps):
     cancelled_by: Mapped[Optional[AppointmentRole]] = mapped_column(
         Enum(AppointmentRole), nullable=True
     )
-    cancellation_reason: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True
-    )
+    cancellation_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     slot: Mapped["AvailabilitySlot"] = relationship(
         "AvailabilitySlot", back_populates="appointment"

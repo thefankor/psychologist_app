@@ -5,12 +5,14 @@ Revises: 640586435caf
 Create Date: 2026-05-14 12:38:10.627528
 
 """
+
 import uuid
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "1e151e2cfe29"
@@ -84,13 +86,9 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.CheckConstraint("ends_at > starts_at", name="ck_slot_time_order"),
-        sa.ForeignKeyConstraint(
-            ["psychologist_id"], ["users.id"], ondelete="CASCADE"
-        ),
+        sa.ForeignKeyConstraint(["psychologist_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint(
-            "psychologist_id", "starts_at", name="uq_slot_psy_starts"
-        ),
+        sa.UniqueConstraint("psychologist_id", "starts_at", name="uq_slot_psy_starts"),
     )
     op.create_index(
         "ix_slots_psy_status_starts",
@@ -164,9 +162,7 @@ def upgrade() -> None:
             },
         )
         conn.execute(
-            sa.text(
-                "UPDATE appointments SET slot_id = :sid WHERE id = :aid"
-            ),
+            sa.text("UPDATE appointments SET slot_id = :sid WHERE id = :aid"),
             {"sid": new_slot_id, "aid": row.appointment_id},
         )
 
@@ -246,17 +242,13 @@ def downgrade() -> None:
     op.alter_column("appointments", "start_at", nullable=False)
     op.alter_column("appointments", "ends_at", nullable=False)
 
-    op.drop_constraint(
-        "fk_appointment_slot", "appointments", type_="foreignkey"
-    )
+    op.drop_constraint("fk_appointment_slot", "appointments", type_="foreignkey")
     op.drop_column("appointments", "cancellation_reason")
     op.drop_column("appointments", "cancelled_by")
     op.drop_column("appointments", "cancelled_at")
     op.drop_column("appointments", "slot_id")
 
-    op.drop_index(
-        "ix_slots_starts", table_name="psychologist_availability_slots"
-    )
+    op.drop_index("ix_slots_starts", table_name="psychologist_availability_slots")
     op.drop_index(
         "ix_slots_psy_status_starts",
         table_name="psychologist_availability_slots",

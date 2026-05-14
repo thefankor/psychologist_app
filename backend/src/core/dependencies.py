@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 from fastapi import Depends, HTTPException, Query, WebSocket, WebSocketException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.core.auth import TokenService
 from src.core.db.database import get_async_db
 from src.crud import Store

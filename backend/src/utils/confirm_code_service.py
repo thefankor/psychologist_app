@@ -1,4 +1,5 @@
 from fastapi import Depends
+
 from src.core.db.redis_cache import RedisCache, get_cache
 
 

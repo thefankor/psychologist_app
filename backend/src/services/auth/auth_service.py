@@ -3,6 +3,7 @@ from datetime import timedelta
 from typing import Literal
 
 from fastapi import Depends, HTTPException, status
+
 from src.config import settings
 from src.core.auth import HashService, TokenService
 from src.core.dependencies import get_store

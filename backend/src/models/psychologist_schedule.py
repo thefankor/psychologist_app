@@ -2,6 +2,7 @@ from datetime import time
 
 from sqlalchemy import Boolean, Enum, ForeignKey, Time
 from sqlalchemy.orm import Mapped, mapped_column
+
 from src.models.base import BaseWithTimestamps
 from src.models.enums.schedules import DayOfWeek
 

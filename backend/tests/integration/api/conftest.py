@@ -4,10 +4,12 @@ Provides authed_psy/authed_client TestClient fixtures that bypass the full
 OTP auth flow via FastAPI dependency overrides. Tests focus on slot/booking
 logic, not auth.
 """
+
 import uuid
 
 import pytest
 import pytest_asyncio
+
 from main import app
 from src.core.dependencies import (
     get_any_user_id,

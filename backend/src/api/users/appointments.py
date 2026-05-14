@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
+
 from src.core.dependencies import get_current_user_id
 from src.schemas.appointments import AppointmentSchema, CreateAppointment
 from src.services.user.appointments import AppointmentService
@@ -18,9 +19,7 @@ async def book_slot(
     current_client: int = Depends(get_current_user_id),
     service: AppointmentService = Depends(),
 ) -> AppointmentSchema:
-    return await service.book_slot(
-        client_id=current_client, slot_id=data.slot_id
-    )
+    return await service.book_slot(client_id=current_client, slot_id=data.slot_id)
 
 
 @router.delete(

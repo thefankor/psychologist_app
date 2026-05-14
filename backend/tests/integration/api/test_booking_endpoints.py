@@ -4,9 +4,7 @@ def test_book_slot_via_api(authed_psy, authed_client, psy_id):
         json={"starts_at": "2026-06-01T09:00:00+00:00"},
     )
     slot_id = create_slot.json()["id"]
-    resp = authed_client.post(
-        "/user/appointments/", json={"slot_id": slot_id}
-    )
+    resp = authed_client.post("/user/appointments/", json={"slot_id": slot_id})
     assert resp.status_code == 200
     data = resp.json()
     assert data["slot_id"] == slot_id
@@ -19,13 +17,9 @@ def test_double_book_returns_409(authed_psy, authed_client):
         json={"starts_at": "2026-06-01T09:00:00+00:00"},
     )
     slot_id = create.json()["id"]
-    r1 = authed_client.post(
-        "/user/appointments/", json={"slot_id": slot_id}
-    )
+    r1 = authed_client.post("/user/appointments/", json={"slot_id": slot_id})
     assert r1.status_code == 200
-    r2 = authed_client.post(
-        "/user/appointments/", json={"slot_id": slot_id}
-    )
+    r2 = authed_client.post("/user/appointments/", json={"slot_id": slot_id})
     assert r2.status_code == 409
 
 

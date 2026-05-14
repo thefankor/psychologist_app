@@ -3,6 +3,7 @@ from datetime import date, time, timedelta
 
 import pytest
 import pytest_asyncio
+
 from src.models.enums import DayOfWeek, UserRole
 from src.tasks.extend_slot_horizon import extend_horizon_for_psy
 
@@ -35,9 +36,7 @@ async def psy_with_template(store):
     return user.id
 
 
-async def test_extend_horizon_creates_slots_up_to_target(
-    store, psy_with_template
-):
+async def test_extend_horizon_creates_slots_up_to_target(store, psy_with_template):
     target = date.today() + timedelta(days=14)
     created = await extend_horizon_for_psy(
         store=store, psychologist_id=psy_with_template, target=target
@@ -45,9 +44,7 @@ async def test_extend_horizon_creates_slots_up_to_target(
     assert created > 0
 
 
-async def test_extend_horizon_target_in_past_returns_zero(
-    store, psy_with_template
-):
+async def test_extend_horizon_target_in_past_returns_zero(store, psy_with_template):
     target = date.today() - timedelta(days=5)
     created = await extend_horizon_for_psy(
         store=store, psychologist_id=psy_with_template, target=target

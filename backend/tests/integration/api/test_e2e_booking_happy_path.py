@@ -18,8 +18,7 @@ def test_full_booking_happy_path(authed_psy, authed_client, psy_id):
 
     # 2. Psy generates slots
     g = authed_psy.post(
-        "/psychologists/slots/generate"
-        "?from_date=2026-06-01&to_date=2026-06-01"
+        "/psychologists/slots/generate?from_date=2026-06-01&to_date=2026-06-01"
     )
     assert g.status_code == 200
     assert g.json()["created"] == 3

@@ -2,10 +2,10 @@ from datetime import datetime, timedelta
 from uuid import UUID
 
 from fastapi import Depends
+
 from src.core.dependencies import get_store
 from src.core.exceptions import (
     NotSlotOwnerError,
-    SlotCollisionError,
     SlotNotFoundError,
     SlotNotFreeError,
 )
@@ -32,9 +32,7 @@ class SlotManagementService:
         Защита от пересечений интервалов — на уровне БД через EXCLUDE-индекс
         no_slot_overlap; DAO ловит ошибку и поднимает SlotCollisionError.
         """
-        profile = await self._store.psychologist.find_by_id(
-            model_id=psychologist_id
-        )
+        profile = await self._store.psychologist.find_by_id(model_id=psychologist_id)
         duration = timedelta(minutes=profile.session_duration_minutes)
         slot = await self._store.availability_slot.add(
             return_model=True,
@@ -67,9 +65,7 @@ class SlotManagementService:
         await self._store.availability_slot.flush_with_collision_check()
         return slot
 
-    async def delete(
-        self, psychologist_id: int, slot_id: UUID
-    ) -> None:
+    async def delete(self, psychologist_id: int, slot_id: UUID) -> None:
         """Удаляет FREE-слот.
 
         Для BOOKED-слотов используйте `BookingService.cancel_by_psy`.

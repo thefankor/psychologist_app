@@ -12,6 +12,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from src.models.base import BaseWithTimestamps
 from src.models.enums.slots import SlotSource, SlotStatus
 
@@ -31,9 +32,7 @@ class AvailabilitySlot(BaseWithTimestamps):
     __tablename__ = "psychologist_availability_slots"
     __table_args__ = (
         CheckConstraint("ends_at > starts_at", name="ck_slot_time_order"),
-        UniqueConstraint(
-            "psychologist_id", "starts_at", name="uq_slot_psy_starts"
-        ),
+        UniqueConstraint("psychologist_id", "starts_at", name="uq_slot_psy_starts"),
         Index(
             "ix_slots_psy_status_starts",
             "psychologist_id",
@@ -52,9 +51,7 @@ class AvailabilitySlot(BaseWithTimestamps):
     starts_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False
     )
-    ends_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=False
-    )
+    ends_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     status: Mapped[SlotStatus] = mapped_column(
         Enum(SlotStatus, name="slot_status"),
         nullable=False,

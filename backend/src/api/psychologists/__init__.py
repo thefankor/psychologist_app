@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from src.api.psychologists.appointments import router as appointments_router
 from src.api.psychologists.client_notes import router as client_notes_router
 from src.api.psychologists.clients import router as clients_router

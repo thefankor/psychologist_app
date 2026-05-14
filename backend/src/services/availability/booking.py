@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import Depends
+
 from src.core.dependencies import get_store
 from src.core.exceptions import (
     AppointmentAlreadyCancelledError,
@@ -12,7 +13,7 @@ from src.core.exceptions import (
     SlotNotFoundError,
 )
 from src.crud import Store
-from src.models import Appointment, SlotStatus
+from src.models import Appointment
 from src.models.enums.appointments import AppointmentRole
 
 
@@ -33,9 +34,7 @@ class BookingService:
     def __init__(self, store: Store = Depends(get_store)):
         self._store = store
 
-    async def book_slot(
-        self, client_id: int, slot_id: UUID
-    ) -> Appointment:
+    async def book_slot(self, client_id: int, slot_id: UUID) -> Appointment:
         """Бронирует FREE-слот для клиента.
 
         Атомарно переводит слот FREE→BOOKED через UPDATE и получает
@@ -45,13 +44,9 @@ class BookingService:
             SlotNotFoundError: слот с таким id не существует.
             SlotNotAvailableError: слот не находится в статусе FREE.
         """
-        psychologist_id = await self._store.availability_slot.try_book(
-            slot_id=slot_id
-        )
+        psychologist_id = await self._store.availability_slot.try_book(slot_id=slot_id)
         if psychologist_id is None:
-            exists = await self._store.availability_slot.find_by_id(
-                model_id=slot_id
-            )
+            exists = await self._store.availability_slot.find_by_id(model_id=slot_id)
             if exists is None:
                 raise SlotNotFoundError()
             raise SlotNotAvailableError()
@@ -74,9 +69,7 @@ class BookingService:
         await self._store.session.flush()
         return appointment
 
-    async def cancel_by_client(
-        self, client_id: int, appointment_id: UUID
-    ) -> None:
+    async def cancel_by_client(self, client_id: int, appointment_id: UUID) -> None:
         """Клиент отменяет свою запись. Слот возвращается в FREE.
 
         Slot-переход атомарен через try_release. Запись помечается как
@@ -98,9 +91,7 @@ class BookingService:
         if not attendees:
             raise NotAppointmentAttendeeError()
 
-        released = await self._store.availability_slot.try_release(
-            slot_id=appt.slot_id
-        )
+        released = await self._store.availability_slot.try_release(slot_id=appt.slot_id)
         if not released:
             # Гонка: психолог только что отменил этот же слот.
             raise AppointmentAlreadyCancelledError()
@@ -127,9 +118,7 @@ class BookingService:
             slot_id=slot_id, psychologist_id=psychologist_id
         )
         if not ok:
-            slot = await self._store.availability_slot.find_by_id(
-                model_id=slot_id
-            )
+            slot = await self._store.availability_slot.find_by_id(model_id=slot_id)
             if slot is None:
                 raise SlotNotFoundError()
             if slot.psychologist_id != psychologist_id:

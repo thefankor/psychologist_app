@@ -3,6 +3,7 @@ from datetime import time
 
 import pytest
 import pytest_asyncio
+
 from src.core.exceptions import TemplateRangeOverlapError
 from src.models.enums import DayOfWeek, UserRole
 from src.schemas.working_hours import TemplateRangeInput
@@ -21,9 +22,7 @@ async def psy(store):
     return user.id
 
 
-async def test_replace_with_two_non_overlapping_ranges_same_day_ok(
-    store, psy
-):
+async def test_replace_with_two_non_overlapping_ranges_same_day_ok(store, psy):
     service = WorkingHoursService(store=store)
     await service.replace_template(
         psychologist_id=psy,

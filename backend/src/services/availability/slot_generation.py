@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from fastapi import Depends
+
 from src.core.dependencies import get_store
 from src.core.exceptions import SlotRangeTooWideError
 from src.crud import Store
@@ -51,9 +52,7 @@ class SlotGenerationService:
         if (to_date - from_date).days > MAX_GENERATION_RANGE_DAYS:
             raise SlotRangeTooWideError()
 
-        profile = await self._store.psychologist.find_by_id(
-            model_id=psychologist_id
-        )
+        profile = await self._store.psychologist.find_by_id(model_id=psychologist_id)
         if profile is None:
             return 0, 0
 
@@ -114,15 +113,13 @@ class SlotGenerationService:
                 return dt.replace(tzinfo=None) if dt.tzinfo else dt
 
             existing_intervals = [
-                (_strip_tz(ex.starts_at), _strip_tz(ex.ends_at))
-                for ex in existing
+                (_strip_tz(ex.starts_at), _strip_tz(ex.ends_at)) for ex in existing
             ]
             rows_to_insert = [
                 r
                 for r in rows_to_insert
                 if not any(
-                    ex_s < _strip_tz(r["ends_at"])
-                    and ex_e > _strip_tz(r["starts_at"])
+                    ex_s < _strip_tz(r["ends_at"]) and ex_e > _strip_tz(r["starts_at"])
                     for ex_s, ex_e in existing_intervals
                 )
             ]

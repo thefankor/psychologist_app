@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import case, func, literal, select
 from sqlalchemy.dialects.postgresql import JSONB, aggregate_order_by
 from sqlalchemy.orm import aliased
+
 from src.core.wrapper import handle_db_errors
 from src.crud.impl.base import BaseDAO
 from src.models import (
@@ -126,7 +127,9 @@ class AppointmentDAO(BaseDAO):
             order = AvailabilitySlot.starts_at.desc()
 
         query = (
-            query.group_by(Appointment.id, AvailabilitySlot.starts_at, AvailabilitySlot.ends_at)
+            query.group_by(
+                Appointment.id, AvailabilitySlot.starts_at, AvailabilitySlot.ends_at
+            )
             .order_by(order)
             .limit(limit)
             .offset(offset)
@@ -175,9 +178,7 @@ class AppointmentAttendeeDAO(BaseDAO):
                 Appointment,
                 Appointment.id == psychologist_attendee.appointment_id,
             )
-            .join(
-                AvailabilitySlot, AvailabilitySlot.id == Appointment.slot_id
-            )
+            .join(AvailabilitySlot, AvailabilitySlot.id == Appointment.slot_id)
             .outerjoin(cp, cp.id == client_attendee.user_id)
             .where(
                 psychologist_attendee.user_id == psychologist_id,

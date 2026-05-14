@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.crud.impl import (
     AppointmentAttendeeDAO,
     AppointmentDAO,
@@ -66,9 +67,7 @@ class Store:
     def availability_slot(self) -> AvailabilitySlotsDAO:
         """Возвращает интерфейс для работы со слотами доступности."""
         if self._availability_slot_dao is None:
-            self._availability_slot_dao = AvailabilitySlotsDAO(
-                session=self._session
-            )
+            self._availability_slot_dao = AvailabilitySlotsDAO(session=self._session)
         return self._availability_slot_dao
 
     @property

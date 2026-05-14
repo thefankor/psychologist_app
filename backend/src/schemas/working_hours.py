@@ -1,6 +1,7 @@
 from datetime import time
 
 from pydantic import BaseModel, ConfigDict, model_validator
+
 from src.models.enums import DayOfWeek
 
 

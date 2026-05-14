@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+
 from src.core.dependencies import TokenInfo, get_any_user_id, get_any_user_id_and_type
 from src.schemas.groups import ChatSchema, DirectChatCreatedSchema, DirectChatRequest
 from src.services.chats import ChatsService

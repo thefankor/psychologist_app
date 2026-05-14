@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 import pytest_asyncio
+
 from src.models import SlotSource, SlotStatus
 from src.models.enums import UserRole
 from src.tasks.cleanup_stale_slots import cleanup_stale_free

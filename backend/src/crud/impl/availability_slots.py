@@ -5,6 +5,7 @@ from uuid import UUID
 from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
+
 from src.core.exceptions import SlotCollisionError
 from src.core.wrapper import handle_db_errors
 from src.crud.impl.base import BaseDAO
@@ -96,9 +97,7 @@ class AvailabilitySlotsDAO(BaseDAO):
         stmt = (
             pg_insert(self.model)
             .values(rows)
-            .on_conflict_do_nothing(
-                index_elements=["psychologist_id", "starts_at"]
-            )
+            .on_conflict_do_nothing(index_elements=["psychologist_id", "starts_at"])
             .returning(self.model.id)
         )
         try:

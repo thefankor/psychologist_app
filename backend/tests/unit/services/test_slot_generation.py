@@ -1,10 +1,10 @@
 import uuid
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timezone
 
 import pytest
 import pytest_asyncio
+
 from src.core.exceptions import SlotRangeTooWideError
-from src.models import SlotStatus
 from src.models.enums import DayOfWeek, UserRole
 from src.services.availability.slot_generation import SlotGenerationService
 

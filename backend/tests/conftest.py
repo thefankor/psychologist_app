@@ -1,13 +1,13 @@
-import os
 from typing import AsyncGenerator
 
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
-from main import app
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
+from main import app
 from src.core.db.database import get_async_db
 from src.crud import Store
 from src.models import Base
@@ -20,6 +20,7 @@ from tests.utils import TEST_DB_BACKEND
 # TEST_DB_BACKEND=postgres and configure POSTGRES_* env vars; CI does this.
 if TEST_DB_BACKEND == "postgres":
     from sqlalchemy.pool import NullPool
+
     from src.config import settings
 
     TEST_DATABASE_URL = settings.DATABASE_URL
@@ -56,9 +57,7 @@ def _truncate_pg_tables_sync():
     async def _impl():
         async with test_engine.begin() as conn:
             tables = ", ".join(t.name for t in Base.metadata.sorted_tables)
-            await conn.execute(
-                text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE")
-            )
+            await conn.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
 
     asyncio.run(_impl())
 

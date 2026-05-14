@@ -35,6 +35,39 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # settings.py validates these at import time; tests use SQLite so DB
+      # values are dummies but must be present and well-typed.
+      STATIC_BASE_URL: "http://localhost:8000/static"
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ci
+      POSTGRES_PASSWORD: ci
+      POSTGRES_DB: ci
+      REDIS_HOST: localhost
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ""
+      RESEND_API_KEY: ci
+      RESEND_EMAIL: ci@example.com
+      ACCESS_SECRET_KEY: ci-secret
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_DAYS: "30"
+      SMS_AERO_LOGIN: ci
+      SMS_AERO_KEY: ci
+      SMS_AERO_SIGN: ci
+      LIVEKIT_WS_URL: wss://ci.example.com
+      LIVEKIT_API_KEY: ci
+      LIVEKIT_API_SECRET: ci
     steps:
       - uses: actions/checkout@v3
 
@@ -67,6 +100,15 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U testuser -d testdb"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10

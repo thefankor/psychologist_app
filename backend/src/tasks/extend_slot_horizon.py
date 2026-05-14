@@ -2,6 +2,7 @@ import asyncio
 from datetime import date, timedelta
 
 from sqlalchemy import select
+
 from src.config import settings
 from src.core.db.database import async_session_maker
 from src.crud import Store
@@ -23,9 +24,7 @@ async def extend_horizon_for_psy(
     Returns:
         Количество созданных слотов.
     """
-    last = await store.availability_slot.last_slot_date(
-        psychologist_id=psychologist_id
-    )
+    last = await store.availability_slot.last_slot_date(psychologist_id=psychologist_id)
     if last is None:
         from_date = date.today()
     else:

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+
 from src.core.dependencies import get_current_psychologist_id
 from src.schemas.appointments import AppointmentSchema
 from src.services.user.appointments import AppointmentService

@@ -1,8 +1,6 @@
 def test_create_one_off_slot(authed_psy):
     starts = "2026-06-01T09:00:00+00:00"
-    resp = authed_psy.post(
-        "/psychologists/slots/", json={"starts_at": starts}
-    )
+    resp = authed_psy.post("/psychologists/slots/", json={"starts_at": starts})
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "FREE"
@@ -57,8 +55,7 @@ def test_generate_from_template(authed_psy):
         },
     )
     resp = authed_psy.post(
-        "/psychologists/slots/generate"
-        "?from_date=2026-06-01&to_date=2026-06-01"
+        "/psychologists/slots/generate?from_date=2026-06-01&to_date=2026-06-01"
     )
     assert resp.status_code == 200
     body = resp.json()
@@ -81,12 +78,10 @@ def test_generate_idempotent(authed_psy):
         },
     )
     authed_psy.post(
-        "/psychologists/slots/generate"
-        "?from_date=2026-06-01&to_date=2026-06-01"
+        "/psychologists/slots/generate?from_date=2026-06-01&to_date=2026-06-01"
     )
     resp = authed_psy.post(
-        "/psychologists/slots/generate"
-        "?from_date=2026-06-01&to_date=2026-06-01"
+        "/psychologists/slots/generate?from_date=2026-06-01&to_date=2026-06-01"
     )
     body = resp.json()
     assert body["created"] == 0
@@ -120,7 +115,5 @@ def test_patch_slot_starts_at(authed_psy):
 def test_create_slot_collision_returns_409(authed_psy):
     starts = "2026-06-01T09:00:00+00:00"
     authed_psy.post("/psychologists/slots/", json={"starts_at": starts})
-    resp = authed_psy.post(
-        "/psychologists/slots/", json={"starts_at": starts}
-    )
+    resp = authed_psy.post("/psychologists/slots/", json={"starts_at": starts})
     assert resp.status_code == 409

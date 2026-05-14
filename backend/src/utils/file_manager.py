@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from fastapi import HTTPException, UploadFile
 from PIL import Image
+
 from src.config import constants
 
 

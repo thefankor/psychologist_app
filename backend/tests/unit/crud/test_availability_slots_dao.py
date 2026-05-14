@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 import pytest_asyncio
 from fastapi import HTTPException
+
 from src.models import SlotSource, SlotStatus
 from src.models.enums import UserRole
 
@@ -48,9 +49,7 @@ async def test_add_slot_returns_row(store, psy_user):
     assert _naive(slot.starts_at) == _naive(starts)
 
 
-async def test_bulk_insert_ignore_conflicts_skips_duplicates(
-    store, psy_user
-):
+async def test_bulk_insert_ignore_conflicts_skips_duplicates(store, psy_user):
     starts = datetime(2026, 6, 1, 9, 0, tzinfo=timezone.utc)
     rows = [
         {
@@ -198,20 +197,11 @@ async def test_try_psy_cancel_checks_ownership_and_status(store, psy_user):
         source=SlotSource.MANUAL,
     )
     # Wrong psy
-    assert (
-        await store.availability_slot.try_psy_cancel(slot.id, 999999)
-        is False
-    )
+    assert await store.availability_slot.try_psy_cancel(slot.id, 999999) is False
     # Right psy
-    assert (
-        await store.availability_slot.try_psy_cancel(slot.id, psy_user)
-        is True
-    )
+    assert await store.availability_slot.try_psy_cancel(slot.id, psy_user) is True
     # Already CANCELLED — second attempt fails
-    assert (
-        await store.availability_slot.try_psy_cancel(slot.id, psy_user)
-        is False
-    )
+    assert await store.availability_slot.try_psy_cancel(slot.id, psy_user) is False
 
 
 async def test_delete_stale_free_removes_only_old_free(store, psy_user):
@@ -262,16 +252,12 @@ async def test_last_slot_date_returns_latest(store, psy_user):
         status=SlotStatus.FREE,
         source=SlotSource.MANUAL,
     )
-    last = await store.availability_slot.last_slot_date(
-        psychologist_id=psy_user
-    )
+    last = await store.availability_slot.last_slot_date(psychologist_id=psy_user)
     assert _naive(last) == _naive(base + timedelta(days=5))
 
 
 async def test_last_slot_date_returns_none_for_empty(store, psy_user):
-    last = await store.availability_slot.last_slot_date(
-        psychologist_id=psy_user
-    )
+    last = await store.availability_slot.last_slot_date(psychologist_id=psy_user)
     assert last is None
 
 
