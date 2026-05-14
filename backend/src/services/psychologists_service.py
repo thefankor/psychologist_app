@@ -38,6 +38,8 @@ class PsychologistService:
             age=profile.age,
             gender=profile.gender,
             rating=profile.rating,
+            timezone=profile.timezone,
+            session_duration_minutes=profile.session_duration_minutes,
         )
 
     async def update_profile(self, user_id: int, data: PsychologistProfileUpdate):

@@ -29,12 +29,86 @@ jobs:
       - name: Run ruff check
         run: make ruff_check
 
-#  test:
-#    name: Tests
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - uses: actions/checkout@v3
-#
-#      - name: Run all tests
-#        run: make test-all
+  backend-tests-sqlite:
+    name: Backend Tests (SQLite, fast)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-test.txt
+
+      - name: Run tests (default SQLite backend; PG-only tests skip)
+        run: pytest -v
+
+  backend-tests-postgres:
+    name: Backend Tests (PostgreSQL)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U testuser -d testdb"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DB_BACKEND: postgres
+      # Connection details consumed by src.config.settings.DATABASE_URL
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: testdb
+      # Other Settings fields are required to import settings; values don't
+      # matter for the test path.
+      STATIC_BASE_URL: "http://localhost:8000/static"
+      REDIS_HOST: localhost
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ""
+      RESEND_API_KEY: ci
+      RESEND_EMAIL: ci@example.com
+      ACCESS_SECRET_KEY: ci-secret
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_DAYS: "30"
+      SMS_AERO_LOGIN: ci
+      SMS_AERO_KEY: ci
+      SMS_AERO_SIGN: ci
+      LIVEKIT_WS_URL: wss://ci.example.com
+      LIVEKIT_API_KEY: ci
+      LIVEKIT_API_SECRET: ci
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-test.txt
+
+      - name: Apply Alembic migrations (gets EXCLUDE constraint + native enums)
+        run: alembic upgrade head
+
+      - name: Run full test suite against PostgreSQL
+        run: pytest -v

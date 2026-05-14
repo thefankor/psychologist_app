@@ -1,3 +1,4 @@
+import os
 from typing import AsyncGenerator
 
 import pytest
@@ -12,14 +13,28 @@ from src.crud import Store
 from src.models import Base
 from src.services.auth import AuthService
 from src.services.user import UserService
+from tests.utils import TEST_DB_BACKEND
 
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+# Default: SQLite in-memory (fast, no DB setup). To run PG-only tests
+# (EXCLUDE-constraint behaviour, JSONB, native enums), set
+# TEST_DB_BACKEND=postgres and configure POSTGRES_* env vars; CI does this.
+if TEST_DB_BACKEND == "postgres":
+    from sqlalchemy.pool import NullPool
+    from src.config import settings
 
-test_engine = create_async_engine(
-    TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+    TEST_DATABASE_URL = settings.DATABASE_URL
+    # NullPool: every operation opens a fresh connection. Avoids the
+    # "Future attached to different loop" / "another operation in progress"
+    # errors that come from sharing pooled asyncpg connections across the
+    # per-test event loops pytest-asyncio creates.
+    test_engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
+else:
+    TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+    test_engine = create_async_engine(
+        TEST_DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
 
 TestingSessionLocal = sessionmaker(
     bind=test_engine,
@@ -28,11 +43,55 @@ TestingSessionLocal = sessionmaker(
 )
 
 
+def _truncate_pg_tables_sync():
+    """Wipe data from all tables. Used once at session start in PG mode.
+
+    Runs in its own asyncio.run() to avoid sharing the loop with pytest-asyncio.
+    Schema must already exist (CI applies migrations before pytest).
+    """
+    import asyncio
+
+    from sqlalchemy import text
+
+    async def _impl():
+        async with test_engine.begin() as conn:
+            tables = ", ".join(t.name for t in Base.metadata.sorted_tables)
+            await conn.execute(
+                text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE")
+            )
+
+    asyncio.run(_impl())
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _reset_pg_data():
+    """Sync session-scope fixture so PG truncate doesn't leak event loops."""
+    if TEST_DB_BACKEND == "postgres":
+        _truncate_pg_tables_sync()
+
+
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup_database():
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    if TEST_DB_BACKEND == "postgres":
+        # Schema set up externally via `alembic upgrade head`; data cleaned
+        # in _reset_pg_data above.
+        pass
+    else:
+        async with test_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
     yield
+
+
+def pytest_collection_modifyitems(config, items):
+    """Auto-skip tests marked `@requires_postgres` when not on a PG backend."""
+    if TEST_DB_BACKEND == "postgres":
+        return
+    skip_pg = pytest.mark.skip(
+        reason="requires PostgreSQL backend (set TEST_DB_BACKEND=postgres)"
+    )
+    for item in items:
+        if "requires_postgres" in item.keywords:
+            item.add_marker(skip_pg)
 
 
 @pytest_asyncio.fixture

@@ -1,13 +1,12 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from src.models.enums.appointments import AppointmentRole
 
 
 class CreateAppointment(BaseModel):
-    psychologist_id: int
-    start_at: datetime
+    slot_id: UUID
 
 
 class AppointmentAttendeeSchema(BaseModel):
@@ -18,8 +17,14 @@ class AppointmentAttendeeSchema(BaseModel):
 
 
 class AppointmentSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
+    slot_id: UUID
     start_at: datetime
     ends_at: datetime
     is_group: bool = False
-    attendees: list[AppointmentAttendeeSchema]
+    cancelled_at: datetime | None = None
+    cancelled_by: AppointmentRole | None = None
+    cancellation_reason: str | None = None
+    attendees: list[AppointmentAttendeeSchema] = []
