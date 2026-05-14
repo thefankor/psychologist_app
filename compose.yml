@@ -24,10 +24,13 @@ services:
         restart: always
         env_file:
             - .env
+        environment:
+            - RUN_MIGRATIONS=1
         working_dir: /app
         ports:
             - '8000:8000'
         volumes:
+            - ./backend:/app
             - ${STATIC_DIR}:/app/static
         depends_on:
             db:
@@ -69,10 +72,17 @@ services:
         restart: always
         env_file:
             - .env
+        environment:
+            - RUN_MIGRATIONS=0
         working_dir: /app
+        volumes:
+            - ./backend:/app
         depends_on:
             - db
             - redis
+        # Disable inherited HEALTHCHECK — it probes /docs on port 8000 which celery doesn't serve.
+        healthcheck:
+            disable: true
         command: celery -A src.tasks.celery_app worker --loglevel=info
 
     frontend:
