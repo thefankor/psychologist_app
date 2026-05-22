@@ -80,12 +80,6 @@ class ChatsService:
         if other_info is None:
             raise HTTPException(status_code=404, detail="User not found")
 
-        has_appointment = await self._store.appointment_attendee.has_shared_appointment(
-            user_id_a=caller_id, user_id_b=other_user_id
-        )
-        if not has_appointment:
-            raise HTTPException(status_code=403, detail="Нет совместной записи")
-
         chat = await self._store.chat.get_or_create_direct_chat(
             user_id_a=caller_id, user_id_b=other_user_id
         )
