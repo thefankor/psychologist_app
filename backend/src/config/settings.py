@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     LIVEKIT_API_KEY: str
     LIVEKIT_API_SECRET: str
 
+    SLOT_HORIZON_DAYS: int = 60
+
     class Config:
         env_file = ".env"
         extra = "allow"

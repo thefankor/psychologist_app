@@ -1,6 +1,7 @@
 import uuid
 
 import pytest_asyncio
+
 from src.crud import Store
 from src.services.auth import AuthService
 

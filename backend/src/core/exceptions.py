@@ -140,3 +140,76 @@ class InvalidTokenException(BaseError):
 
     status_code = status.HTTP_401_UNAUTHORIZED
     detail = "Невалидный токен"
+
+
+# --- Слоты доступности и бронирования -----------------------------------
+
+
+class SlotNotFoundError(BaseError):
+    """Слот не найден."""
+
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = "Слот не найден"
+
+
+class SlotNotAvailableError(BaseError):
+    """Клиент пытается забронировать слот, который уже не FREE."""
+
+    status_code = status.HTTP_409_CONFLICT
+    detail = "Слот более недоступен"
+
+
+class SlotNotFreeError(BaseError):
+    """Психолог пытается изменить или удалить слот, который не FREE."""
+
+    status_code = status.HTTP_409_CONFLICT
+    detail = "Слот не находится в статусе FREE"
+
+
+class SlotNotBookedError(BaseError):
+    """Психолог пытается отменить слот, который не BOOKED."""
+
+    status_code = status.HTTP_409_CONFLICT
+    detail = "Слот не забронирован"
+
+
+class SlotCollisionError(BaseError):
+    """У психолога уже есть слот с таким же временем начала."""
+
+    status_code = status.HTTP_409_CONFLICT
+    detail = "У психолога уже есть слот в это время"
+
+
+class TemplateRangeOverlapError(BaseError):
+    """Два диапазона шаблона в одном дне недели пересекаются."""
+
+    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    detail = "Диапазоны в одном дне недели пересекаются"
+
+
+class SlotRangeTooWideError(BaseError):
+    """Диапазон генерации шире разрешённого максимума (180 дней)."""
+
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Слишком широкий диапазон (максимум 180 дней)"
+
+
+class NotSlotOwnerError(BaseError):
+    """Психолог не является владельцем слота."""
+
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = "Психолог не является владельцем слота"
+
+
+class NotAppointmentAttendeeError(BaseError):
+    """Клиент не является участником этой записи."""
+
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = "Клиент не является участником этой записи"
+
+
+class AppointmentAlreadyCancelledError(BaseError):
+    """Попытка отменить запись, которая уже отменена."""
+
+    status_code = status.HTTP_409_CONFLICT
+    detail = "Запись уже отменена"

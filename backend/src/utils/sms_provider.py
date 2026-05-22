@@ -1,4 +1,5 @@
 import requests
+
 from src.config import settings
 
 

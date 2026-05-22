@@ -1,4 +1,5 @@
 from fastapi import WebSocket, WebSocketDisconnect
+
 from src.schemas.ws import WSUser
 
 

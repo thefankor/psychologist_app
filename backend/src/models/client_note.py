@@ -1,5 +1,6 @@
 from sqlalchemy import ForeignKey, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column
+
 from src.models.base import BaseWithTimestamps
 
 

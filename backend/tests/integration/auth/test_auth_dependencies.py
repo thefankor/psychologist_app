@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import pytest
 from fastapi import HTTPException
+
 from src.core.dependencies import get_current_user_id
 from src.services.auth import AuthService
 
@@ -23,6 +24,7 @@ class TestAuthDependencies:
     async def test_get_current_user_no_credentials(self):
         """Тест извлечения пользователя без учетных данных"""
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.crud import Store
 
@@ -44,6 +46,7 @@ class TestAuthDependencies:
     async def test_get_current_user_invalid_token(self):
         """Тест извлечения пользователя с невалидным токеном"""
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.crud import Store
 
@@ -67,6 +70,7 @@ class TestAuthDependencies:
     async def test_get_current_user_wrong_token_type(self):
         """Тест извлечения пользователя с токеном неправильного типа"""
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.crud import Store
 
@@ -89,33 +93,25 @@ class TestAuthDependencies:
             await test_engine.dispose()
 
     @pytest.mark.asyncio
-    async def test_get_current_user_not_found(self):
-        """Тест извлечения несуществующего пользователя"""
-        from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-        from src.config import settings
-        from src.crud import Store
+    async def test_get_current_user_not_found(self, store):
+        """Тест извлечения несуществующего пользователя.
 
-        test_engine = create_async_engine(settings.DATABASE_URL)
-        async_session_maker = async_sessionmaker(test_engine, expire_on_commit=False)
+        В отличие от соседних тестов в этом файле этот тест действительно
+        выполняет DB-запрос (check_exist по user_id=999). Использует общую
+        `store` фикстуру из conftest, чтобы не создавать собственный engine —
+        иначе в CI-окружении без живого Postgres тест падает с 500 вместо 401.
+        """
+        auth_service = AuthService()
+        tokens = auth_service.create_tokens({"sub": "999", "type": "CLIENT"})
 
-        try:
-            async with async_session_maker() as session:
-                store = Store(session=session)
-                auth_service = AuthService()
-                tokens = auth_service.create_tokens({"sub": "999", "type": "CLIENT"})
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_user_id(
+                credentials=make_fake_creds(tokens.token), store=store
+            )
 
-                with pytest.raises(HTTPException) as exc_info:
-                    await get_current_user_id(
-                        credentials=make_fake_creds(tokens.token), store=store
-                    )
-
-                assert exc_info.value.status_code == 401
-                assert "Authentication failed." == str(exc_info.value.detail["detail"])
-                assert "Could not validate credentials" == str(
-                    exc_info.value.detail["message"]
-                )
-        finally:
-            await test_engine.dispose()
+        assert exc_info.value.status_code == 401
+        assert str(exc_info.value.detail["detail"]) == "Authentication failed."
+        assert str(exc_info.value.detail["message"]) == "Could not validate credentials"
 
     @pytest.mark.asyncio
     async def test_get_current_user_expired_token(self):
@@ -123,6 +119,7 @@ class TestAuthDependencies:
         from datetime import timedelta
 
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.core.auth.token import TokenService
         from src.crud import Store
@@ -157,6 +154,7 @@ class TestAuthDependencies:
         from datetime import timedelta
 
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.core.auth.token import TokenService
         from src.crud import Store
@@ -193,6 +191,7 @@ class TestAuthDependencies:
         from datetime import timedelta
 
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
         from src.config import settings
         from src.core.auth.token import TokenService
         from src.crud import Store

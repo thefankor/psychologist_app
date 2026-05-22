@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+
 from src.core.dependencies import get_current_user_id
 from src.schemas import EmptyModel, FavoritesPsychologistsResponse, PsychologistID
 from src.services.user.favorites_service import FavoriteService

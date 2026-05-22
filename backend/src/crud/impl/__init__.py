@@ -1,4 +1,5 @@
 from src.crud.impl.appointments import AppointmentAttendeeDAO, AppointmentDAO
+from src.crud.impl.availability_slots import AvailabilitySlotsDAO
 from src.crud.impl.chat_members import ChatMembersDAO
 from src.crud.impl.chat_messages import ChatMessagesDAO
 from src.crud.impl.chats import ChatsDAO
@@ -23,4 +24,5 @@ __all__ = [
     "AppointmentDAO",
     "AppointmentAttendeeDAO",
     "WorkingHoursDAO",
+    "AvailabilitySlotsDAO",
 ]

@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from src.api.users.appointments import router as appointments_router
 from src.api.users.favorites import router as favorites_router
 from src.api.users.payment_methods import router as payment_methods_router

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile
+
 from src.core.dependencies import get_current_psychologist_id
 from src.models import UserRole
 from src.schemas import EmptyModel

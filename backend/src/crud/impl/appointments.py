@@ -3,11 +3,13 @@ from datetime import datetime, timezone
 from sqlalchemy import case, func, literal, select
 from sqlalchemy.dialects.postgresql import JSONB, aggregate_order_by
 from sqlalchemy.orm import aliased
+
 from src.core.wrapper import handle_db_errors
 from src.crud.impl.base import BaseDAO
 from src.models import (
     Appointment,
     AppointmentAttendee,
+    AvailabilitySlot,
     ClientProfile,
     PsychologistProfile,
 )
@@ -98,12 +100,14 @@ class AppointmentDAO(BaseDAO):
         query = (
             select(
                 Appointment.id.label("appointment_id"),
-                Appointment.start_at,
-                Appointment.ends_at,
+                AvailabilitySlot.starts_at.label("start_at"),
+                AvailabilitySlot.ends_at,
                 Appointment.is_group,
                 attendees_json,
             )
             .select_from(Appointment)
+            # Slot хранит время приёма
+            .join(AvailabilitySlot, AvailabilitySlot.id == Appointment.slot_id)
             # Подтягиваем всех участников + их профили
             .outerjoin(a, a.appointment_id == Appointment.id)
             .outerjoin(cp, cp.id == a.user_id)  # если участник клиент — попадём в cp
@@ -116,14 +120,19 @@ class AppointmentDAO(BaseDAO):
 
         now = datetime.now(timezone.utc)
         if is_upcoming:
-            query = query.where(Appointment.ends_at > now)
-            order = Appointment.start_at.asc()
+            query = query.where(AvailabilitySlot.ends_at > now)
+            order = AvailabilitySlot.starts_at.asc()
         else:
-            query = query.where(Appointment.ends_at <= now)
-            order = Appointment.start_at.desc()
+            query = query.where(AvailabilitySlot.ends_at <= now)
+            order = AvailabilitySlot.starts_at.desc()
 
         query = (
-            query.group_by(Appointment.id).order_by(order).limit(limit).offset(offset)
+            query.group_by(
+                Appointment.id, AvailabilitySlot.starts_at, AvailabilitySlot.ends_at
+            )
+            .order_by(order)
+            .limit(limit)
+            .offset(offset)
         )
 
         result = await self.session.execute(query)
@@ -157,7 +166,7 @@ class AppointmentAttendeeDAO(BaseDAO):
                 client_attendee.user_id.label("client_id"),
                 cp.name,
                 cp.avatar,
-                func.min(Appointment.start_at).label("first_session"),
+                func.min(AvailabilitySlot.starts_at).label("first_session"),
                 func.count(Appointment.id).label("total_sessions"),
             )
             .select_from(psychologist_attendee)
@@ -169,6 +178,7 @@ class AppointmentAttendeeDAO(BaseDAO):
                 Appointment,
                 Appointment.id == psychologist_attendee.appointment_id,
             )
+            .join(AvailabilitySlot, AvailabilitySlot.id == Appointment.slot_id)
             .outerjoin(cp, cp.id == client_attendee.user_id)
             .where(
                 psychologist_attendee.user_id == psychologist_id,
@@ -182,7 +192,7 @@ class AppointmentAttendeeDAO(BaseDAO):
 
         query = (
             query.group_by(client_attendee.user_id, cp.name, cp.avatar)
-            .order_by(func.min(Appointment.start_at).desc())
+            .order_by(func.min(AvailabilitySlot.starts_at).desc())
             .limit(limit)
             .offset(offset)
         )

@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import case, func, select, update
+
 from src.crud.impl.base import BaseDAO
 from src.models import ChatMessage, ClientProfile, PsychologistProfile
 

@@ -1,68 +1,61 @@
-from datetime import datetime, timedelta
+from uuid import UUID
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends
+
 from src.config import settings
 from src.core.dependencies import get_store
 from src.crud import Store
 from src.models.enums.appointments import AppointmentRole
 from src.schemas.appointments import AppointmentAttendeeSchema, AppointmentSchema
+from src.services.availability.booking import BookingService
 
 
 class AppointmentService:
-    """
-    Сервис для управления встречами
+    """Сервис для управления встречами клиента.
+
+    Бронирование и отмена делегируются в BookingService.
+    Чтение списков использует AppointmentDAO.find_appointments
+    с JOIN на слоты для получения времени приёма.
     """
 
     def __init__(
         self,
         store: Store = Depends(get_store),
     ):
-        """Инициализация избранных психологами клиента
-
-        Args:
-            store: Хранилище данных, используемое для операций с избранными.
-        """
         self._store = store
 
-    async def create_appointment(
-        self, client_id: int, psychologist_id: int, start_at: datetime
-    ) -> AppointmentSchema:
-        is_exist = await self._store.psychologist.check_exist(model_id=psychologist_id)
-
-        if not is_exist:
-            raise HTTPException(status_code=404, detail="Psychologist not found")
-
-        new_appointment = await self._store.appointment.add(
-            start_at=start_at,
-            ends_at=start_at + timedelta(hours=1),
-        )
-
-        await self._store.appointment_attendee.add(
-            user_id=psychologist_id,
-            appointment_id=new_appointment.id,
-            role=AppointmentRole.PSYCHOLOGIST,
-        )
-        await self._store.appointment_attendee.add(
-            user_id=client_id,
-            appointment_id=new_appointment.id,
-            role=AppointmentRole.CLIENT,
-        )
-
+    async def book_slot(self, client_id: int, slot_id: UUID) -> AppointmentSchema:
+        """Клиент бронирует слот. Возвращает созданную запись."""
+        booking = BookingService(store=self._store)
+        appt = await booking.book_slot(client_id=client_id, slot_id=slot_id)
+        # Загружаем слот явно, чтобы избежать lazy-load на relationship
+        # (async-сессия не делает синхронный IO для отложенных связей).
+        slot = await self._store.availability_slot.find_by_id(model_id=appt.slot_id)
         return AppointmentSchema(
-            id=new_appointment.id,
-            start_at=new_appointment.start_at,
-            ends_at=new_appointment.ends_at,
-            is_group=new_appointment.is_group,
+            id=appt.id,
+            slot_id=appt.slot_id,
+            start_at=slot.starts_at,
+            ends_at=slot.ends_at,
+            is_group=appt.is_group,
+            cancelled_at=appt.cancelled_at,
+            cancelled_by=appt.cancelled_by,
+            cancellation_reason=appt.cancellation_reason,
             attendees=[
                 AppointmentAttendeeSchema(
-                    user_id=client_id,
-                    role=AppointmentRole.CLIENT,
+                    user_id=client_id, role=AppointmentRole.CLIENT
                 ),
                 AppointmentAttendeeSchema(
-                    user_id=psychologist_id,
+                    user_id=slot.psychologist_id,
                     role=AppointmentRole.PSYCHOLOGIST,
                 ),
             ],
+        )
+
+    async def cancel_appointment(self, client_id: int, appointment_id: UUID) -> None:
+        """Клиент отменяет свою запись."""
+        booking = BookingService(store=self._store)
+        await booking.cancel_by_client(
+            client_id=client_id, appointment_id=appointment_id
         )
 
     async def _get_user_appointments(
@@ -85,6 +78,7 @@ class AppointmentService:
         return [
             AppointmentSchema(
                 id=appointment.appointment_id,
+                slot_id=appointment.appointment_id,  # placeholder
                 start_at=appointment.start_at,
                 ends_at=appointment.ends_at,
                 is_group=appointment.is_group,

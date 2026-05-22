@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
+
 from src.config import settings
 from src.models.enums import ChatType
 

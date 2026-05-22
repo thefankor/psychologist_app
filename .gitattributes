@@ -1,0 +1,5 @@
+# Force LF line endings for files that must work in Linux containers,
+# regardless of the developer's git autocrlf setting.
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+*.dockerfile text eol=lf

@@ -1,7 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.crud.impl import (
     AppointmentAttendeeDAO,
     AppointmentDAO,
+    AvailabilitySlotsDAO,
     ChatMembersDAO,
     ChatMessagesDAO,
     ChatsDAO,
@@ -54,6 +56,19 @@ class Store:
         self._appointment_attendee_dao: AppointmentAttendeeDAO | None = None
         self._client_note_dao: ClientNoteDAO | None = None
         self._working_hours_dao: WorkingHoursDAO | None = None
+        self._availability_slot_dao: AvailabilitySlotsDAO | None = None
+
+    @property
+    def session(self) -> AsyncSession:
+        """Возвращает сессию SQLAlchemy (для сервисов, делающих flush напрямую)."""
+        return self._session
+
+    @property
+    def availability_slot(self) -> AvailabilitySlotsDAO:
+        """Возвращает интерфейс для работы со слотами доступности."""
+        if self._availability_slot_dao is None:
+            self._availability_slot_dao = AvailabilitySlotsDAO(session=self._session)
+        return self._availability_slot_dao
 
     @property
     def user(self) -> UserDAO:

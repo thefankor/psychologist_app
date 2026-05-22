@@ -1,16 +1,20 @@
 from datetime import time
 
-from sqlalchemy import Boolean, Enum, ForeignKey, Time, UniqueConstraint
+from sqlalchemy import Boolean, Enum, ForeignKey, Time
 from sqlalchemy.orm import Mapped, mapped_column
+
 from src.models.base import BaseWithTimestamps
 from src.models.enums.schedules import DayOfWeek
 
 
 class PsychologistWorkingHours(BaseWithTimestamps):
+    """Диапазон рабочих часов психолога в шаблоне недели.
+
+    Может быть несколько диапазонов в одном дне недели (например, утро + вечер).
+    Используется как источник для генерации слотов доступности (SlotSource=TEMPLATE).
+    """
+
     __tablename__ = "psychologist_working_hours"
-    __table_args__ = (
-        UniqueConstraint("psychologist_id", "day_of_week", name="uq_psychologist_day"),
-    )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     psychologist_id: Mapped[int] = mapped_column(

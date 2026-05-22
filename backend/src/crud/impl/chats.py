@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from sqlalchemy import and_, case, func, insert, select
+
 from src.core.wrapper import handle_db_errors
 from src.crud.impl.base import BaseDAO
 from src.models import Chat, ChatMember, ChatMessage, ClientProfile, PsychologistProfile

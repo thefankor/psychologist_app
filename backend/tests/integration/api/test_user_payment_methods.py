@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from src.utils.sms_confirm_service import SMSGetCode
 
 
