@@ -289,26 +289,39 @@ export default function Chats() {
 		[],
 	);
 
+	const applyChats = useCallback((data: Chat[], preferChatId?: string) => {
+		setChats(data);
+		const initial: Record<string, Message[]> = {};
+		data.forEach((chat) => {
+			initial[chat.id] = chat.last_message ? [chat.last_message] : [];
+		});
+		setMessages(initial);
+		if (preferChatId) {
+			setSelectedId(preferChatId);
+		} else if (data.length > 0) {
+			setSelectedId(data[0].id);
+		}
+	}, []);
+
 	useEffect(() => {
 		getChats(token)
 			.then((data: Chat[]) => {
-				setChats(data);
-				const initial: Record<string, Message[]> = {};
-				data.forEach((chat) => {
-					initial[chat.id] = chat.last_message
-						? [chat.last_message]
-						: [];
-				});
-				setMessages(initial);
-				if (openChatId && data.some((c) => c.id === openChatId)) {
-					setSelectedId(openChatId);
-				} else if (data.length > 0) {
-					setSelectedId(data[0].id);
-				}
+				const prefer = openChatId && data.some((c) => c.id === openChatId)
+					? openChatId
+					: undefined;
+				applyChats(data, prefer);
 			})
 			.catch(() => {})
 			.finally(() => setLoading(false));
 	}, []);
+
+	useEffect(() => {
+		if (!openChatId) return;
+		// Перезагружаем список чатов и выбираем нужный
+		getChats(token)
+			.then((data: Chat[]) => applyChats(data, openChatId))
+			.catch(() => {});
+	}, [location]);
 
 	useEffect(() => {
 		let destroyed = false;
