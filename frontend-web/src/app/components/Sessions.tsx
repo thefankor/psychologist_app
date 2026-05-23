@@ -6,6 +6,7 @@ import {
 	User,
 	Loader2,
 	Video,
+	X,
 } from 'lucide-react';
 import { Link } from 'react-router';
 import { Button } from './ui/button';
@@ -24,8 +25,10 @@ import { useUser } from '../context/UserContext';
 import {
 	getPsyshologistAppointments,
 	getAllAppointments,
-	createAppointment,
 	getPsychologistsForClient,
+	getFreeSlots,
+	bookSlot,
+	cancelAppointment,
 } from '../../api/psychologist';
 
 const fixUrl = (url: string | null) =>
@@ -68,15 +71,27 @@ const isInActiveWindow = (startAt: string, now: Date) => {
 	return t >= start - 15 * 60 * 1000 && t < start + 15 * 60 * 1000;
 };
 
+interface FreeSlot {
+	id: string;
+	starts_at: string;
+	ends_at: string;
+}
+
 function NewSessionDialog({ onCreated }: { onCreated: () => void }) {
 	const token = localStorage.getItem('token') ?? '';
 	const [open, setOpen] = useState(false);
 	const [psychologists, setPsychologists] = useState<any[]>([]);
 	const [loadingPsych, setLoadingPsych] = useState(false);
 	const [psychId, setPsychId] = useState('');
-	const [date, setDate] = useState('');
-	const [time, setTime] = useState('');
-	const [creating, setCreating] = useState(false);
+	const today = new Date().toISOString().slice(0, 10);
+	const weekLater = new Date(Date.now() + 7 * 86400_000).toISOString().slice(0, 10);
+	const [fromDate, setFromDate] = useState(today);
+	const [toDate, setToDate] = useState(weekLater);
+	const [slots, setSlots] = useState<FreeSlot[]>([]);
+	const [loadingSlots, setLoadingSlots] = useState(false);
+	const [slotsError, setSlotsError] = useState('');
+	const [selectedSlot, setSelectedSlot] = useState('');
+	const [booking, setBooking] = useState(false);
 	const [error, setError] = useState('');
 
 	const handleOpen = async (o: boolean) => {
@@ -91,33 +106,67 @@ function NewSessionDialog({ onCreated }: { onCreated: () => void }) {
 				setLoadingPsych(false);
 			}
 		}
+		if (!o) {
+			setPsychId('');
+			setSlots([]);
+			setSlotsError('');
+			setSelectedSlot('');
+			setError('');
+		}
 	};
 
-	const handleCreate = async () => {
-		if (!psychId || !date || !time) {
-			setError('Заполните все поля');
+	const fetchSlots = async (id: string) => {
+		if (!id) return;
+		setLoadingSlots(true);
+		setSlotsError('');
+		setSelectedSlot('');
+		try {
+			const fromDt = `${fromDate}T00:00:00Z`;
+			const toDt = `${toDate}T23:59:59Z`;
+			const data: FreeSlot[] = await getFreeSlots(token, parseInt(id), fromDt, toDt);
+			setSlots(data);
+			if (data.length === 0) setSlotsError('Нет доступных слотов в этом периоде');
+		} catch (e: any) {
+			setSlotsError(e.message || 'Ошибка при загрузке слотов');
+		} finally {
+			setLoadingSlots(false);
+		}
+	};
+
+	const handlePsychChange = (id: string) => {
+		setPsychId(id);
+		setSlots([]);
+		setSlotsError('');
+		setSelectedSlot('');
+		if (id) fetchSlots(id);
+	};
+
+	const handleBook = async () => {
+		if (!selectedSlot) {
+			setError('Выберите время');
 			return;
 		}
-		setCreating(true);
+		setBooking(true);
 		setError('');
 		try {
-			const d = new Date(`${date}T${time}:00`);
-			const tzOffset = -d.getTimezoneOffset();
-			const sign = tzOffset >= 0 ? '+' : '-';
-			const pad = (n: number) => String(Math.abs(n)).padStart(2, '0');
-			const startAt = `${date}T${time}:00${sign}${pad(Math.floor(Math.abs(tzOffset) / 60))}:${pad(Math.abs(tzOffset) % 60)}`;
-			await createAppointment(token, parseInt(psychId), startAt);
+			await bookSlot(token, selectedSlot);
 			setOpen(false);
-			setPsychId('');
-			setDate('');
-			setTime('');
 			onCreated();
 		} catch (e: any) {
 			setError(e.message || 'Ошибка при записи');
 		} finally {
-			setCreating(false);
+			setBooking(false);
 		}
 	};
+
+	const formatSlot = (s: FreeSlot) =>
+		new Date(s.starts_at).toLocaleString('ru-RU', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpen}>
@@ -127,7 +176,7 @@ function NewSessionDialog({ onCreated }: { onCreated: () => void }) {
 					Записаться к психологу
 				</Button>
 			</DialogTrigger>
-			<DialogContent className='dark:bg-gray-800 dark:border-gray-700'>
+			<DialogContent className='dark:bg-gray-800 dark:border-gray-700 max-w-md'>
 				<DialogHeader>
 					<DialogTitle className='dark:text-white'>
 						Запись к психологу
@@ -144,7 +193,7 @@ function NewSessionDialog({ onCreated }: { onCreated: () => void }) {
 						) : (
 							<select
 								value={psychId}
-								onChange={(e) => setPsychId(e.target.value)}
+								onChange={(e) => handlePsychChange(e.target.value)}
 								className='w-full rounded-md border border-input px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer'
 							>
 								<option value=''>Выберите психолога</option>
@@ -158,37 +207,78 @@ function NewSessionDialog({ onCreated }: { onCreated: () => void }) {
 						)}
 					</div>
 
-					<div className='space-y-2'>
-						<Label className='dark:text-gray-200'>Дата</Label>
-						<input
-							type='date'
-							value={date}
-							min={new Date().toISOString().slice(0, 10)}
-							onChange={(e) => setDate(e.target.value)}
-							className='w-full px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer'
-						/>
-					</div>
+					{psychId && (
+						<>
+							<div className='flex gap-2 items-end'>
+								<div className='flex-1 space-y-1'>
+									<Label className='dark:text-gray-200 text-xs'>С</Label>
+									<input
+										type='date'
+										value={fromDate}
+										min={today}
+										onChange={(e) => setFromDate(e.target.value)}
+										className='w-full px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer'
+									/>
+								</div>
+								<div className='flex-1 space-y-1'>
+									<Label className='dark:text-gray-200 text-xs'>По</Label>
+									<input
+										type='date'
+										value={toDate}
+										min={fromDate}
+										onChange={(e) => setToDate(e.target.value)}
+										className='w-full px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer'
+									/>
+								</div>
+								<Button
+									variant='outline'
+									size='sm'
+									onClick={() => fetchSlots(psychId)}
+									disabled={loadingSlots}
+									className='dark:border-gray-600 dark:text-gray-300 self-end'
+								>
+									{loadingSlots ? <Loader2 className='w-4 h-4 animate-spin' /> : 'Найти'}
+								</Button>
+							</div>
 
-					<div className='space-y-2'>
-						<Label className='dark:text-gray-200'>Время</Label>
-						<input
-							type='time'
-							value={time}
-							onChange={(e) => setTime(e.target.value)}
-							className='w-full px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer'
-						/>
-					</div>
+							{slotsError && !loadingSlots && (
+								<p className='text-sm text-gray-500 dark:text-gray-400'>{slotsError}</p>
+							)}
+
+							{loadingSlots && (
+								<div className='flex justify-center py-4'>
+									<Loader2 className='w-6 h-6 animate-spin text-blue-500' />
+								</div>
+							)}
+
+							{!loadingSlots && slots.length > 0 && (
+								<div className='space-y-1 max-h-52 overflow-y-auto pr-1'>
+									{slots.map((s) => (
+										<button
+											key={s.id}
+											onClick={() => setSelectedSlot(s.id)}
+											className={`w-full text-left px-3 py-2 rounded-md text-sm border transition-colors ${
+												selectedSlot === s.id
+													? 'bg-blue-600 text-white border-blue-600'
+													: 'dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 hover:border-blue-400 dark:hover:border-blue-500'
+											}`}
+										>
+											{formatSlot(s)}
+										</button>
+									))}
+								</div>
+							)}
+						</>
+					)}
 
 					{error && <p className='text-sm text-red-500'>{error}</p>}
 
 					<Button
-						onClick={handleCreate}
-						disabled={creating}
+						onClick={handleBook}
+						disabled={booking || !selectedSlot}
 						className='w-full bg-blue-600 hover:bg-blue-700 dark:text-white'
 					>
-						{creating && (
-							<Loader2 className='w-4 h-4 mr-2 animate-spin' />
-						)}
+						{booking && <Loader2 className='w-4 h-4 mr-2 animate-spin' />}
 						Записаться
 					</Button>
 				</div>
@@ -201,15 +291,30 @@ function SessionCard({
 	appointment,
 	isPsychologist,
 	now,
+	onCancelled,
 }: {
 	appointment: any;
 	isPsychologist: boolean;
 	now: Date;
+	onCancelled?: () => void;
 }) {
+	const token = localStorage.getItem('token') ?? '';
+	const [cancelling, setCancelling] = useState(false);
 	const myRole = isPsychologist ? 'PSYCHOLOGIST' : 'CLIENT';
 	const otherParty =
 		appointment.attendees?.find((a: any) => a.role !== myRole) ??
 		appointment.attendees?.[0];
+
+	const handleCancel = async () => {
+		setCancelling(true);
+		try {
+			await cancelAppointment(token, String(appointment.id));
+			onCancelled?.();
+		} catch {
+		} finally {
+			setCancelling(false);
+		}
+	};
 
 	const active = isInActiveWindow(appointment.start_at, now);
 	const upcoming = isUpcoming(appointment.start_at, now);
@@ -318,6 +423,22 @@ function SessionCard({
 						>
 							<Video className='w-4 h-4 mr-2' />
 							{active ? 'Начать сессию' : 'Недоступно'}
+						</Button>
+					)}
+					{upcoming && !isPsychologist && (
+						<Button
+							variant='outline'
+							size='icon'
+							disabled={cancelling}
+							onClick={handleCancel}
+							title='Отменить запись'
+							className='dark:border-gray-600 dark:text-gray-300 dark:hover:bg-red-900/30 hover:border-red-400 hover:text-red-500'
+						>
+							{cancelling ? (
+								<Loader2 className='w-4 h-4 animate-spin' />
+							) : (
+								<X className='w-4 h-4' />
+							)}
 						</Button>
 					)}
 				</div>
@@ -465,6 +586,7 @@ export default function Sessions() {
 											appointment={a}
 											isPsychologist={isPsychologist}
 											now={now}
+											onCancelled={fetchAppointments}
 										/>
 									))
 								: empty('Нет запланированных сессий')}

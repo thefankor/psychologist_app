@@ -236,45 +236,27 @@ export const deleteFavoritePsychologist = async (token: string, id: number) => {
 };
 
 export const getWorkingHours = async (token: string) => {
-	const url = '/psychologists/working-hours/';
-	try {
-		const res = await apiFetch(url, {
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${token}`,
-			},
-		});
-		if (!res.ok) {
-			const error = await res.json();
-			throw new Error(error?.detail || error?.message || 'API error');
-		}
-		return res.json();
-	} catch (error: any) {
-		console.log('Ошибка при получении рабочих часов:', error);
-		throw error;
-	}
+	const res = await apiFetch('/psychologists/template/', {
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
+		},
+	});
+	if (!res.ok) throw new Error((await res.json())?.detail || 'API error');
+	return res.json();
 };
 
-export const updateWorkingHours = async (token: string, schedule: any[]) => {
-	const url = '/psychologists/working-hours/';
-	try {
-		const res = await apiFetch(url, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${token}`,
-			},
-			body: JSON.stringify(schedule),
-		});
-		if (!res.ok) {
-			const error = await res.json();
-			throw new Error(error?.detail || error?.message || 'API error');
-		}
-		return res.json();
-	} catch (error: any) {
-		console.log('Ошибка при обновлении рабочих часов:', error);
-		throw error;
-	}
+export const updateWorkingHours = async (token: string, ranges: any[]) => {
+	const res = await apiFetch('/psychologists/template/', {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
+		},
+		body: JSON.stringify({ ranges }),
+	});
+	if (!res.ok) throw new Error((await res.json())?.detail || 'API error');
+	return res.json();
 };
 
 export const getClientsForPsychologist = async (token: string) => {
@@ -348,6 +330,117 @@ export const getClientForPsychologistByID = async (
 		console.log('Ошибка во время получения клиента по ID: ', error);
 		throw error;
 	}
+};
+
+export const getMySlots = async (
+	token: string,
+	fromDt: string,
+	toDt: string,
+	status?: string,
+) => {
+	const params = new URLSearchParams({ from_dt: fromDt, to_dt: toDt });
+	if (status) params.set('status', status);
+	const res = await apiFetch(`/psychologists/slots/?${params}`, {
+		headers: { Authorization: `Bearer ${token}` },
+	});
+	if (!res.ok) throw new Error((await res.json())?.detail || 'API error');
+	return res.json();
+};
+
+export const generateSlots = async (
+	token: string,
+	fromDate: string,
+	toDate: string,
+) => {
+	const params = new URLSearchParams({
+		from_date: fromDate,
+		to_date: toDate,
+	});
+	const res = await apiFetch(`/psychologists/slots/generate?${params}`, {
+		method: 'POST',
+		headers: { Authorization: `Bearer ${token}` },
+	});
+	if (!res.ok) throw new Error((await res.json())?.detail || 'API error');
+	return res.json();
+};
+
+export const createManualSlot = async (token: string, startsAt: string) => {
+	const res = await apiFetch('/psychologists/slots/', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
+		},
+		body: JSON.stringify({ starts_at: startsAt }),
+	});
+	if (!res.ok) throw new Error((await res.json())?.detail || 'API error');
+	return res.json();
+};
+
+export const deleteSlot = async (token: string, slotId: string) => {
+	const res = await apiFetch(`/psychologists/slots/${slotId}`, {
+		method: 'DELETE',
+		headers: { Authorization: `Bearer ${token}` },
+	});
+	if (!res.ok && res.status !== 204)
+		throw new Error((await res.json())?.detail || 'API error');
+};
+
+export const cancelSlot = async (
+	token: string,
+	slotId: string,
+	reason?: string,
+) => {
+	const res = await apiFetch(`/psychologists/slots/${slotId}/cancel`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
+		},
+		body: JSON.stringify({ reason: reason ?? null }),
+	});
+	if (!res.ok && res.status !== 204)
+		throw new Error((await res.json())?.detail || 'API error');
+};
+
+export const getFreeSlots = async (
+	token: string,
+	psychologistId: number,
+	fromDt: string,
+	toDt: string,
+) => {
+	const params = new URLSearchParams({ from_dt: fromDt, to_dt: toDt });
+	const res = await apiFetch(
+		`/psychologists/${psychologistId}/free-slots/?${params}`,
+		{ headers: { Authorization: `Bearer ${token}` } },
+	);
+	if (!res.ok) throw new Error((await res.json())?.detail || 'API error');
+	return res.json();
+};
+
+export const bookSlot = async (token: string, slotId: string) => {
+	const res = await apiFetch('/user/appointments/', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
+		},
+		body: JSON.stringify({ slot_id: slotId }),
+	});
+	if (!res.ok) throw new Error((await res.json())?.detail || 'API error');
+	return res.json();
+};
+
+export const cancelAppointment = async (
+	token: string,
+	appointmentId: string,
+) => {
+	const res = await apiFetch(`/user/appointments/${appointmentId}`, {
+		method: 'DELETE',
+		headers: { Authorization: `Bearer ${token}` },
+	});
+	if (!res.ok && res.status !== 204)
+		throw new Error((await res.json())?.detail || 'API error');
 };
 
 export const getClientNotes = async (token: string, client_id: number) => {

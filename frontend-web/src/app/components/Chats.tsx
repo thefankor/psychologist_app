@@ -306,9 +306,10 @@ export default function Chats() {
 	useEffect(() => {
 		getChats(token)
 			.then((data: Chat[]) => {
-				const prefer = openChatId && data.some((c) => c.id === openChatId)
-					? openChatId
-					: undefined;
+				const prefer =
+					openChatId && data.some((c) => c.id === openChatId)
+						? openChatId
+						: undefined;
 				applyChats(data, prefer);
 			})
 			.catch(() => {})
@@ -317,7 +318,6 @@ export default function Chats() {
 
 	useEffect(() => {
 		if (!openChatId) return;
-		// Перезагружаем список чатов и выбираем нужный
 		getChats(token)
 			.then((data: Chat[]) => applyChats(data, openChatId))
 			.catch(() => {});

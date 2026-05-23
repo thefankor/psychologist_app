@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Clock, CheckCircle2, XCircle, Loader2, Save } from 'lucide-react';
+import {
+	Clock,
+	CheckCircle2,
+	XCircle,
+	Loader2,
+	Save,
+	Zap,
+	Trash2,
+	Plus,
+	CalendarDays,
+} from 'lucide-react';
 import {
 	Card,
 	CardContent,
@@ -12,7 +22,15 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { getWorkingHours, updateWorkingHours } from '../../api/psychologist';
+import {
+	getWorkingHours,
+	updateWorkingHours,
+	getMySlots,
+	generateSlots,
+	createManualSlot,
+	deleteSlot,
+	cancelSlot,
+} from '../../api/psychologist';
 
 const DAY_ORDER = [
 	'MONDAY',
@@ -56,6 +74,14 @@ const calcHours = (start: string | null, end: string | null): number => {
 	return diff > 0 ? diff : 0;
 };
 
+interface Slot {
+	id: string;
+	starts_at: string;
+	ends_at: string;
+	status: 'FREE' | 'BOOKED' | 'CANCELLED';
+	source: 'TEMPLATE' | 'MANUAL';
+}
+
 interface DaySchedule {
 	day_of_week: string;
 	start_time: string | null;
@@ -72,6 +98,100 @@ export default function WorkingHours() {
 	const [error, setError] = useState('');
 	const [saveError, setSaveError] = useState('');
 	const [saved, setSaved] = useState(false);
+
+	const [slots, setSlots] = useState<Slot[]>([]);
+	const [slotsLoading, setSlotsLoading] = useState(false);
+	const [slotFromDate, setSlotFromDate] = useState(() =>
+		new Date().toISOString().slice(0, 10),
+	);
+	const [slotToDate, setSlotToDate] = useState(() => {
+		const d = new Date();
+		d.setDate(d.getDate() + 30);
+		return d.toISOString().slice(0, 10);
+	});
+	const [generating, setGenerating] = useState(false);
+	const [generateMsg, setGenerateMsg] = useState('');
+	const [manualDate, setManualDate] = useState('');
+	const [manualTime, setManualTime] = useState('');
+	const [addingManual, setAddingManual] = useState(false);
+	const [slotError, setSlotError] = useState('');
+
+	const fetchSlots = async () => {
+		setSlotsLoading(true);
+		setSlotError('');
+		try {
+			const from = new Date(slotFromDate + 'T00:00:00').toISOString();
+			const to = new Date(slotToDate + 'T23:59:59').toISOString();
+			const data: Slot[] = await getMySlots(token, from, to);
+			setSlots(
+				data.sort(
+					(a, b) =>
+						new Date(a.starts_at).getTime() -
+						new Date(b.starts_at).getTime(),
+				),
+			);
+		} catch (e: any) {
+			setSlotError(e.message || 'Ошибка загрузки слотов');
+		} finally {
+			setSlotsLoading(false);
+		}
+	};
+
+	const handleGenerate = async () => {
+		setGenerating(true);
+		setGenerateMsg('');
+		setSlotError('');
+		try {
+			const res = await generateSlots(token, slotFromDate, slotToDate);
+			setGenerateMsg(
+				`Создано: ${res.created}, пропущено: ${res.skipped}`,
+			);
+			await fetchSlots();
+		} catch (e: any) {
+			setSlotError(e.message || 'Ошибка генерации');
+		} finally {
+			setGenerating(false);
+		}
+	};
+
+	const handleAddManual = async () => {
+		if (!manualDate || !manualTime) return;
+		setAddingManual(true);
+		setSlotError('');
+		try {
+			const d = new Date(`${manualDate}T${manualTime}:00`);
+			await createManualSlot(token, d.toISOString());
+			setManualDate('');
+			setManualTime('');
+			await fetchSlots();
+		} catch (e: any) {
+			setSlotError(e.message || 'Ошибка создания слота');
+		} finally {
+			setAddingManual(false);
+		}
+	};
+
+	const handleDeleteSlot = async (slotId: string) => {
+		try {
+			await deleteSlot(token, slotId);
+			setSlots((prev) => prev.filter((s) => s.id !== slotId));
+		} catch (e: any) {
+			setSlotError(e.message || 'Ошибка удаления');
+		}
+	};
+
+	const handleCancelSlot = async (slotId: string) => {
+		try {
+			await cancelSlot(token, slotId);
+			setSlots((prev) =>
+				prev.map((s) =>
+					s.id === slotId ? { ...s, status: 'CANCELLED' } : s,
+				),
+			);
+		} catch (e: any) {
+			setSlotError(e.message || 'Ошибка отмены');
+		}
+	};
 
 	const fetchSchedule = async () => {
 		setLoading(true);
@@ -98,6 +218,7 @@ export default function WorkingHours() {
 
 	useEffect(() => {
 		fetchSchedule();
+		fetchSlots();
 	}, []);
 
 	const updateDay = (index: number, patch: Partial<DaySchedule>) => {
@@ -138,13 +259,13 @@ export default function WorkingHours() {
 					end_time: toApi(toInput(d.end_time)),
 					is_active: d.is_active,
 				}));
-			const updated: DaySchedule[] = await updateWorkingHours(
-				token,
-				payload,
-			);
+			const resp = await updateWorkingHours(token, payload);
+			const updatedList: DaySchedule[] = Array.isArray(resp)
+				? resp
+				: (resp.ranges ?? []);
 			const sorted = DAY_ORDER.map(
 				(d) =>
-					updated.find((x) => x.day_of_week === d) ??
+					updatedList.find((x: DaySchedule) => x.day_of_week === d) ??
 					schedule.find((x) => x.day_of_week === d)!,
 			);
 			setSchedule(sorted);
@@ -440,6 +561,218 @@ export default function WorkingHours() {
 							</Button>
 						</div>
 					</div>
+				</CardContent>
+			</Card>
+
+			<Card className='mt-8 dark:bg-gray-800 dark:border-gray-700'>
+				<CardHeader>
+					<CardTitle className='dark:text-white flex items-center gap-2'>
+						<CalendarDays className='w-5 h-5' />
+						Слоты для записи
+					</CardTitle>
+					<CardDescription className='dark:text-gray-400'>
+						Управление временными слотами для записи клиентов
+					</CardDescription>
+				</CardHeader>
+				<CardContent className='space-y-6'>
+					<div className='flex flex-wrap gap-4 items-end p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/40'>
+						<div className='space-y-1'>
+							<Label className='text-sm dark:text-gray-300'>
+								С
+							</Label>
+							<input
+								type='date'
+								value={slotFromDate}
+								onChange={(e) =>
+									setSlotFromDate(e.target.value)
+								}
+								className='px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer'
+							/>
+						</div>
+						<div className='space-y-1'>
+							<Label className='text-sm dark:text-gray-300'>
+								По
+							</Label>
+							<input
+								type='date'
+								value={slotToDate}
+								min={slotFromDate}
+								onChange={(e) => setSlotToDate(e.target.value)}
+								className='px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer'
+							/>
+						</div>
+						<Button
+							onClick={() => fetchSlots()}
+							variant='outline'
+							className='dark:border-gray-600 dark:text-gray-300'
+						>
+							Показать
+						</Button>
+						<Button
+							onClick={handleGenerate}
+							disabled={generating}
+							className='bg-blue-600 hover:bg-blue-700 dark:text-white'
+						>
+							{generating ? (
+								<Loader2 className='w-4 h-4 mr-2 animate-spin' />
+							) : (
+								<Zap className='w-4 h-4 mr-2' />
+							)}
+							Сгенерировать из шаблона
+						</Button>
+						{generateMsg && (
+							<span className='text-sm text-green-600 dark:text-green-400'>
+								{generateMsg}
+							</span>
+						)}
+					</div>
+
+					<div className='flex flex-wrap gap-4 items-end p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/40'>
+						<div className='space-y-1'>
+							<Label className='text-sm dark:text-gray-300'>
+								Дата
+							</Label>
+							<input
+								type='date'
+								value={manualDate}
+								min={new Date().toISOString().slice(0, 10)}
+								onChange={(e) => setManualDate(e.target.value)}
+								className='px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer'
+							/>
+						</div>
+						<div className='space-y-1'>
+							<Label className='text-sm dark:text-gray-300'>
+								Время
+							</Label>
+							<input
+								type='time'
+								value={manualTime}
+								onChange={(e) => setManualTime(e.target.value)}
+								className='px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer'
+							/>
+						</div>
+						<Button
+							onClick={handleAddManual}
+							disabled={
+								addingManual || !manualDate || !manualTime
+							}
+							className='bg-purple-600 hover:bg-purple-700 dark:text-white'
+						>
+							{addingManual ? (
+								<Loader2 className='w-4 h-4 mr-2 animate-spin' />
+							) : (
+								<Plus className='w-4 h-4 mr-2' />
+							)}
+							Добавить вручную
+						</Button>
+					</div>
+
+					{slotError && (
+						<p className='text-sm text-red-500'>{slotError}</p>
+					)}
+
+					{slotsLoading ? (
+						<div className='flex justify-center py-8'>
+							<Loader2 className='w-6 h-6 animate-spin text-blue-500' />
+						</div>
+					) : slots.length === 0 ? (
+						<p className='text-sm text-center text-gray-500 dark:text-gray-400 py-8'>
+							Нет слотов в выбранном периоде
+						</p>
+					) : (
+						<div className='space-y-2'>
+							{slots.map((slot) => {
+								const start = new Date(slot.starts_at);
+								const end = new Date(slot.ends_at);
+								const statusColor =
+									slot.status === 'FREE'
+										? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+										: slot.status === 'BOOKED'
+											? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+											: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400';
+								const statusLabel =
+									slot.status === 'FREE'
+										? 'Свободен'
+										: slot.status === 'BOOKED'
+											? 'Занят'
+											: 'Отменён';
+								return (
+									<div
+										key={slot.id}
+										className='flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
+									>
+										<div className='flex items-center gap-3'>
+											<div>
+												<p className='text-sm font-medium text-gray-900 dark:text-white'>
+													{start.toLocaleDateString(
+														'ru-RU',
+														{
+															day: 'numeric',
+															month: 'long',
+															weekday: 'short',
+														},
+													)}
+												</p>
+												<p className='text-xs text-gray-500 dark:text-gray-400'>
+													{start.toLocaleTimeString(
+														'ru-RU',
+														{
+															hour: '2-digit',
+															minute: '2-digit',
+														},
+													)}
+													{' — '}
+													{end.toLocaleTimeString(
+														'ru-RU',
+														{
+															hour: '2-digit',
+															minute: '2-digit',
+														},
+													)}
+													{slot.source ===
+														'MANUAL' && (
+														<span className='ml-2 text-purple-500'>
+															вручную
+														</span>
+													)}
+												</p>
+											</div>
+										</div>
+										<div className='flex items-center gap-2'>
+											<Badge className={statusColor}>
+												{statusLabel}
+											</Badge>
+											{slot.status === 'FREE' && (
+												<button
+													onClick={() =>
+														handleDeleteSlot(
+															slot.id,
+														)
+													}
+													className='cursor-pointer p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors'
+													title='Удалить'
+												>
+													<Trash2 className='w-4 h-4' />
+												</button>
+											)}
+											{slot.status === 'BOOKED' && (
+												<button
+													onClick={() =>
+														handleCancelSlot(
+															slot.id,
+														)
+													}
+													className='cursor-pointer px-2 py-1 rounded text-xs bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/20 dark:text-red-400 transition-colors'
+												>
+													Отменить
+												</button>
+											)}
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					)}
 				</CardContent>
 			</Card>
 		</div>
