@@ -26,6 +26,42 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.execute("CREATE EXTENSION IF NOT EXISTS btree_gist")
+    # Remove overlapping duplicates (keeping smallest id), cascade through FK chain
+    op.execute(
+        """
+        DELETE FROM appointments_attendees
+        WHERE appointment_id IN (
+            SELECT a.id FROM appointments a
+            JOIN psychologist_availability_slots s1 ON a.slot_id = s1.id
+            JOIN psychologist_availability_slots s2
+              ON s1.psychologist_id = s2.psychologist_id
+             AND s1.id > s2.id
+             AND tstzrange(s1.starts_at, s1.ends_at, '[)') && tstzrange(s2.starts_at, s2.ends_at, '[)')
+        )
+        """
+    )
+    op.execute(
+        """
+        DELETE FROM appointments
+        WHERE slot_id IN (
+            SELECT a.id
+            FROM psychologist_availability_slots a
+            JOIN psychologist_availability_slots b
+              ON a.psychologist_id = b.psychologist_id
+             AND a.id > b.id
+             AND tstzrange(a.starts_at, a.ends_at, '[)') && tstzrange(b.starts_at, b.ends_at, '[)')
+        )
+        """
+    )
+    op.execute(
+        """
+        DELETE FROM psychologist_availability_slots a
+        USING psychologist_availability_slots b
+        WHERE a.id > b.id
+          AND a.psychologist_id = b.psychologist_id
+          AND tstzrange(a.starts_at, a.ends_at, '[)') && tstzrange(b.starts_at, b.ends_at, '[)')
+        """
+    )
     op.execute(
         """
         ALTER TABLE psychologist_availability_slots

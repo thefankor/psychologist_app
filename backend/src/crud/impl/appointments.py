@@ -112,7 +112,7 @@ class AppointmentDAO(BaseDAO):
             .outerjoin(a, a.appointment_id == Appointment.id)
             .outerjoin(cp, cp.id == a.user_id)  # если участник клиент — попадём в cp
             .outerjoin(pp, pp.id == a.user_id)  # если участник психолог — попадём в pp
-            .where(attendee_filter)
+            .where(attendee_filter, Appointment.cancelled_at.is_(None))
         )
 
         if client_id is not None:
