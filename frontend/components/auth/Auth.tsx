@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	Text,
 	TextInput,
@@ -6,14 +6,38 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 } from 'react-native';
-import Button from '@/components/custom/Button';
 import { styles } from './styles';
 import { UI } from '@/types/ui';
+import { useRouter } from 'expo-router';
+import { Button } from '../custom';
+import { getVerifyCode } from '@/api/auth/auth';
+import { getToken } from '@/helpers/helper';
+import { Loading } from '../custom/ui/Loading';
 
-export default function Auth() {
+const Auth = () => {
 	const [email, setEmail] = useState<string>('');
 	const [error, setError] = useState<string | null>(null);
-	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(false);
+	const router = useRouter();
+
+	useEffect(() => {
+		checkToken();
+	}, []);
+
+	const checkToken = async () => {
+		try {
+			setLoading(true);
+
+			const token = await getToken();
+			if (token) {
+				router.replace('/profile');
+			}
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	const validateEmail = (email: string): string | null => {
 		if (email.length === 0) return 'Поле не должно быть пустым';
@@ -22,19 +46,26 @@ export default function Auth() {
 		return null;
 	};
 
-	const sendEmail = (email: string) => {
-		setError(null);
-		const validationError = validateEmail(email);
-		if (validationError) {
-			setError(validationError);
-			return;
+	const sendEmail = async (email: string) => {
+		try {
+			setLoading(true);
+			setError(null);
+			const validationError = validateEmail(email);
+			if (validationError) {
+				setError(validationError);
+				return;
+			}
+
+			await getVerifyCode(email);
+			router.push({
+				pathname: '/auth/verify',
+				params: { email },
+			});
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
 		}
-
-		setIsLoading(true);
-
-		setTimeout(() => {
-			setIsLoading(false);
-		}, 2000);
 	};
 
 	const handleEmailChange = (text: string) => {
@@ -42,6 +73,9 @@ export default function Auth() {
 		if (error) setError(null);
 	};
 
+	if (loading) {
+		return <Loading />;
+	}
 	return (
 		<KeyboardAvoidingView
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -75,7 +109,7 @@ export default function Auth() {
 							value={email}
 							onChangeText={handleEmailChange}
 							returnKeyType='send'
-							editable={!isLoading}
+							editable={!loading}
 							onSubmitEditing={() => sendEmail(email)}
 						/>
 					</View>
@@ -84,16 +118,18 @@ export default function Auth() {
 
 					<Button
 						text={
-							isLoading ? 'Отправка...' : 'Получить код из письма'
+							loading ? 'Отправка...' : 'Получить код из письма'
 						}
 						pressColor='#0043E9'
 						style={[UI.styles.continueButton]}
 						textStyle={styles.button__text}
-						disabled={isLoading}
+						disabled={loading}
 						onPress={() => sendEmail(email)}
 					/>
 				</View>
 			</View>
 		</KeyboardAvoidingView>
 	);
-}
+};
+
+export default Auth;

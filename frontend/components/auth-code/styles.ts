@@ -103,7 +103,7 @@ export const styles = StyleSheet.create({
 	},
 	button__text: {
 		color: '#fff',
-		fontFamily: 'Involve',
+		fontFamily: 'Hezaedrus500',
 		fontSize: 14,
 	},
 	container__error: {

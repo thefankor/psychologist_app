@@ -1,3 +1,8 @@
+import * as SecureStore from 'expo-secure-store';
+import { Dispatch } from '@reduxjs/toolkit';
+import * as MediaLibrary from 'expo-media-library';
+import { MethodFormat } from '@/types/types';
+
 export const hidePart = (text: string, n: number, format?: string) => {
 	const replaced = text.substring(n);
 	return format ? format : '***' + replaced;
@@ -11,4 +16,133 @@ export const formatTime = (timeInSeconds: number): string => {
 	const formattedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
 
 	return `${formattedMinutes}:${formattedSeconds}`;
+};
+
+export const dataHandler = (
+	key: string,
+	value: string,
+	setData: (item: any) => void,
+) => {
+	return setData((prev: any) => ({ ...prev, [key]: value }));
+};
+
+export async function saveToken(token: string) {
+	await SecureStore.setItemAsync('auth_token', token);
+}
+
+export async function getToken() {
+	return await SecureStore.getItemAsync('auth_token');
+}
+
+export async function getRole(): Promise<'psychologist' | 'client' | null> {
+	return (await SecureStore.getItemAsync('user_role')) as any;
+}
+
+export async function deleteToken() {
+	return await SecureStore.deleteItemAsync('auth_token');
+}
+export const formatDate = (dateString: string | Date | undefined): string => {
+	if (!dateString) return '';
+
+	try {
+		const date =
+			typeof dateString === 'string' ? new Date(dateString) : dateString;
+
+		if (isNaN(date.getTime())) return '';
+
+		const day = date.getDate();
+		const month = date.getMonth();
+
+		const months = [
+			'января',
+			'февраля',
+			'марта',
+			'апреля',
+			'мая',
+			'июня',
+			'июля',
+			'августа',
+			'сентября',
+			'октября',
+			'ноября',
+			'декабря',
+		];
+
+		return `${day} ${months[month]}`;
+	} catch (e) {
+		console.error('Error formatting date:', e);
+		return '';
+	}
+};
+
+export const loadImages = async (
+	setPhotos: React.Dispatch<React.SetStateAction<MediaLibrary.Asset[]>>,
+	inPopup?: boolean,
+) => {
+	if (inPopup) {
+		return;
+	}
+	const fetchedAlbums = await MediaLibrary.getAssetsAsync({
+		mediaType: 'photo',
+		first: 20,
+		sortBy: ['creationTime'],
+	});
+	setPhotos(fetchedAlbums.assets);
+};
+
+export const requestPermissionsMedia = async (
+	setPhotos: React.Dispatch<React.SetStateAction<MediaLibrary.Asset[]>>,
+	requestPermission: () => Promise<MediaLibrary.PermissionResponse>,
+	inPopup?: boolean,
+) => {
+	try {
+		const permission = await MediaLibrary.requestPermissionsAsync();
+
+		if (permission.status !== 'granted') {
+			requestPermission();
+		}
+
+		if (permission.status === 'granted') {
+			return await loadImages(setPhotos, inPopup);
+		}
+	} catch (error) {
+		console.error('Ошибка при запросе разрешений:', error);
+	}
+};
+
+// export enum MethodFormat {
+//   GESTALT = 'GESTALT',
+//   PSYHODRAM = 'PSYHODRAM',
+//   PSYHOANALISE = 'PSYHOANALISE',
+//   EXISTENAL = 'EXISTENAL',
+//   SYSTEM = 'SYSTEM',
+// }
+
+export const METHOD_DISPLAY_NAMES: Record<MethodFormat, string> = {
+	[MethodFormat.GESTALT]: 'Гештальт-терапия',
+	[MethodFormat.PSYHODRAM]: 'Психодрама',
+	[MethodFormat.PSYHOANALISE]: 'Психоанализ',
+	[MethodFormat.EXISTENAL]: 'Экзистенциальная терапия',
+	[MethodFormat.SYSTEM]: 'Системная терапия',
+};
+
+export const formatMethods = (methods: string[] | undefined): string => {
+	if (!methods || methods.length === 0) {
+		return 'Методы не указаны';
+	}
+
+	return methods
+		.map((method) => {
+			const upperMethod =
+				method.toUpperCase() as keyof typeof MethodFormat;
+			const enumKey = MethodFormat[upperMethod];
+
+			if (enumKey && METHOD_DISPLAY_NAMES[enumKey]) {
+				return METHOD_DISPLAY_NAMES[enumKey];
+			}
+
+			return method;
+		})
+		.filter(Boolean)
+		.join(', ');
 };

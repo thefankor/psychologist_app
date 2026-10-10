@@ -49,6 +49,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env_prod
 
 # typescript
 *.tsbuildinfo
@@ -59,3 +60,7 @@ expo-env.d.ts
 /ios
 /android
 
+
+.claude
+docs/superpowers/
+CLAUDE.md

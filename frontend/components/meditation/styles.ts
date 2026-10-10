@@ -1,0 +1,115 @@
+import { StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+	},
+	background: {
+		flex: 1,
+	},
+	header: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		paddingHorizontal: 24,
+	},
+	title: {
+		fontFamily: 'Hezaedrus500',
+		fontSize: 28,
+		color: '#011443',
+		textAlign: 'center',
+		marginBottom: 16,
+	},
+	subtitle: {
+		fontFamily: 'Hezaedrus',
+		fontSize: 16,
+		color: '#01144399',
+		textAlign: 'center',
+		marginBottom: 32,
+	},
+	forwardButton: {
+		backgroundColor: '#3E75FF',
+		paddingVertical: 16,
+		paddingHorizontal: 48,
+		borderRadius: 32,
+	},
+	forwardText: {
+		fontFamily: 'Hezaedrus500',
+		fontSize: 18,
+		color: '#fff',
+	},
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0,0,0,0.5)',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	modalContent: {
+		backgroundColor: '#fff',
+		borderRadius: 24,
+		padding: 24,
+		width: '90%',
+		maxHeight: '80%',
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 10,
+		elevation: 5,
+	},
+	modalTitle: {
+		fontFamily: 'Hezaedrus500',
+		fontSize: 22,
+		color: '#011443',
+		textAlign: 'center',
+		marginBottom: 16,
+	},
+	closeButton: {
+		marginTop: 16,
+		alignSelf: 'center',
+		backgroundColor: '#3E75FF',
+		paddingVertical: 12,
+		paddingHorizontal: 32,
+		borderRadius: 32,
+	},
+	closeText: {
+		fontFamily: 'Hezaedrus500',
+		fontSize: 16,
+		color: '#fff',
+	},
+	dropdown: {
+		position: 'absolute',
+		bottom: 0,
+		width: '100%',
+		maxHeight: '80%',
+		backgroundColor: '#F7F8FA',
+		borderTopLeftRadius: 32,
+		borderTopRightRadius: 32,
+		padding: 24,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: -4 },
+		shadowOpacity: 0.15,
+		shadowRadius: 12,
+		elevation: 10,
+	},
+
+	dropdownTitle: {
+		fontFamily: 'Hezaedrus500',
+		fontSize: 20,
+		color: '#011443',
+		textAlign: 'center',
+		marginBottom: 16,
+	},
+	backdrop: {
+		...StyleSheet.absoluteFillObject,
+		backgroundColor: 'rgba(0,0,0,0.3)',
+	},
+
+	handle: {
+		width: 40,
+		height: 5,
+		borderRadius: 3,
+		backgroundColor: '#ccc',
+		alignSelf: 'center',
+		marginBottom: 12,
+	},
+});

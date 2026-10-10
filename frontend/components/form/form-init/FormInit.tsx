@@ -1,0 +1,217 @@
+import { Pressable, Text, TextInput, View, ViewStyle } from 'react-native';
+import { DatePickerModal } from 'react-native-paper-dates';
+import { useEffect, useState } from 'react';
+import { useKeyboard } from '@react-native-community/hooks';
+import { styles } from './styles';
+import { dataHandler, getRole, getToken } from '@/helpers/helper';
+import { Select, Option } from '@/components/custom/ui/Select';
+import { StatusBar } from 'expo-status-bar';
+import { Button } from '@/components/custom/ui/Button';
+import { UI } from '@/types/ui';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FormSteps, genderOptions } from '@/types/types';
+import { getUser } from '@/api/profile/profile';
+import { useRouter } from 'expo-router';
+import { Loading } from '@/components/custom/ui/Loading';
+
+const labelStyle = {
+	paddingTop: 0,
+	display: 'flex',
+	flexDirection: 'row',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	paddingRight: 12,
+} as ViewStyle;
+
+export enum Gender {
+	NOT_CHOOSEN = 0,
+	NOT_STATED = 1,
+	MALE = 2,
+	FEMALE = 3,
+}
+
+export interface InitState {
+	name: string;
+	gender: Gender;
+	birthDate: Date | string;
+}
+
+interface Props {
+	setStep: (step: FormSteps) => void;
+}
+
+export const FormInit = ({ setStep }: Props) => {
+	const [date, setDate] = useState(new Date());
+	const [visible, setVisible] = useState(false);
+	const [isFocused, setIsFocused] = useState(false);
+	const router = useRouter();
+	const [open, setOpen] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(false);
+
+	const [formState, setFormState] = useState<InitState>({
+		name: '',
+		gender: Gender.NOT_CHOOSEN,
+		birthDate: 'Указать',
+	});
+
+	useEffect(() => {
+		checkData();
+	}, []);
+
+	const checkData = async () => {
+		try {
+			setLoading(true);
+			const token = await getToken();
+			const res = await getUser(token!);
+
+			if (res.name) {
+				router.push('/profile');
+			}
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const calculateData = (birthDate: Date) => {
+		const currentDate = new Date().getTime();
+		const birthSeconds = birthDate.getTime();
+
+		const age = Math.floor(
+			(currentDate - birthSeconds) / (365 * 24 * 60 * 60 * 1000),
+		);
+
+		return age === 0 ? 'Указать' : age;
+	};
+
+	const onConfirm = ({ date }: any) => {
+		setVisible(false);
+		setDate(date);
+		setFormState((prev) => ({
+			...prev,
+			birthDate: date,
+		}));
+	};
+
+	const handleSelect = (genderValue: Gender) => {
+		setFormState((prev) => ({
+			...prev,
+			gender: genderValue,
+		}));
+	};
+
+	const keyboard = useKeyboard();
+
+	const sendData = async () => {
+		try {
+			setLoading(true);
+			await AsyncStorage.setItem(
+				'initData',
+				JSON.stringify({
+					name: formState.name,
+					birth_date: formState.birthDate,
+					gender: Gender[formState.gender]?.toUpperCase(),
+				}),
+			);
+			await AsyncStorage.setItem('init', 'true');
+			setStep(FormSteps.STEP_ONE);
+		} catch (err) {
+			console.log('Error saving data:', err);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	if (loading) {
+		return <Loading />;
+	}
+
+	return (
+		<View
+			style={[
+				styles.container,
+				{ paddingBottom: keyboard.keyboardHeight + 70 },
+			]}
+		>
+			<StatusBar style='dark' />
+			<DatePickerModal
+				mode='single'
+				visible={visible}
+				onConfirm={onConfirm}
+				onDismiss={() => setVisible(false)}
+				date={date}
+				label='Выберите дату рождения'
+				saveLabel='Установить'
+				animationType='fade'
+				locale='ru-Ru'
+			/>
+			<View style={styles.inputs__wrap}>
+				<Text style={styles.container__title}>Расскажите о себе</Text>
+				<View style={styles.input__wrap}>
+					<TextInput
+						autoFocus
+						style={[styles.input, isFocused && styles.active]}
+						value={formState.name}
+						cursorColor={UI.colors.blue}
+						onFocus={() => setIsFocused(true)}
+						placeholder={isFocused ? '' : 'Имя'}
+						placeholderTextColor={UI.colors.mediumBlue}
+						onBlur={() => setIsFocused(false)}
+						onChangeText={(text) =>
+							dataHandler('name', text, setFormState)
+						}
+					/>
+				</View>
+				<Pressable
+					style={[styles.input, labelStyle]}
+					onPress={() => setVisible(true)}
+				>
+					<Text style={{ fontFamily: 'Hezaedrus' }}>Ваш возраст</Text>
+					<Text
+						style={{
+							fontFamily: 'Hezaedrus',
+							color:
+								formState.birthDate === 'Указать'
+									? '#0114434D'
+									: '#3565D9',
+						}}
+					>
+						{typeof formState.birthDate === 'string'
+							? formState.birthDate
+							: JSON.stringify(
+									calculateData(formState.birthDate),
+								).replaceAll('"', '')}
+					</Text>
+				</Pressable>
+				<Select
+					name='Ваш пол'
+					isActive={formState.gender !== Gender.NOT_CHOOSEN}
+					value={
+						formState.gender !== Gender.NOT_CHOOSEN
+							? [formState.gender]
+							: []
+					}
+					options={genderOptions}
+					onSelect={handleSelect}
+					maxHeight={160}
+					setOpen={setOpen}
+					selectStyle={styles.select__container}
+					font='Hezaedrus'
+				/>
+			</View>
+			<Button
+				disabled={
+					formState.name === '' ||
+					formState.gender === Gender.NOT_CHOOSEN ||
+					formState.birthDate === 'Указать'
+				}
+				text='Далее'
+				onPress={sendData}
+				style={UI.styles.continueButton}
+				textStyle={UI.styles.continueText}
+				pressColor={UI.colors.pressableColor}
+			/>
+		</View>
+	);
+};

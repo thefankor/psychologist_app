@@ -1,0 +1,28 @@
+name: Deploy with Docker Compose
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  dev-deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create .env file from secrets.DEV_ENV
+        run: echo "${{ secrets.DEV_ENV }}" > .env
+
+      - name: Build images
+        run: docker compose build
+        id: build_step
+
+      - name: Stop previous services
+        run: docker compose down --remove-orphans
+        if: success()
+
+      - name: Run services
+        run: docker compose up -d --build --remove-orphans
+        if: success()

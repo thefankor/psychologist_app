@@ -10,21 +10,26 @@ import {
 	Platform,
 	TouchableWithoutFeedback,
 } from 'react-native';
-import Button from '@/components/custom/Button';
+
 import { styles } from './styles';
 import { UI } from '@/types/ui';
 import { StatusBar } from 'expo-status-bar';
-import { formatTime, hidePart } from '@/helpers/helper';
+import { formatTime, getRole, saveToken } from '@/helpers/helper';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Button } from '../custom';
+import { checkVerifyCode, getVerifyCode } from '@/api/auth/auth';
+import { Loading } from '../custom/ui/Loading';
 
 const AuthCode = () => {
+	const router = useRouter();
 	const [codes, setCodes] = useState<string[]>(['', '', '', '', '']);
+	const [loading, setLoading] = useState<boolean>(false);
 	const inputRefs = useRef<(TextInput | null)[]>([]);
 	const [status, setStatus] = useState<'default' | 'error' | 'success'>(
-		'default'
+		'default',
 	);
 	const [timer, setTimer] = useState(60);
-
-	const CORRECT_CODE = '12345';
+	const { email } = useLocalSearchParams<{ email: string }>();
 
 	useEffect(() => {
 		if (timer <= 0) return;
@@ -40,15 +45,34 @@ const AuthCode = () => {
 		return () => clearInterval(interval);
 	}, [timer]);
 
-	const verifyCode = (currentCodes: string[]) => {
-		const code = currentCodes.join('');
-		if (code.length === 5) {
-			if (code === CORRECT_CODE) {
-				setStatus('success');
-				Keyboard.dismiss();
-			} else {
-				setStatus('error');
+	const verifyCode = async (codesArray: string[]) => {
+		const role = await getRole();
+		const code = codesArray.join('');
+
+		if (code.length < 5) return;
+
+		try {
+			setLoading(true);
+			const res = await checkVerifyCode(email, code, role!);
+
+			setStatus('success');
+			Keyboard.dismiss();
+			if (res) {
+				await saveToken(res.token);
 			}
+			if (role === 'client') {
+				router.push('/form');
+			} else {
+				router.push({
+					pathname: '/survey',
+					params: { email },
+				});
+			}
+		} catch (err) {
+			setStatus('error');
+			console.log(err);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -67,6 +91,11 @@ const AuthCode = () => {
 		}
 	};
 
+	const handleSendAgain = async () => {
+		setTimer(60);
+		await getVerifyCode(email);
+	};
+
 	const handleKeyPress = ({ nativeEvent }: any, index: number) => {
 		if (nativeEvent.key === 'Backspace') {
 			if (codes[index] === '' && index > 0)
@@ -80,7 +109,7 @@ const AuthCode = () => {
 		}
 	};
 
-	const getInputStyle = (index: number) => {
+	const getInputStyle = () => {
 		switch (status) {
 			case 'error':
 				return { borderColor: 'red', color: 'red' };
@@ -90,6 +119,10 @@ const AuthCode = () => {
 				return {};
 		}
 	};
+
+	if (loading) {
+		return <Loading />;
+	}
 
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -101,7 +134,10 @@ const AuthCode = () => {
 				<StatusBar style='dark' />
 				<View style={[styles.container, { justifyContent: 'center' }]}>
 					<View style={styles.container__header}>
-						<Pressable style={styles.back__btn}>
+						<Pressable
+							style={styles.back__btn}
+							onPress={() => router.push('/auth')}
+						>
 							<Image
 								source={require('@/assets/images/back.png')}
 								style={{ height: 24, width: 24 }}
@@ -115,8 +151,7 @@ const AuthCode = () => {
 							Введите 5-значный код
 						</Text>
 						<Text style={styles.code__description}>
-							Письмо с кодом было отправлено на почту{' '}
-							{hidePart('example@mail.ru', 5)}
+							Письмо с кодом было отправлено на почту {email}
 						</Text>
 
 						<View style={styles.input__wrap}>
@@ -138,7 +173,7 @@ const AuthCode = () => {
 									style={[
 										styles.input,
 										code !== '' && styles.input__active,
-										getInputStyle(index),
+										getInputStyle(),
 									]}
 									autoFocus={index === 0}
 									autoCorrect={false}
@@ -159,7 +194,7 @@ const AuthCode = () => {
 								pressColor={UI.colors.pressableColor}
 								style={UI.styles.continueButton}
 								textStyle={UI.styles.continueText}
-								onPress={() => setTimer(60)}
+								onPress={handleSendAgain}
 							/>
 						) : (
 							<Text style={styles.repeat__text}>
